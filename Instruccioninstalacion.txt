@@ -1,0 +1,18 @@
+--intalacion de NodeJS
+winget install OpenJS.NodeJS.LTS
+
+Verifica la intalacion:
+node -v
+npm -v
+Deberías ver algo como v20.x.x y 10.x.x.
+---crean las carpetas .next/ y node_modules/
+npm i
+npm run build
+--Luego hacer un install de las dependencias
+en cd la raiz del proyecto
+npm install
+--Ejecutar el proyecto con
+
+npm run dev
+
+ http://localhost:3000.
