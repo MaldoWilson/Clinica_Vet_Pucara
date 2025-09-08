@@ -1,22 +1,28 @@
+// Componente principal de informacion
 export default function Hero() {
   return (
-    <section className="bg-gradient-to-b from-blue-50 to-white">
-      <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 text-center">
-        <h1 className="text-3xl md:text-5xl font-bold mb-4">
-          Cuidamos a tus mascotas con cariño y excelencia
-        </h1>
-        <p className="text-neutral-600 max-w-2xl mx-auto">
-          Agenda tu hora online, conoce nuestros profesionales y servicios. Atención en San Bernardo.
-        </p>
-        <div className="mt-6 flex gap-3 justify-center">
-          <a href="/reservas" className="px-5 py-2.5 rounded-xl bg-blue-600 text-white">
-            Agendar hora
-          </a>
-          <a href="/contacto" className="px-5 py-2.5 rounded-xl border">
-            Contáctanos
-          </a>
-        </div>
-      </div>
-    </section>
+<section className="relative isolate">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-transparent -z-10" />
+        <header className="container py-16 sm:py-24 text-center">
+          <p className="text-sm font-medium text-blue-700/80 tracking-wide mb-2">
+            Clínica Pucará — San Bernardo
+          </p>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight">
+            Cuidamos a tus mascotas con cariño y excelencia
+          </h1>
+          <p className="mt-4 max-w-2xl mx-auto text-neutral-600">
+            Agenda tu hora online, conoce a nuestro equipo y servicios.
+          </p>
+
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <a href="/reservas" className="btn btn-primary">
+              Agendar hora
+            </a>
+            <a href="/contacto" className="btn btn-ghost">
+              Contáctanos
+            </a>
+          </div>
+        </header>
+      </section>
   );
 }

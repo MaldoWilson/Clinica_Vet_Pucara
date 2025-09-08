@@ -1,3 +1,4 @@
+// Componente de servicios que ofrece la veterinaria
 type Props = { service: { id?: string; name: string; description: string; price_clp?: number } };
 export default function ServiceCard({ service }: Props) {
   return (
@@ -8,5 +9,6 @@ export default function ServiceCard({ service }: Props) {
         <p className="mt-2 text-sm">Desde ${service.price_clp.toLocaleString("es-CL")}</p>
       ) : null}
     </article>
+
   );
 }

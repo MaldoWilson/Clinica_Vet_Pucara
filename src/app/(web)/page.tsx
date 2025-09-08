@@ -1,7 +1,8 @@
+// Home Principal de la pagina web
 import Hero from "@/components/Hero";
 import ServiceCard from "@/components/ServiceCard";
 import { supabaseServer } from "@/lib/supabaseClient";
-
+import WhatsAppButton from "@/components/whatsapp";
 export default async function Home() {
   const supa = supabaseServer();
   const { data: servicios } = await supa
@@ -25,6 +26,12 @@ export default async function Home() {
           ))}
         </div>
       </section>
+     
+      <WhatsAppButton
+        phone="569"   // Pongamos numero para probar
+        text="¡Hola! Vengo desde la web y quiero agendar una hora 🐶🐱"
+        floating               // botón flotante abajo a la derecha
+      />
     </div>
   );
 }
