@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-
+import Image from "next/image";
 export default function ContactoPage() {
   const [sending, setSending] = useState(false);
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -13,9 +13,20 @@ export default function ContactoPage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-12">
-      <h1 className="text-2xl md:text-3xl font-semibold mb-4">Contacto</h1>
+   <div className="max-w-4xl mx-auto px-4 py-12 flex items-start gap-8">
+
+  <div className="flex-shrink-0">
+    <Image
+      src="/logo.png"  // 👉 coloca tu archivo logo.png en /public
+      alt="Clínica Pucará"
+      width={120}
+      height={120}
+      priority
+    />
+  </div>
+      
       <form onSubmit={submit} className="space-y-4">
+        <h1 className="text-2xl md:text-3xl font-semibold mb-4">Contacto</h1>
         <input name="name" placeholder="Tu nombre" className="w-full border rounded-xl p-3" required />
         <input name="email" placeholder="Correo (opcional)" className="w-full border rounded-xl p-3" />
         <input name="phone" placeholder="Teléfono (opcional)" className="w-full border rounded-xl p-3" />
