@@ -154,7 +154,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
-              Citas
+              Mascotas
             </a>
           </div>
         </div>
