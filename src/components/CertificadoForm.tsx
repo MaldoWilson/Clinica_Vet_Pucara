@@ -19,6 +19,7 @@ export default function CertificadoForm() {
           <select className="w-full border rounded px-2 py-1">
             <option>Vacunación</option>
             <option>Salud</option>
+            <option>Viaje</option>
             <option>Otros</option>
           </select>
         </div>

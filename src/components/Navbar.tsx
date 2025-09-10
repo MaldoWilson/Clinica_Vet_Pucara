@@ -29,7 +29,8 @@ export default function Navbar() {
     { href: "/servicios", label: "Servicios" },
     { href: "/equipo", label: "Equipo" },
     { href: "/reservas", label: "Reservas" },
-    { href: "/contacto", label: "Contacto" }
+    { href: "/contacto", label: "Contacto" },
+    { href: "/producto", label: "Productos" }
   ];
 
   const isActive = (href: string) => pathname === href;
