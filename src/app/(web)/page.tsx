@@ -26,6 +26,7 @@ export default async function Home() {
           ))}
         </div>
       </section>
+      
      
       <WhatsAppButton
         phone="569"   // Pongamos numero para probar
