@@ -22,7 +22,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const allowed = (process.env.ADMIN_EMAILS || "")
+  // Verificar emails autorizados usando la variable de entorno correcta
+  const allowed = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
     .split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
   const email = (session.user.email || "").toLowerCase();
 

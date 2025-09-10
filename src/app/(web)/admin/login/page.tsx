@@ -17,40 +17,108 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const supa = createClientComponentClient(); // 👈 helpers (no tu cliente personalizado)
-      const { error } = await supa.auth.signInWithPassword({ email, password: pass });
+      const supa = createClientComponentClient();
+      console.log("Intentando login con:", { email, redirect });
+      
+      const { data, error } = await supa.auth.signInWithPassword({ 
+        email: email.trim(), 
+        password: pass 
+      });
+      
       if (error) {
+        console.error("Error de login:", error);
         alert(error.message);
         setLoading(false);
         return;
       }
 
-      // cookies ya se escribieron; refresca y redirige
-      router.replace(redirect);
-      router.refresh();
+      if (data.user) {
+        console.log("Login exitoso, redirigiendo a:", redirect);
+        
+        // Pequeño delay para asegurar que las cookies se establezcan
+        setTimeout(() => {
+          router.replace(redirect);
+          router.refresh();
+        }, 100);
+      }
     } catch (err: any) {
+      console.error("Error inesperado:", err);
       alert(err.message || "Error al ingresar");
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl md:text-3xl font-semibold mb-6">Ingreso administrador</h1>
-      {errorFlag && (
-        <div className="mb-4 text-sm text-red-600">
-          Tu cuenta no está autorizada para el panel.
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Clínica Pucará</h1>
+          <h2 className="text-xl font-semibold text-gray-700">Panel de Administración</h2>
         </div>
-      )}
-      <form onSubmit={doLogin} className="space-y-3">
-        <input type="email" placeholder="Correo" className="w-full border rounded-xl p-3"
-               value={email} onChange={(e)=>setEmail(e.target.value)} required />
-        <input type="password" placeholder="Contraseña" className="w-full border rounded-xl p-3"
-               value={pass} onChange={(e)=>setPass(e.target.value)} required />
-        <button disabled={loading} className="px-5 py-2.5 rounded-xl bg-blue-600 text-white">
-          {loading ? "Ingresando..." : "Ingresar"}
-        </button>
-      </form>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <h3 className="text-lg font-medium text-gray-900 mb-6 text-center">
+            Iniciar Sesión
+          </h3>
+          
+          {errorFlag && (
+            <div className="mb-4 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md">
+              Tu cuenta no está autorizada para acceder al panel de administración.
+            </div>
+          )}
+          
+          <form onSubmit={doLogin} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Correo electrónico
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="tu@email.com"
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Contraseña
+              </label>
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+                required
+              />
+            </div>
+            
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Ingresando..." : "Ingresar"}
+            </button>
+          </form>
+          
+          <div className="mt-6 text-center">
+            <a
+              href="/"
+              className="text-sm text-blue-600 hover:text-blue-500"
+            >
+              ← Volver al sitio principal
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

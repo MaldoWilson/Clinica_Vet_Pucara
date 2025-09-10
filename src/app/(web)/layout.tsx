@@ -1,21 +1,36 @@
+"use client";
 import "@/app/(web)/globals.css";
 import { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export const metadata = {
-  title: process.env.NEXT_PUBLIC_SITE_NAME || "Clínica Pucará",
-  description: "Atención veterinaria integral. Agenda tu hora.",
-};
+export default function WebLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
+  const isAdminPage = pathname.startsWith("/admin") && pathname !== "/admin/login";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+  if (isLoginPage) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {children}
+      </div>
+    );
+  }
+
+  if (isAdminPage) {
+    return (
+      <div className="min-h-screen">
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <html lang="es">
-      <body className="min-h-dvh flex flex-col">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </body>
-    </html>
+    <div className="min-h-dvh flex flex-col">
+      <Navbar />
+      <main className="flex-1 pt-16 lg:pt-18">{children}</main>
+      <Footer />
+    </div>
   );
 }
