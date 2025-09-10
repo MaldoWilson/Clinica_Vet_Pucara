@@ -134,31 +134,41 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Navegación del admin */}
       <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            <a
-              href="/admin"
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                pathname === "/admin"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Inicio
-            </a>
-            <a
-              href="/admin/citas"
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                pathname === "/admin/citas"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Mascotas
-            </a>
-          </div>
-        </div>
-      </nav>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex space-x-8">
+      <a
+        href="/admin"
+        className={`py-4 px-1 border-b-2 font-medium text-sm ${
+          pathname === "/admin"
+            ? "border-blue-500 text-blue-600"
+            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+        }`}
+      >
+        Gestión
+      </a>
+      <a
+        href="/admin/citas"
+        className={`py-4 px-1 border-b-2 font-medium text-sm ${
+          pathname === "/admin/citas"
+            ? "border-blue-500 text-blue-600"
+            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+        }`}
+      >
+        Mascotas
+      </a>
+      <a
+        href="/admin/contenido"
+        className={`py-4 px-1 border-b-2 font-medium text-sm ${
+          pathname === "/admin/contenido"
+            ? "border-blue-500 text-blue-600"
+            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+        }`}
+      >
+        Contenido
+      </a>
+    </div>
+  </div>
+</nav>
 
       {/* Contenido principal */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
