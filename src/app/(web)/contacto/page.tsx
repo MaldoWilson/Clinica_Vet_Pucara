@@ -19,8 +19,8 @@ export default function ContactoPage() {
     <Image
       src="/logo.png"  // 👉 coloca tu archivo logo.png en /public
       alt="Clínica Pucará"
-      width={120}
-      height={120}
+      width={400}
+      height={400}
       priority
     />
   </div>
