@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import MapVet from "@/components/MapaVet";
+import WhatsAppButton from "@/components/whatsapp";
 
 export default function ContactoPage() {
   const direccion = "Esmeralda 97, San Bernardo, Santiago, Chile";
@@ -24,10 +25,10 @@ export default function ContactoPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-10">
       
-      {/* Columna izquierda: Logo + datos + mapa */}
+    
       <div className="space-y-6">
         <Image
-          src="/logo.png" // 👉 coloca tu archivo logo.png en /public
+          src="/logo.png" 
           alt="Clínica Pucará"
           width={300}
           height={300}
@@ -83,6 +84,14 @@ export default function ContactoPage() {
           {sending ? "Enviando..." : "Enviar"}
         </button>
       </form>
+           <WhatsAppButton
+        phone="569"   // Pongamos numero para probar
+        text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
+        floating // botón flotante abajo a la derecha
+      />
     </div>
+
+
+
   );
 }

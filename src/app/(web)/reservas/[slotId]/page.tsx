@@ -159,6 +159,7 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
           {sending ? "Enviando…" : "Reservar"}
         </button>
       </form>
+
     </div>
   );
 }

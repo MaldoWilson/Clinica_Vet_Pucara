@@ -4,6 +4,8 @@ import ServiceCard from "@/components/ServiceCard";
 import LatestBlogs from "@/components/LatestBlogs";
 import { supabaseServer } from "@/lib/supabaseClient";
 import WhatsAppButton from "@/components/whatsapp";
+
+
 export default async function Home() {
   const supa = supabaseServer();
   const { data: servicios } = await supa
@@ -27,13 +29,17 @@ export default async function Home() {
           ))}
         </div>
       </section>
+<<<<<<< Updated upstream
       
       <LatestBlogs />
+=======
+
+>>>>>>> Stashed changes
      
       <WhatsAppButton
         phone="569"   // Pongamos numero para probar
-        text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia🐶🐱"
-        floating               // botón flotante abajo a la derecha
+        text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
+        floating // botón flotante abajo a la derecha
       />
     </div>
   );
