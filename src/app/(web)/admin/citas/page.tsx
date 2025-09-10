@@ -1,15 +1,15 @@
+// app/admin/citas/page.tsx
 import { supabaseServer } from "@/lib/supabaseClient";
-import AdminCitasTable from "@/components/AdminCitasTable";
+import AdminPanel from "@/components/AdminPanel";
 
 export const dynamic = "force-dynamic";
 
 type SearchParams = { estado?: string };
 
 export default async function AdminCitasPage({ searchParams }: { searchParams: SearchParams }) {
-  const estado = searchParams.estado ?? ""; // "", PENDIENTE, CONFIRMADA, ATENDIDA, CANCELADA
+  const estado = searchParams.estado ?? "";
   const supa = supabaseServer();
 
-  // Join sencillo: cita + servicio + horario (+ fecha)
   const query = supa
     .from("citas")
     .select(`
@@ -24,8 +24,8 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
   if (estado) query.eq("estado", estado);
 
   const { data, error } = await query;
+
   if (error) {
-    // Muestra el error en la página para depuración
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
         <h1 className="text-2xl md:text-3xl font-semibold mb-4">Admin · Citas</h1>
@@ -34,10 +34,5 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
     );
   }
 
-  return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-2xl md:text-3xl font-semibold mb-6">Admin · Citas</h1>
-      <AdminCitasTable initialCitas={data ?? []} initialEstado={estado} />
-    </div>
-  );
+  return <AdminPanel initialCitas={data ?? []} estado={estado} />;
 }
