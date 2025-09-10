@@ -59,7 +59,7 @@ export default function Navbar() {
               />
             </div>
             <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              Clínica Pucará
+              Veterinaria Pucará
             </span>
           </Link>
 
