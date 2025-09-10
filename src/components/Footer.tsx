@@ -28,7 +28,7 @@ export default function Footer() {
                 </div>
                 <div className="text-center lg:text-right">
                   <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
-                    Clínica Pucará
+                    Veterinaria Pucará
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300 mt-1">
                     Veterinaria San Bernardo
@@ -38,8 +38,8 @@ export default function Footer() {
               
               {/* Información de contacto */}
               <div className="text-center lg:text-right space-y-1 sm:space-y-2 text-xs sm:text-sm text-slate-300">
-                <p>📍 San Bernardo, Región Metropolitana</p>
-                <p>📞 +56 9 XXXX XXXX</p>
+                <p>📍 Esmeralda 97, San Bernardo, Región Metropolitana</p>
+                <p>📞 +56 2 859 2840</p>
                 <p>✉️ contacto@clinicapucara.cl</p>
               </div>
             </div>
@@ -137,8 +137,8 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/reservas" className="hover:text-emerald-400 transition-colors block py-1">
-                      Reserva tu Hora
+                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
+                      Contacto
                     </Link>
                   </li>
                   <li>
