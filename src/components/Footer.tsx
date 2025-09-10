@@ -11,7 +11,7 @@ export default function Footer() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             
             {/* Logo y nombre - Lado derecho */}
-            <div className="flex flex-col items-center lg:items-end space-y-4 order-2 lg:order-1">
+            <div className="flex flex-col items-center lg:items-start space-y-4 order-2 lg:order-1">
               <Link 
                 href="/" 
                 className="flex items-center gap-3 group transition-transform duration-200 hover:scale-105"
@@ -26,7 +26,7 @@ export default function Footer() {
                     className="transition-transform duration-200 group-hover:rotate-6 sm:w-16 sm:h-16"
                   />
                 </div>
-                <div className="text-center lg:text-right">
+                <div className="text-center lg:text-left">
                   <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
                     Veterinaria Pucará
                   </h3>
@@ -37,7 +37,7 @@ export default function Footer() {
               </Link>
               
               {/* Información de contacto */}
-              <div className="text-center lg:text-right space-y-1 sm:space-y-2 text-xs sm:text-sm text-slate-300">
+              <div className="text-center lg:text-left space-y-1 sm:space-y-2 text-xs sm:text-sm text-slate-300">
                 <p>📍 Esmeralda 97, San Bernardo, Región Metropolitana</p>
                 <p>📞 +56 2 859 2840</p>
                 <p>✉️ contacto@clinicapucara.cl</p>
@@ -48,7 +48,7 @@ export default function Footer() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 order-1 lg:order-2">
               
               {/* Servicios */}
-              <div>
+              <div className="text-center sm:text-left">
                 <h4 className="text-base sm:text-lg font-semibold text-emerald-400 mb-3 sm:mb-4">
                   Servicios
                 </h4>
@@ -82,7 +82,7 @@ export default function Footer() {
               </div>
 
               {/* Consejos */}
-              <div>
+              <div className="text-center sm:text-left">
                 <h4 className="text-base sm:text-lg font-semibold text-emerald-400 mb-3 sm:mb-4">
                   Consejos
                 </h4>
@@ -116,7 +116,7 @@ export default function Footer() {
               </div>
 
               {/* Sobre Nosotros */}
-              <div>
+              <div className="text-center sm:text-left">
                 <h4 className="text-base sm:text-lg font-semibold text-emerald-400 mb-3 sm:mb-4">
                   Sobre Nosotros
                 </h4>
