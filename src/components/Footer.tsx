@@ -88,8 +88,8 @@ export default function Footer() {
                 </h4>
                 <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-slate-300">
                   <li>
-                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
-                      Cuidado Preventivo
+                    <Link href="/blog" className="hover:text-emerald-400 transition-colors block py-1">
+                      Blogs
                     </Link>
                   </li>
                   <li>

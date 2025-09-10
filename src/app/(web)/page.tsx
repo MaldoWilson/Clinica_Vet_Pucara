@@ -1,6 +1,7 @@
 // Home Principal de la pagina web
 import Hero from "@/components/Hero";
 import ServiceCard from "@/components/ServiceCard";
+import LatestBlogs from "@/components/LatestBlogs";
 import { supabaseServer } from "@/lib/supabaseClient";
 import WhatsAppButton from "@/components/whatsapp";
 export default async function Home() {
@@ -27,6 +28,7 @@ export default async function Home() {
         </div>
       </section>
       
+      <LatestBlogs />
      
       <WhatsAppButton
         phone="569"   // Pongamos numero para probar
