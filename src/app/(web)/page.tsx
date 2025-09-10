@@ -29,13 +29,9 @@ export default async function Home() {
           ))}
         </div>
       </section>
-<<<<<<< Updated upstream
-      
-      <LatestBlogs />
-=======
 
->>>>>>> Stashed changes
-     
+<LatestBlogs/>
+
       <WhatsAppButton
         phone="569"   // Pongamos numero para probar
         text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
