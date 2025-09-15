@@ -30,26 +30,32 @@ export default function BlogCard({ blog }: Props) {
   };
 
   return (
-    <Link href={`/blog/${blog.id}`} className="block">
-      <article className="rounded-2xl border p-6 hover:shadow-lg transition-all duration-300 bg-white cursor-pointer h-full">
+    <div className="max-w-md bg-white border border-gray-200 rounded-lg shadow-sm">
+      <Link href={`/blog/${blog.id}`}>
         {blog.image_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={blog.image_url}
             alt={blog.titulo}
-            className="w-full h-40 object-cover rounded-xl mb-4"
+            className="rounded-t-lg w-full h-48 object-cover"
           />
         )}
-        <h3 className="font-semibold text-xl mb-3 text-gray-800 line-clamp-2">{blog.titulo}</h3>
-        <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">
+      </Link>
+      <div className="p-5">
+        <Link href={`/blog/${blog.id}`}>
+          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 line-clamp-2">
+            {blog.titulo}
+          </h5>
+        </Link>
+        <p className="mb-3 font-normal text-gray-700 line-clamp-3">
           {truncateContent(blog.contenido)}
         </p>
         {blog.created_at && (
-          <p className="text-xs text-gray-500 mt-auto">
+          <p className="text-xs text-gray-500">
             {formatDate(blog.created_at)}
           </p>
         )}
-      </article>
-    </Link>
+      </div>
+    </div>
   );
 }

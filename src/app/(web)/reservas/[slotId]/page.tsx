@@ -155,9 +155,12 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
           rows={4}
           disabled={sending}
         />
-        <button disabled={sending} className="px-5 py-2.5 rounded-xl bg-blue-600 text-white">
+        <button disabled={sending} className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
           {sending ? "Enviando…" : "Reservar"}
         </button>
+        <p className="text-sm text-gray-600 mt-2">
+          * Si tu mascota requiere atención urgente, contáctanos directamente por WhatsApp para una atención más rápida.
+        </p>
       </form>
 
     </div>

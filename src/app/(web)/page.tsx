@@ -35,5 +35,6 @@ export default async function Home() {
         floating // botón flotante abajo a la derecha
       />
     </div>
+    
   );
 }
