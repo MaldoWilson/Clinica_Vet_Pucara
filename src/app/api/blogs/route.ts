@@ -77,3 +77,54 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const id: string = String(body?.id || "");
+    if (!id) return NextResponse.json({ error: 'id requerido' }, { status: 400 });
+
+    const updates: any = {};
+    if (typeof body?.titulo === 'string') updates.titulo = body.titulo;
+    if (typeof body?.contenido === 'string') updates.contenido = body.contenido;
+    if (typeof body?.publico !== 'undefined') updates.publico = Boolean(body.publico);
+    if (typeof body?.image_url !== 'undefined') updates.image_url = body.image_url ? String(body.image_url) : null;
+
+    const supabase = supabaseServer();
+    const { data, error } = await supabase
+      .from('blogs')
+      .update(updates)
+      .eq('id', id)
+      .select('id, created_at, titulo, contenido, publico, image_url')
+      .single();
+
+    if (error) {
+      console.error('Error al actualizar blog:', error);
+      return NextResponse.json({ error: 'No se pudo actualizar el blog' }, { status: 500 });
+    }
+
+    return NextResponse.json({ blog: data });
+  } catch (error) {
+    console.error('Error en PUT /api/blogs:', error);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const id: string = String(body?.id || "");
+    if (!id) return NextResponse.json({ error: 'id requerido' }, { status: 400 });
+
+    const supabase = supabaseServer();
+    const { error } = await supabase.from('blogs').delete().eq('id', id);
+    if (error) {
+      console.error('Error al eliminar blog:', error);
+      return NextResponse.json({ error: 'No se pudo eliminar el blog' }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error('Error en DELETE /api/blogs:', error);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+  }
+}

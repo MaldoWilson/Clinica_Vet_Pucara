@@ -24,14 +24,14 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { nombre, descripcion, precio_clp, duracion_min } = body || {};
+    const { nombre, descripcion, precio_clp, duracion_min, image_url } = body || {};
     if (!nombre) {
       return NextResponse.json({ ok: false, error: "nombre es requerido" }, { status: 400 });
     }
     const supa = supabaseServer();
     const { data, error } = await supa
       .from("servicios")
-      .insert({ nombre, descripcion, precio_clp, duracion_min })
+      .insert({ nombre, descripcion, precio_clp, duracion_min, image_url })
       .select("id, nombre, descripcion, precio_clp, duracion_min, creado_en, image_url")
       .single();
     if (error) throw error;

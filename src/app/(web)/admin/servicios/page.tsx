@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import AdminEditableTable from "@/components/AdminEditableTable";
 
 type Servicio = {
   id: string;
@@ -26,6 +27,9 @@ export default function AdminServiciosPage() {
     duracion_min: "",
   });
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const isEdit = useMemo(() => Boolean(editing?.id), [editing]);
 
   const loadServicios = async () => {
@@ -49,6 +53,8 @@ export default function AdminServiciosPage() {
   const resetForm = () => {
     setEditing(null);
     setForm({ nombre: "", descripcion: "", precio_clp: "", duracion_min: "" });
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,11 +62,24 @@ export default function AdminServiciosPage() {
     try {
       setSaving(true);
       setError(null);
+
+      // 1) Si hay imagen, primero la subimos para obtener la URL pública
+      let image_url: string | null = null;
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append("file", imageFile);
+        const up = await fetch("/api/servicios/upload", { method: "POST", body: fd });
+        const upJson = await up.json();
+        if (!up.ok || upJson.error) throw new Error(upJson.error || "Error al subir imagen");
+        image_url = upJson.image_url || null;
+      }
+
       const payload: any = {
         nombre: form.nombre.trim(),
         descripcion: form.descripcion.trim() || null,
         precio_clp: form.precio_clp ? Number(form.precio_clp) : null,
         duracion_min: form.duracion_min ? Number(form.duracion_min) : null,
+        image_url,
       };
 
       let url = "/api/servicios";
@@ -101,6 +120,8 @@ export default function AdminServiciosPage() {
       precio_clp: s.precio_clp?.toString() || "",
       duracion_min: s.duracion_min?.toString() || "",
     });
+    setImageFile(null);
+    setImagePreview(s.image_url || null);
   };
 
   const handleDelete = async (id: string) => {
@@ -185,6 +206,25 @@ export default function AdminServiciosPage() {
               onChange={(e) => setForm((f) => ({ ...f, duracion_min: e.target.value }))}
             />
           </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-1">Imagen</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setImageFile(file);
+                  setImagePreview(file ? URL.createObjectURL(file) : null);
+                }}
+              />
+              {imagePreview && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border" />
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
+          </div>
           <div className="flex items-end gap-2">
             <button
               type="submit"
@@ -206,84 +246,54 @@ export default function AdminServiciosPage() {
         </form>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Imagen</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Duración</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Creado</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {loading ? (
-              <tr><td className="px-4 py-4" colSpan={7}>Cargando...</td></tr>
-            ) : servicios.length === 0 ? (
-              <tr><td className="px-4 py-4" colSpan={7}>Sin servicios</td></tr>
-            ) : (
-              servicios.map((s) => (
-                <tr key={s.id}>
-                  <td className="px-4 py-2">
-                    <div className="flex items-center gap-3">
-                      {s.image_url ? (
-                        <Image src={s.image_url} alt={s.nombre} width={56} height={56} className="w-14 h-14 object-cover rounded" />
-                      ) : (
-                        <div className="w-14 h-14 bg-gray-100 rounded grid place-items-center text-xs text-gray-400">Sin
-                          imagen</div>
-                      )}
-                      <label className="text-xs text-blue-600 cursor-pointer">
-                        Subir
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            try {
-                              await handleUpload(s.id, file);
-                            } catch (err: any) {
-                              alert(err.message || "Error subiendo imagen");
-                            } finally {
-                              e.currentTarget.value = "";
-                            }
-                          }}
-                        />
-                      </label>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2 font-medium">{s.nombre}</td>
-                  <td className="px-4 py-2 text-sm text-gray-600 max-w-[360px] truncate">{s.descripcion}</td>
-                  <td className="px-4 py-2">{s.precio_clp != null ? `$${s.precio_clp}` : "-"}</td>
-                  <td className="px-4 py-2">{s.duracion_min != null ? `${s.duracion_min} min` : "-"}</td>
-                  <td className="px-4 py-2 text-sm text-gray-500">{s.creado_en ? new Date(s.creado_en).toLocaleString() : "-"}</td>
-                  <td className="px-4 py-2">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEdit(s)}
-                        className="px-3 py-1 rounded border"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(s.id)}
-                        className="px-3 py-1 rounded bg-red-600 text-white"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <AdminEditableTable
+        items={servicios}
+        loading={loading}
+        emptyText="Sin servicios"
+        onEdit={(item) => handleEdit(item)}
+        onDelete={(id) => handleDelete(id)}
+        onUploadImage={async (id, file) => {
+          try {
+            await handleUpload(id, file);
+          } catch (err: any) {
+            alert(err.message || "Error subiendo imagen");
+          }
+        }}
+        columns={[
+          {
+            key: "imagen",
+            header: "Imagen",
+            render: (s: Servicio) => (
+              <div className="flex items-center gap-3">
+                {s.image_url ? (
+                  <Image src={s.image_url} alt={s.nombre} width={56} height={56} className="w-14 h-14 object-cover rounded" />
+                ) : (
+                  <div className="w-14 h-14 bg-gray-100 rounded grid place-items-center text-xs text-gray-400">Sin imagen</div>
+                )}
+                <label className="text-xs text-blue-600 cursor-pointer">
+                  Subir
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      await handleUpload(s.id, file);
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            ),
+          },
+          { key: "nombre", header: "Nombre", render: (s: Servicio) => <span className="font-medium">{s.nombre}</span> },
+          { key: "descripcion", header: "Descripción", render: (s: Servicio) => <span className="text-sm text-gray-600 max-w-[360px] truncate inline-block">{s.descripcion}</span> },
+          { key: "precio", header: "Precio", render: (s: Servicio) => (s.precio_clp != null ? `$${s.precio_clp}` : "-") },
+          { key: "duracion", header: "Duración", render: (s: Servicio) => (s.duracion_min != null ? `${s.duracion_min} min` : "-") },
+          { key: "creado", header: "Creado", render: (s: Servicio) => <span className="text-sm text-gray-500">{s.creado_en ? new Date(s.creado_en).toLocaleString() : "-"}</span> },
+        ]}
+      />
     </div>
   );
 }
