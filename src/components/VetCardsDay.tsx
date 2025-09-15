@@ -67,7 +67,7 @@ export default function VetCardsDay() {
             <button
               key={d.toISOString()}
               onClick={() => setDay(d)}
-              className={`px-3 py-2 rounded-xl border min-w-[84px] text-center ${active ? "bg-teal-600 text-white border-teal-600" : "hover:bg-neutral-50"}`}
+              className={`px-3 py-2 rounded-xl border min-w-[84px] text-center ${active ? "bg-indigo-400 text-white border-indigo-600" : "hover:bg-neutral-50"}`}
               title={d.toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "short" })}
             >
               <div className="text-xs capitalize">{d.toLocaleDateString("es-CL", { weekday: "short" })}</div>
@@ -95,12 +95,12 @@ export default function VetCardsDay() {
             return (
               <div key={vet.id} className="rounded-2xl border shadow-sm overflow-hidden grid grid-cols-[1fr,160px] bg-white">
                 {/* izquierda: foto + info */}
-                <div className="p-4 flex gap-3">
+                <div className="p-5 flex gap-3">
                   {vet.foto_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={vet.foto_url} alt={vet.nombre} className="w-16 h-16 rounded object-cover border" />
                   ) : (
-                    <div className="w-16 h-16 rounded bg-neutral-200 border flex items-center justify-center text-lg font-semibold">
+                    <div className="w-20 h-20 rounded bg-neutral-200 border flex items-center justify-center text-lg font-semibold">
                       {(vet.nombre || "?").slice(0,1)}
                     </div>
                   )}
@@ -110,14 +110,14 @@ export default function VetCardsDay() {
 
                     {resto.length > 0 && (
                       <details className="mt-3">
-                        <summary className="cursor-pointer text-sm text-teal-700">Ver más horas</summary>
+                        <summary className="cursor-pointer text-m text-indigo-400">Ver más horas</summary>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {resto.map(s => s.reservado ? (
                             <span key={s.id} className="px-3 py-1 rounded-full bg-teal-50 text-teal-900/60 text-sm border border-teal-100" title="Hora reservada">
                               {fmtHora(s.inicio)}
                             </span>
                           ) : (
-                            <Link key={s.id} href={`/reservas/${s.id}`} className="px-3 py-1 rounded-full bg-white text-teal-700 text-sm border border-teal-600 hover:bg-teal-50">
+                            <Link key={s.id} href={`/reservas/${s.id}`} className="px-3 py-1 rounded-full bg-white text-indigo-700 text-sm border border-indigo-500 hover:bg-teal-50">
                               {fmtHora(s.inicio)}
                             </Link>
                           ))}
@@ -128,17 +128,17 @@ export default function VetCardsDay() {
                 </div>
 
                 {/* derecha: columnas de “píldoras” teal */}
-                <div className="bg-teal-600/90 text-white p-4 flex flex-col gap-2 items-center">
+                <div className="bg-indigo-400 text-white p-4 flex flex-col gap-2 items-center">
                   {preview.length === 0 ? (
                     <span className="text-white/90 text-sm">Sin horarios</span>
                   ) : (
                     preview.map(s =>
                       s.reservado ? (
-                        <span key={s.id} className="w-full max-w-[120px] text-center rounded-full py-1 bg-teal-700/60 text-white/80 text-sm border border-white/20" title="Hora reservada">
+                        <span key={s.id} className="w-full max-w-[120px] text-center rounded-full py-1 bg-indigo-400 text-white/80 text-sm border border-white/20" title="Hora reservada">
                           {fmtHora(s.inicio)}
                         </span>
                       ) : (
-                        <Link key={s.id} href={`/reservas/${s.id}`} className="w-full max-w-[120px] text-center rounded-full py-1 bg-white text-teal-700 text-sm border border-transparent hover:bg-teal-50">
+                        <Link key={s.id} href={`/reservas/${s.id}`} className="w-full max-w-[120px] text-center rounded-full py-1 bg-white text-indigo-400 text-sm border border-transparent hover:bg-teal-50">
                           {fmtHora(s.inicio)}
                         </Link>
                       )

@@ -4,8 +4,8 @@ export default function Hero() {
     <section >
       <div className="absolute inset-0 bg-gradient-to-b from-violet-100 to-transparent -z-10" />
       <header className="container py-16 sm:py-24 text-center">
-        <p className="text-sm font-medium text-blue-700/80 tracking-wide mb-2">
-          Clínica Pucará — San Bernardo
+        <p className="text-sm font-medium text-indigo-400 tracking-wide mb-2">
+          Clínica Veterinaria Pucará - San Bernardo
         </p>
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight">
           Cuidamos a tus mascotas con cariño y excelencia

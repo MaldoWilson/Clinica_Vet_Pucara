@@ -28,6 +28,7 @@ export default async function Home() {
       />
       <LatestBlogs />
       
+      
 
       <WhatsAppButton
         phone="569"   // Pongamos numero para probar

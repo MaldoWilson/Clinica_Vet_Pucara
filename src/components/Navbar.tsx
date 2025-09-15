@@ -55,7 +55,7 @@ export default function Navbar() {
                 className="transition-transform duration-200 group-hover:rotate-6"
               />
             </div>
-            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-500 to-indigo-400 bg-clip-text text-transparent">
               Veterinaria Pucará
             </span>
           </Link>
@@ -68,8 +68,8 @@ export default function Navbar() {
                 href={link.href}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                   isActive(link.href)
-                    ? 'text-teal-600 bg-teal-50'
-                    : 'text-gray-700 hover:text-teal-600 hover:bg-gray-50'
+                    ? 'text-indigo-600 bg-indigo-100'
+                    : 'text-gray-700 hover:text-indigo-500 hover:bg-gray-50'
                 }`}
               >
                 {link.label}

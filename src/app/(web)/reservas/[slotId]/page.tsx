@@ -113,7 +113,7 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
       )}
 
       <form onSubmit={submit} className="space-y-3">
-        <select name="servicioId" required className="w-full border rounded-xl p-3" disabled={sending}>
+        <select name="servicioId" required className="w-full border rounded-xl p-3" disabled={sending} aria-label="Seleccionar servicio">
           <option value="">Selecciona un servicio…</option>
           {servicios.map((s) => (
             <option key={s.id} value={s.id}>
