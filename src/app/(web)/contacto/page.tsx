@@ -24,7 +24,7 @@ export default function ContactoPage() {
   };
 
   return (
-    <section className="relative">
+    <section className="relative -mb-16">
       {/* Fondo con imagen personalizada */}
       <div
         className="absolute inset-0 -z-10 bg-cover bg-center"
@@ -32,7 +32,7 @@ export default function ContactoPage() {
       />
       <div className="absolute inset-0 -z-10 bg-teal-900/60" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-6 md:pb-8">
         <div className="grid md:grid-cols-2 gap-8 items-start">
           {/* Columna izquierda: texto, datos y mapa, con logo pequeño */}
           <div className="text-white">
