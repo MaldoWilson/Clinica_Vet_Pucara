@@ -58,7 +58,7 @@ export default function VetCardsDay() {
   }, [slots]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 py-9">
       {/* tira de días */}
       <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
         {days.map(d => {
