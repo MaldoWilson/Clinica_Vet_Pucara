@@ -7,6 +7,7 @@ type Props = {
     titulo: string; 
     contenido: string; 
     created_at?: string;
+    image_url?: string | null;
   } 
 };
 
@@ -31,6 +32,14 @@ export default function BlogCard({ blog }: Props) {
   return (
     <Link href={`/blog/${blog.id}`} className="block">
       <article className="rounded-2xl border p-6 hover:shadow-lg transition-all duration-300 bg-white cursor-pointer h-full">
+        {blog.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={blog.image_url}
+            alt={blog.titulo}
+            className="w-full h-40 object-cover rounded-xl mb-4"
+          />
+        )}
         <h3 className="font-semibold text-xl mb-3 text-gray-800 line-clamp-2">{blog.titulo}</h3>
         <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">
           {truncateContent(blog.contenido)}

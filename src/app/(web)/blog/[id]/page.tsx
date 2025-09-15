@@ -9,6 +9,7 @@ type Blog = {
   titulo: string;
   contenido: string;
   created_at?: string;
+  image_url?: string | null;
 };
 
 export default function BlogDetailPage() {
@@ -98,7 +99,7 @@ export default function BlogDetailPage() {
                   d="M15 19l-7-7 7-7" 
                 />
               </svg>
-              Volver al Blog
+              Volver a Blogs
             </Link>
           </div>
         </div>
@@ -130,7 +131,7 @@ export default function BlogDetailPage() {
                   d="M15 19l-7-7 7-7" 
                 />
               </svg>
-              Volver al Blog
+              Volver a Blogs
             </Link>
           </div>
         </div>
@@ -160,14 +161,23 @@ export default function BlogDetailPage() {
                 d="M15 19l-7-7 7-7" 
               />
             </svg>
-            Volver al Blog
+            Volver a Blogs
           </Link>
         </div>
 
-        {/* Contenido del blog */}
-        <article className="bg-white rounded-2xl shadow-lg p-8">
-          <header className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4 leading-tight">
+        {/* Contenido del blog sin estilo de tarjeta */}
+        <article className="">
+          {blog.image_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={blog.image_url}
+              alt={blog.titulo}
+              className="w-full h-72 md:h-96 object-cover rounded-xl mb-6"
+            />
+          )}
+
+          <header className="mb-6">
+            <h1 className="text-4xl font-bold text-gray-800 mb-3 leading-tight">
               {blog.titulo}
             </h1>
             {blog.created_at && (
@@ -186,29 +196,6 @@ export default function BlogDetailPage() {
             />
           </div>
         </article>
-
-        {/* Botón para volver */}
-        <div className="mt-8 text-center">
-          <Link 
-            href="/blog"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          >
-            <svg 
-              className="mr-2 w-4 h-4" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M15 19l-7-7 7-7" 
-              />
-            </svg>
-            Ver Más Artículos
-          </Link>
-        </div>
       </div>
     </div>
   );
