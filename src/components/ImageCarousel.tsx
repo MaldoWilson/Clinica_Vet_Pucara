@@ -12,7 +12,7 @@ type ImageCarouselProps = {
   images: CarouselImage[];
   intervalMs?: number;
   className?: string;
-  aspectRatio?: string; 
+  aspectRatio?: string; // e.g. "aspect-[16/9]" or "aspect-[3/1]"
 };
 
 export default function ImageCarousel({
@@ -44,8 +44,8 @@ export default function ImageCarousel({
   const startAutoplay = () => {
     if (safeImages.length <= 1) return;
     timerRef.current = setInterval(() => {
-      // Evitar avanzar si hubo interacción en los últimos 2s
-      if (Date.now() - lastInteractionRef.current < 2000) return;
+      // Evitar avanzar si hubo interacción en los últimos 1s
+      if (Date.now() - lastInteractionRef.current < 1000) return;
       setCurrentIndex((idx) => (idx + 1) % safeImages.length);
     }, intervalMs) as unknown as NodeJS.Timeout;
   };
@@ -61,8 +61,8 @@ export default function ImageCarousel({
   if (!safeImages || safeImages.length === 0) return null;
 
   return (
-    <div className={"relative w-full" + (className ?? "")}>
-      <div className={`${aspectRatio} relative w-full  mx-auto bg-transparent`}>
+    <div className={"relative w-full overflow-hidden " + (className ?? "")}>
+      <div className={`${aspectRatio} relative bg-transparent w-full`}>
         {safeImages.map((img, index) => (
           <div
             key={index}
@@ -75,8 +75,8 @@ export default function ImageCarousel({
               alt={img.alt ?? `slide-${index + 1}`}
               fill
               priority={index === 0}
-              className="object-contain"
-              sizes="100vh"
+              className="object-containt"
+              sizes="100vw"
             />
           </div>
         ))}
@@ -88,7 +88,7 @@ export default function ImageCarousel({
           prev();
           resetAutoplay();
         }}
-        className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/60 focus:outline-none"
+        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 focus:outline-none transition-all duration-200 z-10"
       >
         ‹
       </button>
@@ -98,12 +98,12 @@ export default function ImageCarousel({
           next();
           resetAutoplay();
         }}
-        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/60 focus:outline-none"
+        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 focus:outline-none transition-all duration-200 z-10"
       >
         ›
       </button>
 
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {safeImages.map((_, i) => (
           <button
             key={`dot-${i}`}
@@ -112,8 +112,8 @@ export default function ImageCarousel({
               goTo(i);
               resetAutoplay();
             }}
-            className={`h-2 w-2 rounded-full transition-all ${
-              i === currentIndex ? "w-5 bg-white" : "bg-white/60 hover:bg-white"
+            className={`h-2 w-2 rounded-full transition-all duration-300 ${
+              i === currentIndex ? "bg-white scale-125" : "bg-white/60 hover:bg-white/80"
             }`}
           />
         ))}
