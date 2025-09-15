@@ -167,7 +167,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         Contenido
       </a>
             <a
-        href="/admin/servicios/nuevo"
+        href="/admin/servicios"
         className={`py-4 px-1 border-b-2 font-medium text-sm ${
           pathname === "/admin/servicios"
             ? "border-blue-500 text-blue-600"
