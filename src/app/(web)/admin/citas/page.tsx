@@ -1,6 +1,10 @@
 // app/admin/citas/page.tsx
 import { supabaseServer } from "@/lib/supabaseClient";
 import AdminPanel from "@/components/AdminPanel";
+import AdminCitasTable from "@/components/AdminCitasTable";
+import FichaForm from "@/components/FichasForm";
+import RecetaForm from "@/components/RecetaForm";
+import CertificadoForm from "@/components/CertificadoForm";
 
 export const dynamic = "force-dynamic";
 
@@ -34,5 +38,20 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
     );
   }
 
-  return <AdminPanel initialCitas={data ?? []} estado={estado} />;
+  return (
+    <AdminPanel
+      title="Mascotas"
+      tabs={[
+        {
+          id: "citas",
+          label: "📅 Citas",
+          content: <AdminCitasTable initialCitas={(data ?? []) as any} initialEstado={estado} />,
+        },
+        { id: "fichas", label: "🐾 Fichas Mascota", content: <FichaForm /> },
+        { id: "recetas", label: "💊 Recetas Médicas", content: <RecetaForm /> },
+        { id: "certificados", label: "📄 Certificados", content: <CertificadoForm /> },
+      ]}
+      initialActiveTabId="citas"
+    />
+  );
 }

@@ -1,8 +1,16 @@
+"use client";
+
+import AdminPanel from "@/components/AdminPanel";
+
 export default function ContenidoPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Gestión de Contenido</h1>
-      <p>Aquí podrás agregar, modificar y eliminar contenido.</p>
-    </div>
+    <AdminPanel
+      title="Admin · Contenido"
+      tabs={[
+        { id: "blogs", label: "📝 Blogs", content: <div>Gestión de blogs (próximamente)</div> },
+        { id: "productos", label: "🛍️ Productos", content: <div>Gestión de productos (próximamente)</div> },
+      ]}
+      initialActiveTabId="blogs"
+    />
   );
 }

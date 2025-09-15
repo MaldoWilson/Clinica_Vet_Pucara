@@ -1,26 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import AdminCitasTable from "@/components/AdminCitasTable";
-import RecetaForm from "@/components/RecetaForm";
-import CertificadoForm from "@/components/CertificadoForm";
-import FichaForm from "@/components/FichasForm";
+import { ReactNode, useState } from "react";
 
-export default function AdminPanel({ initialCitas, estado }: { initialCitas: any[]; estado: string }) {
-  const [activeTab, setActiveTab] = useState("citas");
+type AdminPanelTab = {
+  id: string;
+  label: string;
+  content: ReactNode;
+};
 
-  const tabs = [
-    { id: "citas", label: "📅 Citas" },
-    { id: "fichas", label: "🐾 Fichas Mascota" },
-    { id: "recetas", label: "💊 Recetas Médicas" },
-    { id: "certificados", label: "📄 Certificados" },
-  ];
+export default function AdminPanel({
+  title = "Panel de Administración",
+  tabs,
+  initialActiveTabId,
+}: {
+  title?: string;
+  tabs: AdminPanelTab[];
+  initialActiveTabId?: string;
+}) {
+  const [activeTab, setActiveTab] = useState(
+    initialActiveTabId ?? (tabs.length > 0 ? tabs[0].id : "")
+  );
+
+  const active = tabs.find((t) => t.id === activeTab) ?? tabs[0];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-2xl md:text-3xl font-semibold mb-6">Panel de Administración</h1>
+      <h1 className="text-2xl md:text-3xl font-semibold mb-6">{title}</h1>
 
-      {/* Menú tabs */}
       <div className="flex gap-4 mb-8">
         {tabs.map((tab) => (
           <button
@@ -37,11 +43,7 @@ export default function AdminPanel({ initialCitas, estado }: { initialCitas: any
         ))}
       </div>
 
-      {/* Contenido según pestaña */}
-      {activeTab === "citas" && <AdminCitasTable initialCitas={initialCitas} initialEstado={estado} />}
-      {activeTab === "fichas" && <FichaForm />}
-      {activeTab === "recetas" && <RecetaForm />}
-      {activeTab === "certificados" && <CertificadoForm />}
+      {active?.content}
     </div>
   );
 }
