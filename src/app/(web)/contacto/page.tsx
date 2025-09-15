@@ -12,8 +12,14 @@ export default function ContactoPage() {
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSending(true);
-    const body = Object.fromEntries(new FormData(e.currentTarget).entries());
-    const res = await fetch("/api/contacto", { method: "POST", body: JSON.stringify(body) });
+    const raw = Object.fromEntries(new FormData(e.currentTarget).entries());
+    const payload = {
+      nombre: String(raw.name ?? "").trim(),
+      correo: (raw as any).email ? String((raw as any).email).trim() : undefined,
+      telefono: (raw as any).phone ? String((raw as any).phone).trim() : undefined,
+      mensaje: String(raw.message ?? "").trim(),
+    };
+    const res = await fetch("/api/contacto", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     setSending(false);
     if (res.ok) {
       alert("¡Mensaje enviado!");
