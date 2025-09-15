@@ -228,10 +228,10 @@ export default function AdminServiciosPage() {
           <div className="flex items-end gap-2">
             <button
               type="submit"
-              className="inline-flex items-center px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-50"
+              className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
               disabled={saving}
             >
-              {saving ? "Guardando..." : isEdit ? "Actualizar" : "Crear"}
+              {saving ? "Guardando..." : isEdit ? "Actualizar" : "Crear Servicio"}
             </button>
             {isEdit && (
               <button

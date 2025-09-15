@@ -231,10 +231,11 @@ export default function BlogsForm() {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-60"
+              className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
             >
-              {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar" : "Guardar Blog")}
+              {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar" : "Crear Blog")}
             </button>
+            
             {editing && (
               <button type="button" className="px-3 py-2 rounded border" onClick={() => {
                 setEditing(null);
