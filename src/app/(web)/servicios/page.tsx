@@ -30,6 +30,18 @@ export default async function ServiciosPage() {
           />
         ))}
       </div>
+
+      <div className="mt-8 flex items-center justify-center gap-3">
+          <a
+            href="/reservas"
+            className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
+          >
+            Agendar hora
+          </a>
+          <a href="/contacto" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
+            Contáctanos
+          </a>
+        </div>
       <WhatsAppButton
         phone="569"
         text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
