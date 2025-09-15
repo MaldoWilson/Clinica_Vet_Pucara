@@ -89,35 +89,23 @@ export default function LatestBlogs() {
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-          Últimos Artículos
+        <h2 className="text-4xl font-bold text-center mb-12">
+          <span className="text-gray-800">Ultimos </span>
+          <span className="text-indigo-400">Articulos</span>
+          <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
         </h2>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+
           {blogs.map((blog) => (
             <BlogCard key={blog.id} blog={blog} />
           ))}
         </div>
-        
+
         <div className="text-center">
-          <Link 
-            href="/blog"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          >
+          <Link
+            href="/blog" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
             Ver Más Artículos
-            <svg 
-              className="ml-2 w-4 h-4" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M9 5l7 7-7 7" 
-              />
-            </svg>
+
           </Link>
         </div>
       </div>
