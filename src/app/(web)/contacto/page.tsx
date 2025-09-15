@@ -12,14 +12,51 @@ export default function ContactoPage() {
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSending(true);
-    const raw = Object.fromEntries(new FormData(e.currentTarget).entries());
+    
+    const formData = new FormData(e.currentTarget);
+    const nombre = formData.get("nombre") as string;
+    const correo = formData.get("correo") as string;
+    const telefono = formData.get("telefono") as string;
+    const mensaje = formData.get("mensaje") as string;
+
+    // Validaciones
+    if (!nombre?.trim()) {
+      alert("El nombre completo es obligatorio");
+      setSending(false);
+      return;
+    }
+
+    if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+      alert("Por favor ingresa un correo electrónico válido");
+      setSending(false);
+      return;
+    }
+
+    if (telefono && !/^[\+]?[0-9\s\-\(\)]{8,15}$/.test(telefono)) {
+      alert("Por favor ingresa un número de teléfono válido");
+      setSending(false);
+      return;
+    }
+
+    if (!mensaje?.trim()) {
+      alert("El mensaje es obligatorio");
+      setSending(false);
+      return;
+    }
+
     const payload = {
-      nombre: String(raw.name ?? "").trim(),
-      correo: (raw as any).email ? String((raw as any).email).trim() : undefined,
-      telefono: (raw as any).phone ? String((raw as any).phone).trim() : undefined,
-      mensaje: String(raw.message ?? "").trim(),
+      nombre: nombre.trim(),
+      correo: correo?.trim() || undefined,
+      telefono: telefono?.trim() || undefined,
+      mensaje: mensaje.trim(),
     };
-    const res = await fetch("/api/contacto", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+
+    const res = await fetch("/api/contacto", { 
+      method: "POST", 
+      headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify(payload) 
+    });
+    
     setSending(false);
     if (res.ok) {
       alert("¡Mensaje enviado!");
@@ -86,11 +123,32 @@ export default function ContactoPage() {
               <h2 className="text-2xl font-bold text-neutral-900">Formulario</h2>
               <p className="text-sm text-neutral-600">¡Estamos aquí para ayudarte!</p>
             </div>
-            <input name="name" placeholder="Nombre completo" className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" required />
-            <input name="phone" placeholder="Número de contacto" className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" />
-            <input name="subject" placeholder="Tipo de consulta" className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" />
-            <input name="reference" placeholder="Ubicación de referencia" className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" />
-            <textarea name="message" placeholder="Mensaje" rows={5} className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" required />
+            <input 
+              name="nombre" 
+              type="text"
+              placeholder="Nombre completo" 
+              className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+              required 
+            />
+            <input 
+              name="correo" 
+              type="email"
+              placeholder="Correo electrónico" 
+              className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+            />
+            <input 
+              name="telefono" 
+              type="tel"
+              placeholder="Número de contacto" 
+              className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+            />
+            <textarea 
+              name="mensaje" 
+              placeholder="Mensaje" 
+              rows={5} 
+              className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+              required 
+            />
             <button
           disabled={sending}
           className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300 w-full"
