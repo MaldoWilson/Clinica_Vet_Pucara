@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-type Vet = { id: string; nombre: string; foto_url?: string | null; especialidad?: string | null };
+type Vet = { id: string; nombre: string; foto_url: string | null; especialidad?: string | null };
 type Slot = {
   id: string;
   inicio: string;

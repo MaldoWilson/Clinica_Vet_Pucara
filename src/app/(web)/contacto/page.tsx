@@ -70,8 +70,8 @@ export default function ContactoPage() {
     <div className="relative -mb-16 min-h-screen">
       {/* Fondo con imagen personalizada que cubre toda la pantalla incluyendo navbar */}
       <div
-        className="fixed inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: `url(${(contactoBg as unknown as { src: string }).src})` }}
+        className="fixed inset-0 -z-10 bg-cover bg-center contacto-bg"
+        style={{ '--contacto-bg': `url(${(contactoBg as unknown as { src: string }).src})` } as React.CSSProperties}
       />
       <div className="fixed inset-0 -z-10 bg-teal-900/60" />
 
@@ -82,7 +82,7 @@ export default function ContactoPage() {
           <div className="text-white">
             <div className="flex items-center gap-3 mb-6">
               
-              <h1 className="text-3xl md:text-4xl font-bold leading-tight">¡Agenda Tu Cita con Nosotros!</h1>
+              <h1 className="text-3xl md:text-4xl font-bold leading-tight">¡Agenda tu cita con nosotros!</h1>
             </div>
             <p className="text-teal-50/90 max-w-2xl mb-6">
               Estamos aquí para cuidar de tu mascota. Completa el formulario y te contactaremos a la brevedad.

@@ -15,3 +15,8 @@ a { @apply underline-offset-2; }
 }
 .btn-primary { @apply bg-blue-600 text-white hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600; }
 .btn-ghost   { @apply bg-white text-neutral-800 ring-1 ring-neutral-200 hover:bg-neutral-50; }
+
+/* Fondo de contacto */
+.contacto-bg {
+  background-image: var(--contacto-bg);
+}
