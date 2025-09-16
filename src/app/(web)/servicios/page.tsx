@@ -1,17 +1,26 @@
 // src/app/servicios/page.tsx
-import { supabaseServer } from "@/lib/supabaseClient";
 import ServiceCard from "@/components/ServiceCard";
 import WhatsAppButton from "@/components/whatsapp";
 
-export default async function ServiciosPage() {
-  const supa = supabaseServer(); // si quieres, usa un cliente ANON para lectura pública
-  const { data: servicios, error } = await supa
-    .from("servicios")
-    .select("id, nombre, descripcion, precio_clp, image_url")
-    .order("nombre", { ascending: true })
-    .limit(6);
+async function getServicios() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/servicios`, {
+      cache: 'no-store'
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      console.error('Error fetching servicios:', data.error);
+      return [];
+    }
+    return data.data || [];
+  } catch (error) {
+    console.error('Error fetching servicios:', error);
+    return [];
+  }
+}
 
-  if (error) console.error(error);
+export default async function ServiciosPage() {
+  const servicios = await getServicios();
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
@@ -21,7 +30,7 @@ export default async function ServiciosPage() {
         <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
       </h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {(servicios ?? []).map((s) => (
+        {servicios.slice(0, 6).map((s: any) => (
           <ServiceCard
             key={s.id}
             service={{
