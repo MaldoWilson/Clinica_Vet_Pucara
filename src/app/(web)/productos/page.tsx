@@ -39,7 +39,7 @@ export default function ProductosPage() {
           data.productos
             .map((p: Producto) => p.categoria)
             .filter((cat: string) => cat && cat.trim() !== "")
-        )];
+        )] as string[];
         setCategories(uniqueCategories);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -126,6 +126,7 @@ export default function ProductosPage() {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              aria-label="Filtrar por categoría"
             >
               <option value="">Todas las categorías</option>
               {categories.map((category) => (
