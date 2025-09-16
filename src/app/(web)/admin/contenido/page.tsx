@@ -2,6 +2,8 @@
 
 import AdminPanel from "@/components/AdminPanel";
 import BlogsForm from "@/components/BlogsForm";
+import AdminServiciosPage from "../servicios/page";
+import AdminEquipoPage from "../equipo/page";
 
 export default function ContenidoPage() {
   return (
@@ -10,6 +12,8 @@ export default function ContenidoPage() {
       tabs={[
         { id: "blogs", label: "📝 Blogs", content: <BlogsForm /> },
         { id: "productos", label: "🛍️ Productos", content: <div>Gestión de productos (próximamente)</div> },
+        { id: "servicios", label: "💼 Servicios", content: <AdminServiciosPage /> },
+        { id: "equipo", label: "👩‍⚕️ Equipo", content: <AdminEquipoPage /> },
       ]}
       initialActiveTabId="blogs"
     />

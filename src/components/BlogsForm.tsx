@@ -200,7 +200,7 @@ export default function BlogsForm() {
           <div className="mb-3">
             <label className="block font-medium">Imagen</label>
             <div className="flex items-center gap-3">
-              <input
+              <input aria-label="..."
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
