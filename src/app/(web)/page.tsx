@@ -19,7 +19,7 @@ export default async function Home() {
   return (
     <div>
       {/* Hero Section estilo Móvil Pet */}
-      <section className="relative min-h-screen flex items-center overflow-hidden -mt-16 lg:-mt-18">
+      <section className="relative h-96 md:h-[700px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
         {/* Background Image */}
         <div className="absolute inset-0 -z-20">
           <Image

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ProductCard from "@/components/ProductCard";
+import WhatsAppButton from "@/components/whatsapp";
 
 type Producto = {
   id: string;
@@ -204,6 +205,11 @@ export default function ProductosPage() {
           </a>
         </div>
       </div>
+      <WhatsAppButton
+        phone="569"
+        text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
+        floating
+      />
     </div>
   );
 }
