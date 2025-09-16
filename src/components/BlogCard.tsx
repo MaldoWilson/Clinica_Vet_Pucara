@@ -43,7 +43,7 @@ export default function BlogCard({ blog }: Props) {
       </Link>
       <div className="p-5">
         <Link href={`/blog/${blog.id}`}>
-          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 line-clamp-2 group-hover:text-gray-900 transition-colors duration-300">
+          <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-900 line-clamp-2 group-hover:text-indigo-400 transition-colors duration-300">
             {blog.titulo}
           </h5>
         </Link>

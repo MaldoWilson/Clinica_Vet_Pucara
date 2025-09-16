@@ -109,7 +109,7 @@ export default function LatestProducts() {
         <div className="text-center">
           <Link
             href="/productos" 
-            className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
+            className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-500 transition-colors duration-300"
           >
             Ver Más Productos
           </Link>

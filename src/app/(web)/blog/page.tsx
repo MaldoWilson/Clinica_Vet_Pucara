@@ -38,9 +38,11 @@ export default function BlogPage() {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">
-            Blog Veterinario
-          </h1>
+        <h2 className="text-4xl font-bold text-center mb-12">
+          <span className="text-gray-800">Blog </span>
+          <span className="text-indigo-400">Veterinario</span>
+          <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
+        </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="animate-pulse">
@@ -57,9 +59,11 @@ export default function BlogPage() {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">
-            Blog Veterinario
-          </h1>
+        <h2 className="text-4xl font-bold text-center mb-12">
+          <span className="text-gray-800">Blog </span>
+          <span className="text-indigo-400">Veterinario</span>
+          <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
+        </h2>
           <div className="text-center text-red-600">
             <p>Error al cargar los artículos: {error}</p>
           </div>
@@ -72,9 +76,11 @@ export default function BlogPage() {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">
-            Blog Veterinario
-          </h1>
+        <h2 className="text-4xl font-bold text-center mb-12">
+          <span className="text-gray-800">Blog </span>
+          <span className="text-indigo-400">Veterinario</span>
+          <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
+        </h2>
           <div className="text-center text-gray-600">
             <p>No hay artículos disponibles en este momento.</p>
             <p className="mt-2">Pronto publicaremos contenido interesante sobre el cuidado de tus mascotas.</p>
@@ -87,9 +93,11 @@ export default function BlogPage() {
   return (
     <div className="py-20">
       <div className="container mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-4 text-gray-800">
-          Blog Veterinario
-        </h1>
+      <h2 className="text-4xl font-bold text-center mb-12">
+          <span className="text-gray-800">Blog </span>
+          <span className="text-indigo-400">Veterinario</span>
+          <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
+        </h2>
         <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
           Descubre consejos, noticias y artículos sobre el cuidado de tus mascotas, 
           escritos por nuestros veterinarios especialistas.

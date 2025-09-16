@@ -50,7 +50,7 @@ export default function ProductCard({ producto }: Props) {
       </Link>
       <div className="p-5">
         <Link href={`/productos/${producto.id}`}>
-          <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-900 line-clamp-2 group-hover:text-indigo-600 transition-colors duration-300">
+          <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-900 line-clamp-2 group-hover:text-indigo-400 transition-colors duration-300">
             {producto.nombre}
           </h5>
         </Link>
