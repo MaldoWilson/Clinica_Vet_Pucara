@@ -19,7 +19,7 @@ export default function ImageCarousel({
   images,
   intervalMs = 3500,
   className,
-  aspectRatio = "aspect-[16/9]",
+  aspectRatio ="aspect-[4/3] sm:aspect-[16/9] lg:aspect-[3/1]"
 }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -53,7 +53,8 @@ export default function ImageCarousel({
   useEffect(() => {
     startAutoplay();
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current as unknown as number);
+      if (timerRef.current)
+        clearInterval(timerRef.current as unknown as number);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [intervalMs, safeImages.length]);
@@ -61,7 +62,10 @@ export default function ImageCarousel({
   if (!safeImages || safeImages.length === 0) return null;
 
   return (
-    <div className={"relative w-full overflow-hidden bg-transparent" + (className ?? "")}>
+    <div
+    className={"relative w-full overflow-hidden bg-transparent " + (className ?? "")
+      }
+    >
       <div className={`${aspectRatio} relative bg-transparent`}>
         {safeImages.map((img, index) => (
           <div
@@ -75,8 +79,11 @@ export default function ImageCarousel({
               alt={img.alt ?? `slide-${index + 1}`}
               fill
               priority={index === 0}
-              className="object-contain"
-              sizes="(max-width: 640px) 100vw, (max-width: 1280px) 100vw, 100vw"
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw,
+              (max-width: 1024px) 100vw,
+              (max-width: 1536px) 100vw,
+              1536px"
             />
           </div>
         ))}
@@ -88,7 +95,8 @@ export default function ImageCarousel({
           prev();
           resetAutoplay();
         }}
-        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 focus:outline-none transition-all duration-200 z-10"
+        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 text-white
+             p-3 sm:p-3 md:p-3 lg:p-2 hover:bg-black/70 focus:outline-none transition-all z-10"
       >
         ‹
       </button>
@@ -98,7 +106,8 @@ export default function ImageCarousel({
           next();
           resetAutoplay();
         }}
-        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 focus:outline-none transition-all duration-200 z-10"
+        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 text-white
+             p-3 sm:p-3 md:p-3 lg:p-2 hover:bg-black/70 focus:outline-none transition-all z-10"
       >
         ›
       </button>
@@ -113,7 +122,9 @@ export default function ImageCarousel({
               resetAutoplay();
             }}
             className={`h-2 w-2 rounded-full transition-all duration-300 ${
-              i === currentIndex ? "bg-white scale-125" : "bg-white/60 hover:bg-white/80"
+              i === currentIndex
+                ? "bg-white scale-125"
+                : "bg-white/60 hover:bg-white/80"
             }`}
           />
         ))}
@@ -121,5 +132,3 @@ export default function ImageCarousel({
     </div>
   );
 }
-
-

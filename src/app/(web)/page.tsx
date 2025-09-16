@@ -79,9 +79,9 @@ export default async function Home() {
 
       <ImageCarousel
         images={[
-          { src: "/slide1.png", alt: "Clinica Vet Pucara" },
-          { src: "/slide.png", alt: "Servicios Veterinarios" },
-          { src: "/slide1.png", alt: "Cuidado de Mascotas" },
+          { src: "/1.webp", alt: "Clinica Vet Pucara" },
+          { src: "/2.webp", alt: "Servicios Veterinarios" },
+          { src: "/3.webp", alt: "Cuidado de Mascotas" },
         ]}
         aspectRatio="aspect-[16/6]"
         intervalMs={4000}
