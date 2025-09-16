@@ -38,7 +38,7 @@ export default function Footer() {
                   />
                 </div>
                 <div className="text-center lg:text-left">
-                  <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+                  <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-400 to-indigo-300 bg-clip-text text-transparent">
                     Veterinaria Pucará
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300 mt-1">
@@ -65,7 +65,7 @@ export default function Footer() {
                   onClick={() => toggleSection("servicios")}
                   aria-expanded={openSections.servicios}
                 >
-                  <span>Servicios</span>
+                  <span className="text-indigo-400">Servicios</span>
                   <svg
                     className={`h-5 w-5 transition-transform duration-200 sm:hidden ${openSections.servicios ? "rotate-180" : "rotate-0"}`}
                     viewBox="0 0 20 20"
@@ -81,27 +81,27 @@ export default function Footer() {
                 </button>
                 <ul className={`${openSections.servicios ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
-                    <Link href="/servicios" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
                       Consulta General
                     </Link>
                   </li>
                   <li>
-                    <Link href="/servicios" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
                       Cirugías
                     </Link>
                   </li>
                   <li>
-                    <Link href="/servicios" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
                       Vacunación
                     </Link>
                   </li>
                   <li>
-                    <Link href="/servicios" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
                       Emergencias 24/7
                     </Link>
                   </li>
                   <li>
-                    <Link href="/servicios" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
                       Laboratorio
                     </Link>
                   </li>
@@ -115,7 +115,7 @@ export default function Footer() {
                   onClick={() => toggleSection("consejos")}
                   aria-expanded={openSections.consejos}
                 >
-                  <span>Consejos</span>
+                  <span className="text-indigo-400">Consejos</span>
                   <svg
                     className={`h-5 w-5 transition-transform duration-200 sm:hidden ${openSections.consejos ? "rotate-180" : "rotate-0"}`}
                     viewBox="0 0 20 20"
@@ -131,27 +131,27 @@ export default function Footer() {
                 </button>
                 <ul className={`${openSections.consejos ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
-                    <Link href="/blog" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/blog" className="hover:text-amber-500 transition-colors block py-1">
                       Blogs
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
                       Alimentación Saludable
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
                       Ejercicio para Mascotas
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
                       Señales de Alerta
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
                       Primeros Auxilios
                     </Link>
                   </li>
@@ -165,7 +165,7 @@ export default function Footer() {
                   onClick={() => toggleSection("sobre")}
                   aria-expanded={openSections.sobre}
                 >
-                  <span>Sobre Nosotros</span>
+                  <span className="text-indigo-400">Sobre Nosotros</span>
                   <svg
                     className={`h-5 w-5 transition-transform duration-200 sm:hidden ${openSections.sobre ? "rotate-180" : "rotate-0"}`}
                     viewBox="0 0 20 20"
@@ -181,27 +181,27 @@ export default function Footer() {
                 </button>
                 <ul className={`${openSections.sobre ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
-                    <Link href="/equipo" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/equipo" className="hover:text-amber-500 transition-colors block py-1">
                       Nuestro Equipo
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
                       Historia
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
                       Misión y Visión
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
                       Contacto
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-emerald-400 transition-colors block py-1">
+                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
                       Ubicación
                     </Link>
                   </li>
