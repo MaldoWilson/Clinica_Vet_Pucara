@@ -47,10 +47,10 @@ export default async function Home() {
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <a href="/blog" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
+                  <a href="/reservas" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
                     Agendar hora
                   </a>
-                  <a href="/blog" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
+                  <a href="/contacto" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
                     Contacto
                   </a>
                 </div>
