@@ -1,5 +1,7 @@
 "use client";
+
 import { useEffect, useMemo, useState } from "react";
+import WhatsAppButton from "@/components/whatsapp";
 
 type Servicio = { id: string; nombre: string };
 type Slot = {
@@ -162,6 +164,12 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
           * Si tu mascota requiere atención urgente, contáctanos directamente por WhatsApp para una atención más rápida.
         </p>
       </form>
+
+      <WhatsAppButton
+        phone="569"   // Pongamos numero para probar
+        text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
+        floating // botón flotante abajo a la derecha
+      />
 
     </div>
   );
