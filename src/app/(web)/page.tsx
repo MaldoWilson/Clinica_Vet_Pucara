@@ -19,7 +19,7 @@ export default async function Home() {
   return (
     <div>
       {/* Hero Section estilo Móvil Pet */}
-      <section className="relative h-96 md:h-[700px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
+      <section className="relative min-h-[500px] md:h-[700px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
         {/* Background Image */}
         <div className="absolute inset-0 -z-20">
           <Image
@@ -36,22 +36,22 @@ export default async function Home() {
         
         {/* Content */}
         <div className="relative z-10 w-full">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Content Card */}
-              <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 lg:p-12 shadow-2xl">
-                <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-4">
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-12 shadow-2xl mx-2 md:mx-0">
+                <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-gray-900 mb-4 leading-tight">
                   Veterinaria <span className="text-indigo-400">Pucará</span>
                 </h1>
-                <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+                <p className="text-base md:text-lg text-gray-700 mb-6 md:mb-8 leading-relaxed">
                   Cuidamos a tus <strong>mascotas</strong> con cariño y excelencia.<strong> Agenda tu hora</strong> online y conoce a nuestro equipo.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <a href="/reservas" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
+                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                  <a href="/reservas" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300 text-center">
                     Agendar hora
                   </a>
-                  <a href="/contacto" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
+                  <a href="/contacto" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300 text-center">
                     Contacto
                   </a>
                 </div>
