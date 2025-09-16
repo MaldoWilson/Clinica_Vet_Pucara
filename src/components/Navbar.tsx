@@ -31,7 +31,7 @@ export default function Navbar() {
     { href: "/equipo", label: "Equipo" },
     { href: "/reservas", label: "Reservas" },
     { href: "/contacto", label: "Contacto" },
-    { href: "/producto", label: "Productos" }
+    { href: "/productos", label: "Productos" }
   ];
 
   const isActive = (href: string) => pathname === href;

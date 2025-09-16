@@ -1,6 +1,7 @@
 // Home Principal de la pagina web
 import Hero from "@/components/Hero";
 import LatestBlogs from "@/components/LatestBlogs";
+import LatestProducts from "@/components/LatestProducts";
 import { supabaseServer } from "@/lib/supabaseClient";
 import WhatsAppButton from "@/components/whatsapp";
 import ImageCarousel from "@/components/ImageCarousel";
@@ -87,6 +88,8 @@ export default async function Home() {
         intervalMs={4000}
         className="rounded-none shadow-none"
       />
+      
+      <LatestProducts />
       <LatestBlogs />
       
       <WhatsAppButton
