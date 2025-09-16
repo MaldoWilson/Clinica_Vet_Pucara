@@ -30,7 +30,7 @@ export default function BlogCard({ blog }: Props) {
   };
 
   return (
-    <div className="max-w-md bg-white border border-gray-200 rounded-lg shadow-sm">
+    <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm">
       <Link href={`/blog/${blog.id}`}>
         {blog.image_url && (
           // eslint-disable-next-line @next/next/no-img-element
