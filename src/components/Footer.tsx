@@ -1,8 +1,19 @@
 // Componente de footer 
+"use client";
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function Footer() {
+  const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
+    servicios: false,
+    consejos: false,
+    sobre: false,
+  });
+
+  function toggleSection(key: keyof typeof openSections) {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
   return (
     <footer className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 text-white mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,7 +48,7 @@ export default function Footer() {
               </Link>
               
               {/* Información de contacto */}
-              <div className="text-center lg:text-left space-y-1 sm:space-y-2 text-xs sm:text-sm text-slate-300">
+              <div className="text-center lg:text-left space-y-1 sm:space-y-2 text-sm sm:text-base text-slate-300">
                 <p>📍 Esmeralda 97, San Bernardo, Región Metropolitana</p>
                 <p>📞 +56 2 859 2840</p>
                 <p>✉️ contacto@clinicapucara.cl</p>
@@ -48,11 +59,27 @@ export default function Footer() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 order-1 lg:order-2">
               
               {/* Servicios */}
-              <div className="text-center sm:text-left">
-                <h4 className="text-base sm:text-lg font-semibold text-emerald-400 mb-3 sm:mb-4">
-                  Servicios
-                </h4>
-                <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-slate-300">
+              <div className="text-left">
+                <button
+                  className="w-full flex items-center justify-between text-left text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4"
+                  onClick={() => toggleSection("servicios")}
+                  aria-expanded={openSections.servicios}
+                >
+                  <span>Servicios</span>
+                  <svg
+                    className={`h-5 w-5 transition-transform duration-200 sm:hidden ${openSections.servicios ? "rotate-180" : "rotate-0"}`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+                <ul className={`${openSections.servicios ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
                     <Link href="/servicios" className="hover:text-emerald-400 transition-colors block py-1">
                       Consulta General
@@ -82,11 +109,27 @@ export default function Footer() {
               </div>
 
               {/* Consejos */}
-              <div className="text-center sm:text-left">
-                <h4 className="text-base sm:text-lg font-semibold text-emerald-400 mb-3 sm:mb-4">
-                  Consejos
-                </h4>
-                <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-slate-300">
+              <div className="text-left">
+                <button
+                  className="w-full flex items-center justify-between text-left text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4"
+                  onClick={() => toggleSection("consejos")}
+                  aria-expanded={openSections.consejos}
+                >
+                  <span>Consejos</span>
+                  <svg
+                    className={`h-5 w-5 transition-transform duration-200 sm:hidden ${openSections.consejos ? "rotate-180" : "rotate-0"}`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+                <ul className={`${openSections.consejos ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
                     <Link href="/blog" className="hover:text-emerald-400 transition-colors block py-1">
                       Blogs
@@ -116,11 +159,27 @@ export default function Footer() {
               </div>
 
               {/* Sobre Nosotros */}
-              <div className="text-center sm:text-left">
-                <h4 className="text-base sm:text-lg font-semibold text-emerald-400 mb-3 sm:mb-4">
-                  Sobre Nosotros
-                </h4>
-                <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-slate-300">
+              <div className="text-left">
+                <button
+                  className="w-full flex items-center justify-between text-left text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4"
+                  onClick={() => toggleSection("sobre")}
+                  aria-expanded={openSections.sobre}
+                >
+                  <span>Sobre Nosotros</span>
+                  <svg
+                    className={`h-5 w-5 transition-transform duration-200 sm:hidden ${openSections.sobre ? "rotate-180" : "rotate-0"}`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+                <ul className={`${openSections.sobre ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
                     <Link href="/equipo" className="hover:text-emerald-400 transition-colors block py-1">
                       Nuestro Equipo
