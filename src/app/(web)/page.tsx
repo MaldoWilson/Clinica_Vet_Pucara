@@ -44,7 +44,7 @@ export default async function Home() {
                   Veterinaria <span className="text-indigo-400">Pucará</span>
                 </h1>
                 <p className="text-base md:text-lg text-gray-700 mb-6 md:mb-8 leading-relaxed">
-                  Cuidamos a tus <strong>mascotas</strong> con cariño y excelencia.<strong> Agenda tu hora</strong> online y conoce a nuestro equipo.
+                  Cuidamos a tus <strong className="text-indigo-400">mascotas</strong> con cariño y excelencia.<strong className="text-indigo-400"> Agenda tu hora</strong> online y conoce a nuestro equipo.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
