@@ -61,8 +61,8 @@ export default function ImageCarousel({
   if (!safeImages || safeImages.length === 0) return null;
 
   return (
-    <div className={"relative w-full overflow-hidden " + (className ?? "")}>
-      <div className={`${aspectRatio} relative bg-transparent w-full`}>
+    <div className={"relative w-full overflow-hidden bg-transparent" + (className ?? "")}>
+      <div className={`${aspectRatio} relative bg-transparent`}>
         {safeImages.map((img, index) => (
           <div
             key={index}
@@ -75,8 +75,8 @@ export default function ImageCarousel({
               alt={img.alt ?? `slide-${index + 1}`}
               fill
               priority={index === 0}
-              className="object-containt"
-              sizes="100vw"
+              className="object-contain"
+              sizes="(max-width: 640px) 100vw, (max-width: 1280px) 100vw, 100vw"
             />
           </div>
         ))}

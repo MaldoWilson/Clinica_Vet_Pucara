@@ -88,7 +88,7 @@ export default function LatestBlogs() {
   }
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-gray-50 w-full">
       <div className="container mx-auto px-4">
         <h2 className="text-4xl font-bold text-center mb-12">
           <span className="text-gray-800">Últimos </span>

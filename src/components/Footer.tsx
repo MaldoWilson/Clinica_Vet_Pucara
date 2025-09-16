@@ -15,7 +15,7 @@ export default function Footer() {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   }
   return (
-    <footer className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 text-white mt-16">
+    <footer className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 text-white ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Contenido principal del footer */}
         <div className="py-8 sm:py-12">
