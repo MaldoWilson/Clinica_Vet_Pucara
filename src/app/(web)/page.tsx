@@ -84,7 +84,7 @@ export default async function Home() {
           { src: "/2.webp", alt: "Clinica Vet Pucara" },
           
         ]}
-        aspectRatio="aspect-[16/6]"
+        aspectRatio="aspect-[3/1]"
         intervalMs={4000}
         className="rounded-none shadow-none"
       />
