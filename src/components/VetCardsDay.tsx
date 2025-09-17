@@ -23,6 +23,7 @@ function ymd(d: Date) { return `${d.getFullYear()}-${String(d.getMonth()+1).padS
 export default function VetCardsDay() {
   const [day, setDay] = useState<Date>(startDay(new Date()));
   const [slots, setSlots] = useState<Slot[]>([]);
+  const [allVets, setAllVets] = useState<Vet[]>([]);
   const [loading, setLoading] = useState(true);
 
   const days = Array.from({ length: 14 }, (_, i) => addDays(startDay(new Date()), i));
@@ -36,26 +37,44 @@ export default function VetCardsDay() {
     }).toString();
 
     setLoading(true);
-    fetch(`/api/horarios?${qs}`)
-      .then(r => r.json())
-      .then(j => setSlots(j?.data || []))
-      .catch(() => setSlots([]))
+    
+    // Obtener tanto los horarios como todos los veterinarios
+    Promise.all([
+      fetch(`/api/horarios?${qs}`).then(r => r.json()).catch(() => ({ data: [] })),
+      fetch(`/api/Veterinarios`).then(r => r.json()).catch(() => ({ data: [] }))
+    ])
+      .then(([horariosRes, vetsRes]) => {
+        setSlots(horariosRes?.data || []);
+        setAllVets(vetsRes?.data || []);
+      })
+      .catch(() => {
+        setSlots([]);
+        setAllVets([]);
+      })
       .finally(() => setLoading(false));
   }, [day]);
 
-  // agrupar por veterinario
+  // agrupar por veterinario - incluir todos los veterinarios
   const groups = useMemo(() => {
     const m = new Map<string, { vet: Vet; slots: Slot[] }>();
+    
+    // Primero, agregar todos los veterinarios con slots vacíos
+    for (const vet of allVets) {
+      m.set(vet.id, { vet, slots: [] });
+    }
+    
+    // Luego, agregar los slots existentes
     for (const s of slots) {
       const v = s.veterinario || { id: "sin-vet", nombre: "Veterinario", foto_url: null, especialidad: null };
       if (!m.has(v.id)) m.set(v.id, { vet: v, slots: [] });
       m.get(v.id)!.slots.push(s);
     }
+    
     const arr = Array.from(m.values());
     arr.forEach(g => g.slots.sort((a,b) => +new Date(a.inicio) - +new Date(b.inicio)));
     arr.sort((a,b) => (a.vet.nombre || "").localeCompare(b.vet.nombre || "", "es"));
     return arr;
-  }, [slots]);
+  }, [slots, allVets]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-9">
@@ -84,7 +103,7 @@ export default function VetCardsDay() {
       {loading ? (
         <p className="text-neutral-500">Cargando horarios…</p>
       ) : groups.length === 0 ? (
-        <p className="text-neutral-600">No hay horarios para este día.</p>
+        <p className="text-neutral-600">No hay veterinarios disponibles.</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {groups.map(({ vet, slots }) => {
@@ -127,10 +146,13 @@ export default function VetCardsDay() {
                   </div>
                 </div>
 
-                {/* derecha: columnas de “píldoras” teal */}
+                {/* derecha: columnas de "píldoras" teal */}
                 <div className="bg-indigo-400 text-white p-4 flex flex-col gap-2 items-center">
                   {preview.length === 0 ? (
-                    <span className="text-white/90 text-sm">Sin horarios</span>
+                    <div className="text-center">
+                      <span className="text-white/90 text-sm block">Sin horarios</span>
+                      <span className="text-white/70 text-xs block mt-1">para este día</span>
+                    </div>
                   ) : (
                     preview.map(s =>
                       s.reservado ? (

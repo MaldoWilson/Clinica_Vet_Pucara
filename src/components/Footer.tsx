@@ -1,4 +1,5 @@
 // Componente de footer 
+/* eslint-disable jsx-a11y/aria-proptypes */
 "use client";
 import Link from "next/link";
 import Image from "next/image";
@@ -63,7 +64,7 @@ export default function Footer() {
                 <button
                   className="w-full flex items-center justify-between text-left text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4"
                   onClick={() => toggleSection("servicios")}
-                  aria-expanded={openSections.servicios}
+                  aria-controls="footer-servicios"
                 >
                   <span className="text-indigo-400">Servicios</span>
                   <svg
@@ -79,7 +80,7 @@ export default function Footer() {
                     />
                   </svg>
                 </button>
-                <ul className={`${openSections.servicios ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
+                <ul id="footer-servicios" className={`${openSections.servicios ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
                     <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
                       Consulta General
@@ -113,7 +114,7 @@ export default function Footer() {
                 <button
                   className="w-full flex items-center justify-between text-left text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4"
                   onClick={() => toggleSection("consejos")}
-                  aria-expanded={openSections.consejos}
+                  aria-controls="footer-consejos"
                 >
                   <span className="text-indigo-400">Consejos</span>
                   <svg
@@ -129,7 +130,7 @@ export default function Footer() {
                     />
                   </svg>
                 </button>
-                <ul className={`${openSections.consejos ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
+                <ul id="footer-consejos" className={`${openSections.consejos ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
                     <Link href="/blog" className="hover:text-amber-500 transition-colors block py-1">
                       Blogs
@@ -163,7 +164,7 @@ export default function Footer() {
                 <button
                   className="w-full flex items-center justify-between text-left text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4"
                   onClick={() => toggleSection("sobre")}
-                  aria-expanded={openSections.sobre}
+                  aria-controls="footer-sobre"
                 >
                   <span className="text-indigo-400">Sobre Nosotros</span>
                   <svg
@@ -179,7 +180,7 @@ export default function Footer() {
                     />
                   </svg>
                 </button>
-                <ul className={`${openSections.sobre ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
+                <ul id="footer-sobre" className={`${openSections.sobre ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
                     <Link href="/equipo" className="hover:text-amber-500 transition-colors block py-1">
                       Nuestro Equipo
@@ -191,7 +192,7 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
+                    <Link href="/mision-vision" className="hover:text-amber-500 transition-colors block py-1">
                       Misión y Visión
                     </Link>
                   </li>

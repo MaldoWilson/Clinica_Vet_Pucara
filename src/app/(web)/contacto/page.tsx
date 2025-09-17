@@ -69,8 +69,7 @@ export default function ContactoPage() {
   return (
     <div className="relative -mb-16 min-h-screen">
       {/* Fondo con imagen personalizada que cubre toda la pantalla incluyendo navbar */}
-      <div
-        className="fixed inset-0 -z-10 bg-cover bg-center contacto-bg"
+      <div className="fixed inset-0 -z-10 bg-cover bg-center contacto-bg"
         style={{ '--contacto-bg': `url(${(contactoBg as unknown as { src: string }).src})` } as React.CSSProperties}
       />
       <div className="fixed inset-0 -z-10 bg-teal-900/60" />
