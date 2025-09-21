@@ -4,6 +4,8 @@ import { supabaseServer } from "@/lib/supabaseClient";
 export async function PATCH(req: Request) {
   try {
     const { id, action } = (await req.json()) as { id: string; action: "confirmar"|"atendida"|"cancelar" };
+    console.log("🔍 Debug API - Recibido:", { id, action });
+    
     const supa = supabaseServer();
 
     if (action === "cancelar") {
@@ -24,10 +26,15 @@ export async function PATCH(req: Request) {
     if (!next) throw new Error("Acción no soportada");
 
     const { error } = await supa.from("citas").update({ estado: next }).eq("id", id);
-    if (error) throw error;
+    if (error) {
+      console.log("🔍 Debug API - Error en update:", error);
+      throw error;
+    }
 
+    console.log("🔍 Debug API - Actualización exitosa");
     return NextResponse.json({ ok: true });
   } catch (e:any) {
+    console.log("🔍 Debug API - Error general:", e);
     return NextResponse.json({ ok:false, error: e.message }, { status: 400 });
   }
 }
