@@ -22,6 +22,7 @@ export default function ProductoDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [producto, setProducto] = useState<Producto | null>(null);
+  const [mainImage, setMainImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +41,7 @@ export default function ProductoDetailPage() {
         }
         
         setProducto(foundProducto);
+        setMainImage(foundProducto.imagen_principal || foundProducto.imagenes?.[0] || null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
       } finally {
@@ -191,10 +193,10 @@ export default function ProductoDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Imagen */}
           <div className="space-y-4">
-            {producto.imagen_principal ? (
+            {mainImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={producto.imagen_principal}
+                src={mainImage}
                 alt={producto.nombre}
                 className="w-full h-96 object-contain bg-white p-4 rounded-xl shadow-lg"
               />
@@ -207,13 +209,17 @@ export default function ProductoDetailPage() {
             {/* Imágenes adicionales si existen */}
             {producto.imagenes && producto.imagenes.length > 0 && (
               <div className="grid grid-cols-4 gap-2">
-                {producto.imagenes.slice(0, 4).map((imagen, index) => (
+                {[producto.imagen_principal, ...(producto.imagenes || [])]
+                  .filter(Boolean)
+                  .slice(0, 4)
+                  .map((imagen, index) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={index}
-                    src={imagen}
+                    src={imagen as string}
                     alt={`${producto.nombre} ${index + 1}`}
-                    className="w-full h-20 object-contain bg-white p-1 rounded-lg"
+                    className={`w-full h-20 object-contain bg-white p-1 rounded-lg cursor-pointer border ${imagen === mainImage ? 'border-indigo-500' : 'border-transparent'}`}
+                    onClick={() => setMainImage(imagen as string)}
                   />
                 ))}
               </div>

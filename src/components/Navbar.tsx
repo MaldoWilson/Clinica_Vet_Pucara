@@ -132,8 +132,7 @@ export default function Navbar() {
         }`}>
           <div className="pt-4 pb-3 space-y-1">
             <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
-              
-              
+
               {/* Navigation links */}
               <div className="space-y-1">
                 {navLinks.map((link) => (
