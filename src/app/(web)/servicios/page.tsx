@@ -2,7 +2,7 @@
 import ServiceCard from "@/components/ServiceCard";
 import WhatsAppButton from "@/components/whatsapp";
 import Image from "next/image";
-import serviciosBanner from "@/app/img/servicio.png";
+import serviciosBanner from "@/app/img/servicio2.webp";
 
 async function getServicios() {
   try {
@@ -35,6 +35,7 @@ export default async function ServiciosPage() {
             alt="Servicios veterinarios"
             fill
             priority
+            quality={90}
             className="object-cover"
           />
         </div>

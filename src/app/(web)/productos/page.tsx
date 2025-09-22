@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/whatsapp";
+import Image from "next/image";
+import productosBanner from "@/app/img/productos.png";
 
 type Producto = {
   id: string;
@@ -60,150 +62,193 @@ export default function ProductosPage() {
     return matchesSearch && matchesCategory;
   });
 
+  const HeaderSection = () => (
+    <section className="relative h-72 md:h-[260px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
+      {/* Imagen de fondo */}
+      <div className="absolute inset-0 -z-20">
+        <Image
+          src={productosBanner}
+          alt="Productos"
+          fill
+          priority
+          className="object-cover"
+        />
+      </div>
+
+      {/* Contenido vacío para mantener el alto */}
+      <div className="relative z-10 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" />
+      </div>
+
+      {/* Efecto ondulado inferior */}
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] -z-10 rotate-180 pointer-events-none">
+        <svg
+          className="relative block w-[140%] md:w-[100%] h-[200px] text-white"
+          fill="currentColor"
+          data-name="Layer 1"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
+        >
+          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+        </svg>
+      </div>
+    </section>
+  );
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="animate-pulse">
-            <div className="bg-gray-200 h-8 w-1/3 mb-8 rounded"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-gray-200 rounded-2xl h-64"></div>
-                </div>
-              ))}
+      <>
+        <HeaderSection />
+        <div className="min-h-screen bg-gray-50 py-16">
+          <div className="container mx-auto px-4 max-w-7xl">
+            <div className="animate-pulse">
+              <div className="bg-gray-200 h-8 w-1/3 mb-8 rounded"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {[...Array(12)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="bg-gray-200 rounded-2xl h-64"></div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
-            <p className="text-gray-600 mb-8">{error}</p>
+      <>
+        <HeaderSection />
+        <div className="min-h-screen bg-gray-50 py-16">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
+              <p className="text-gray-600 mb-8">{error}</p>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
-      <div className="container mx-auto px-4 max-w-7xl">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            <span className="text-gray-800">Nuestros </span>
-            <span className="text-indigo-400">Productos</span>
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Descubre nuestra amplia gama de productos veterinarios de alta calidad para el cuidado de tus mascotas.
-          </p>
-          <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-4"></div>
-        </div>
-
-        {/* Filtros */}
-        <div className="mb-8 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between md:gap-4">
-          {/* Búsqueda */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Buscar productos por nombre, descripción o SKU..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
+    <>
+      <HeaderSection />
+      <div className="min-h-screen bg-gray-50 py-16">
+        <div className="container mx-auto px-4 max-w-7xl">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              <span className="text-gray-800">Nuestros </span>
+              <span className="text-indigo-400">Productos</span>
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Descubre nuestra amplia gama de productos veterinarios de alta calidad para el cuidado de tus mascotas.
+            </p>
+            <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-4"></div>
           </div>
 
-          {/* Filtro por categoría */}
-          <div className="md:w-64">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              aria-label="Filtrar por categoría"
-            >
-              <option value="">Todas las categorías</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Contador de resultados */}
-        <div className="mb-6">
-          <p className="text-gray-600">
-            {filteredProductos.length === productos.length 
-              ? `${productos.length} productos disponibles`
-              : `${filteredProductos.length} de ${productos.length} productos`
-            }
-          </p>
-        </div>
-
-        {/* Grid de productos */}
-        {filteredProductos.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
-              <svg className="mx-auto h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
+          {/* Filtros */}
+          <div className="mb-8 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between md:gap-4">
+            {/* Búsqueda */}
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Buscar productos por nombre, descripción o SKU..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">No se encontraron productos</h3>
-            <p className="text-gray-600 mb-6">
-              {searchTerm || selectedCategory 
-                ? "Intenta ajustar los filtros de búsqueda"
-                : "No hay productos disponibles en este momento"
+
+            {/* Filtro por categoría */}
+            <div className="md:w-64">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                aria-label="Filtrar por categoría"
+              >
+                <option value="">Todas las categorías</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Contador de resultados */}
+          <div className="mb-6">
+            <p className="text-gray-600">
+              {filteredProductos.length === productos.length 
+                ? `${productos.length} productos disponibles`
+                : `${filteredProductos.length} de ${productos.length} productos`
               }
             </p>
-            {(searchTerm || selectedCategory) && (
-              <button
-                onClick={() => {
-                  setSearchTerm("");
-                  setSelectedCategory("");
-                }}
-                className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-              >
-                Limpiar Filtros
-              </button>
-            )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredProductos.map((producto) => (
-              <ProductCard key={producto.id} producto={producto} />
-            ))}
-          </div>
-        )}
 
-        {/* Volver al inicio */}
-        <div className="text-center mt-12">
-          <a
-            href="/"
-            className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
-          >
-            <svg 
-              className="mr-2 w-4 h-4" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
+          {/* Grid de productos */}
+          {filteredProductos.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-gray-400 mb-4">
+                <svg className="mx-auto h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">No se encontraron productos</h3>
+              <p className="text-gray-600 mb-6">
+                {searchTerm || selectedCategory 
+                  ? "Intenta ajustar los filtros de búsqueda"
+                  : "No hay productos disponibles en este momento"
+                }
+              </p>
+              {(searchTerm || selectedCategory) && (
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedCategory("");
+                  }}
+                  className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+                >
+                  Limpiar Filtros
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {filteredProductos.map((producto) => (
+                <ProductCard key={producto.id} producto={producto} />
+              ))}
+            </div>
+          )}
+
+          {/* Volver al inicio */}
+          <div className="text-center mt-12">
+            <a
+              href="/"
+              className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" 
-              />
-            </svg>
-            Volver al Inicio
-          </a>
+              <svg 
+                className="mr-2 w-4 h-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" 
+                />
+              </svg>
+              Volver al Inicio
+            </a>
+          </div>
         </div>
       </div>
       <WhatsAppButton
@@ -211,6 +256,6 @@ export default function ProductosPage() {
         text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
         floating
       />
-    </div>
+    </>
   );
 }
