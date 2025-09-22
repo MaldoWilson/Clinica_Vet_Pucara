@@ -1,7 +1,7 @@
 import VetCard from "@/components/VetCard";
 import WhatsAppButton from "@/components/whatsapp";
 import Image from "next/image";
-import equipoBanner from "@/app/img/equipo.png";
+import equipoBanner from "@/app/img/pucara.png";
 
 async function getVeterinarios() {
   try {
@@ -38,8 +38,7 @@ export default async function EquipoPage() {
           />
         </div>
         
-        {/* Teal Overlay */}
-        <div className="absolute inset-0 -z-10 bg-teal-900/60" />
+        
         
         {/* Content - solo fondo */}
         <div className="relative z-10 w-full">

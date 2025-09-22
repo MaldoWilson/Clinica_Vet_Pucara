@@ -2,7 +2,7 @@
 import ServiceCard from "@/components/ServiceCard";
 import WhatsAppButton from "@/components/whatsapp";
 import Image from "next/image";
-import serviciosBanner from "@/app/img/servicios.png";
+import serviciosBanner from "@/app/img/pucara.png";
 
 async function getServicios() {
   try {
@@ -39,8 +39,7 @@ export default async function ServiciosPage() {
           />
         </div>
         
-        {/* Teal Overlay */}
-        <div className="absolute inset-0 -z-10 bg-teal-900/60" />
+   
         
         {/* Content - solo fondo */}
         <div className="relative z-10 w-full">

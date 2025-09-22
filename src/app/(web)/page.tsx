@@ -6,7 +6,7 @@ import { supabaseServer } from "@/lib/supabaseClient";
 import WhatsAppButton from "@/components/whatsapp";
 import ImageCarousel from "@/components/ImageCarousel";
 import Image from "next/image";
-import pageBanner from "@/app/img/page2.png";
+import pageBanner from "@/app/img/pucara.png";
 
 
 export default async function Home() {
@@ -31,8 +31,7 @@ export default async function Home() {
           />
         </div>
         
-        {/* Teal Overlay */}
-        <div className="absolute inset-0 -z-10 bg-teal-900/60" />
+        
         
         {/* Content */}
         <div className="relative z-10 w-full">
