@@ -1,5 +1,5 @@
 import Image from "next/image";
-import misionBanner from "@/app/img/pucara.png";
+import misionBanner from "@/app/img/blog.png";
 
 export const metadata = {
   title: "Misión y Visión | Clínica Veterinaria Pucará",

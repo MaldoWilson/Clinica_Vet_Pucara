@@ -6,7 +6,7 @@ import { supabaseServer } from "@/lib/supabaseClient";
 import WhatsAppButton from "@/components/whatsapp";
 import ImageCarousel from "@/components/ImageCarousel";
 import Image from "next/image";
-import pageBanner from "@/app/img/pucara.png";
+import pageBanner from "@/app/img/fondo2.png";
 
 
 export default async function Home() {

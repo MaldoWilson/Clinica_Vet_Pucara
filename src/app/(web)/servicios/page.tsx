@@ -2,7 +2,7 @@
 import ServiceCard from "@/components/ServiceCard";
 import WhatsAppButton from "@/components/whatsapp";
 import Image from "next/image";
-import serviciosBanner from "@/app/img/pucara.png";
+import serviciosBanner from "@/app/img/servicio.png";
 
 async function getServicios() {
   try {
