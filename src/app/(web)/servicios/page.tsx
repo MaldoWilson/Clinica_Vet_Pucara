@@ -35,7 +35,7 @@ export default async function ServiciosPage() {
             alt="Servicios veterinarios"
             fill
             priority
-            quality={90}
+            quality={95}
             className="object-cover"
           />
         </div>

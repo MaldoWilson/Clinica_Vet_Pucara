@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/whatsapp";
 import Image from "next/image";
-import productosBanner from "@/app/img/productos.png";
+import productosBanner from "@/app/img/producto.webp";
 
 type Producto = {
   id: string;
@@ -71,6 +71,7 @@ export default function ProductosPage() {
           alt="Productos"
           fill
           priority
+          quality={95}
           className="object-cover"
         />
       </div>

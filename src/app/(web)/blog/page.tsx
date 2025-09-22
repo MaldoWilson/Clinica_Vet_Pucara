@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import BlogCard from "@/components/BlogCard";
 import Image from "next/image";
-import blogBanner from "@/app/img/blog.png";
+import blogBanner from "@/app/img/blog.webp";
 
 type Blog = {
   id: string;
@@ -45,6 +45,7 @@ export default function BlogPage() {
           alt="Blog Veterinario"
           fill
           priority
+          quality={95}
           className="object-cover"
         />
       </div>

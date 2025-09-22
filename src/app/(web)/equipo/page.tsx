@@ -1,7 +1,7 @@
 import VetCard from "@/components/VetCard";
 import WhatsAppButton from "@/components/whatsapp";
 import Image from "next/image";
-import equipoBanner from "@/app/img/equipos.png";
+import equipoBanner from "@/app/img/equipo.webp";
 
 async function getVeterinarios() {
   try {
@@ -34,6 +34,7 @@ export default async function EquipoPage() {
             alt="Equipo veterinario"
             fill
             priority
+            quality={95}
             className="object-cover"
           />
         </div>

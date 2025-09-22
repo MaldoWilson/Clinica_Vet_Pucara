@@ -6,7 +6,7 @@ import { supabaseServer } from "@/lib/supabaseClient";
 import WhatsAppButton from "@/components/whatsapp";
 import ImageCarousel from "@/components/ImageCarousel";
 import Image from "next/image";
-import pageBanner from "@/app/img/fondo2.png";
+import pageBanner from "@/app/img/fondo2.webp";
 
 
 export default async function Home() {
@@ -27,6 +27,7 @@ export default async function Home() {
             alt="Veterinaria móvil"
             fill
             priority
+            quality={95}
             className="object-cover"
           />
         </div>
