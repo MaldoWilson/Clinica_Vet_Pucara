@@ -7,8 +7,8 @@ import { useState } from "react";
 
 export default function Footer() {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
-    servicios: false,
-    consejos: false,
+    comercial: false, // Productos y reservas
+    informacion: false,
     sobre: false,
   });
 
@@ -59,150 +59,115 @@ export default function Footer() {
             {/* Columnas de información - Lado izquierdo */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 order-1 lg:order-2">
               
-              {/* Servicios */}
+              {/* Atención  */}
               <div className="text-left">
                 <button
                   className="w-full flex items-center justify-between text-left text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4"
-                  onClick={() => toggleSection("servicios")}
-                  aria-controls="footer-servicios"
+                  onClick={() => toggleSection("atencion")}
+                  aria-controls="footer-atencion"
                 >
-                  <span className="text-indigo-400">Servicios</span>
+                  <span className="text-indigo-400">Atención</span>
                   <svg
-                    className={`h-5 w-5 transition-transform duration-200 sm:hidden ${openSections.servicios ? "rotate-180" : "rotate-0"}`}
+                    className={`h-5 w-5 transition-transform duration-200 sm:hidden text-indigo-400 hover:text-indigo-300 ${openSections.atencion ? "rotate-180" : "rotate-0"}`}
                     viewBox="0 0 20 20"
                     fill="currentColor"
                     aria-hidden="true"
                   >
                     <path
-                      fill-rule="evenodd"
+                      fillRule="evenodd"
                       d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z"
-                      clip-rule="evenodd"
+                      clipRule="evenodd"
                     />
                   </svg>
                 </button>
-                <ul id="footer-servicios" className={`${openSections.servicios ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
+                <ul id="footer-atencion" className={`${openSections.atencion ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
-                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
-                      Consulta General
+                    <Link href="/reservas" className="hover:text-indigo-300 transition-colors block py-1">
+                      Reserva hora
                     </Link>
                   </li>
                   <li>
-                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
-                      Cirugías
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
-                      Vacunación
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
-                      Emergencias 24/7
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/servicios" className="hover:text-amber-500 transition-colors block py-1">
-                      Laboratorio
+                    <Link href="/productos" className="hover:text-indigo-300 transition-colors block py-1">
+                    Productos
                     </Link>
                   </li>
                 </ul>
               </div>
 
-              {/* Consejos */}
+              {/* Información */}
               <div className="text-left">
                 <button
                   className="w-full flex items-center justify-between text-left text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4"
-                  onClick={() => toggleSection("consejos")}
-                  aria-controls="footer-consejos"
+                  onClick={() => toggleSection("informacion")}
+                  aria-controls="footer-informacion"
                 >
-                  <span className="text-indigo-400">Consejos</span>
+                  <span className="text-indigo-400">Información</span>
                   <svg
-                    className={`h-5 w-5 transition-transform duration-200 sm:hidden ${openSections.consejos ? "rotate-180" : "rotate-0"}`}
+                    className={`h-5 w-5 transition-transform duration-200 sm:hidden text-indigo-400 hover:text-indigo-300 ${openSections.informacion ? "rotate-180" : "rotate-0"}`}
                     viewBox="0 0 20 20"
                     fill="currentColor"
                     aria-hidden="true"
                   >
                     <path
-                      fill-rule="evenodd"
+                      fillRule="evenodd"
                       d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z"
-                      clip-rule="evenodd"
+                      clipRule="evenodd"
                     />
                   </svg>
                 </button>
-                <ul id="footer-consejos" className={`${openSections.consejos ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
+                <ul id="footer-informacion" className={`${openSections.informacion ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
-                    <Link href="/blog" className="hover:text-amber-500 transition-colors block py-1">
+                    <Link href="/blog" className="hover:text-indigo-300 transition-colors block py-1">
                       Blogs
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
-                      Alimentación Saludable
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
-                      Ejercicio para Mascotas
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
-                      Señales de Alerta
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
-                      Primeros Auxilios
+                    <Link href="/servicios" className="hover:text-indigo-300 transition-colors block py-1">
+                      Servicios
                     </Link>
                   </li>
                 </ul>
               </div>
 
-              {/* Sobre Nosotros */}
+              {/* Sobre nosotros */}
               <div className="text-left">
                 <button
                   className="w-full flex items-center justify-between text-left text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4"
                   onClick={() => toggleSection("sobre")}
                   aria-controls="footer-sobre"
                 >
-                  <span className="text-indigo-400">Sobre Nosotros</span>
+                  <span className="text-indigo-400">Sobre nosotros</span>
                   <svg
-                    className={`h-5 w-5 transition-transform duration-200 sm:hidden ${openSections.sobre ? "rotate-180" : "rotate-0"}`}
+                    className={`h-5 w-5 transition-transform duration-200 sm:hidden text-indigo-400 hover:text-indigo-300 ${openSections.sobre ? "rotate-180" : "rotate-0"}`}
                     viewBox="0 0 20 20"
                     fill="currentColor"
                     aria-hidden="true"
                   >
                     <path
-                      fill-rule="evenodd"
+                      fillRule="evenodd"
                       d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z"
-                      clip-rule="evenodd"
+                      clipRule="evenodd"
                     />
                   </svg>
                 </button>
                 <ul id="footer-sobre" className={`${openSections.sobre ? "block" : "hidden"} sm:block space-y-1.5 sm:space-y-2 text-m sm:text-base text-slate-300`}>
                   <li>
-                    <Link href="/equipo" className="hover:text-amber-500 transition-colors block py-1">
-                      Nuestro Equipo
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
-                      Historia
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/mision-vision" className="hover:text-amber-500 transition-colors block py-1">
+                    <Link href="/mision-vision" className="hover:text-indigo-300 transition-colors block py-1">
                       Misión y Visión
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
+                    <Link href="/equipo" className="hover:text-indigo-300 transition-colors block py-1">
+                      Nuestro equipo
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/contacto" className="hover:text-indigo-300 transition-colors block py-1">
                       Contacto
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-amber-500 transition-colors block py-1">
+                    <Link href="/contacto#mapa" className="hover:text-indigo-300 transition-colors block py-1">
                       Ubicación
                     </Link>
                   </li>

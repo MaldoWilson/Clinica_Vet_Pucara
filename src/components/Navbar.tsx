@@ -132,30 +132,7 @@ export default function Navbar() {
         }`}>
           <div className="pt-4 pb-3 space-y-1">
             <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
-              {/* Mobile menu header with logo */}
-              <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <Image
-                    src="/logo.png" 
-                    alt="Clínica Pucará"
-                    width={32}
-                    height={32}
-                    className="rounded-lg"
-                  />
-                  <span className="text-lg font-bold text-gray-800">
-                    Veterinaria Pucará
-                  </span>
-                </div>
-                <button
-                  onClick={() => setIsMenuOpen(false)}
-                  className="p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                  aria-label="Cerrar menú"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+              
               
               {/* Navigation links */}
               <div className="space-y-1">

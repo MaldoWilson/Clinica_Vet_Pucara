@@ -40,7 +40,7 @@ export default function ProductCard({ producto }: Props) {
           <img
             src={producto.imagen_principal}
             alt={producto.nombre}
-            className="rounded-t-lg w-full h-48 object-cover group-hover:brightness-110 transition-all duration-300"
+            className="rounded-t-lg w-full h-48 object-contain bg-white p-2 group-hover:brightness-110 transition-all duration-300"
           />
         ) : (
           <div className="rounded-t-lg w-full h-48 bg-gray-200 flex items-center justify-center group-hover:bg-gray-300 transition-all duration-300">

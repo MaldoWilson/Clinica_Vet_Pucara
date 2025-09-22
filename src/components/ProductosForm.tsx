@@ -312,13 +312,16 @@ export default function ProductosForm() {
             </div>
             <div>
               <label className="block font-medium">Categoría</label>
-              <input
-                type="text"
-                className="w-full border rounded px-2 py-1"
+              <select
+                className="w-full border rounded px-2 py-1 bg-white"
                 value={categoria}
                 onChange={(e) => setCategoria(e.target.value)}
-                placeholder="Ej: Alimentos, Medicamentos"
-              />
+              >
+                <option value="">Selecciona categoría</option>
+                <option value="Alimentos">Alimentos</option>
+                <option value="Medicamentos">Medicamentos</option>
+                <option value="Accesorios">Accesorios</option>
+              </select>
             </div>
           </div>
           

@@ -196,7 +196,7 @@ export default function ProductoDetailPage() {
               <img
                 src={producto.imagen_principal}
                 alt={producto.nombre}
-                className="w-full h-96 object-cover rounded-xl shadow-lg"
+                className="w-full h-96 object-contain bg-white p-4 rounded-xl shadow-lg"
               />
             ) : (
               <div className="w-full h-96 bg-gray-200 rounded-xl flex items-center justify-center">
@@ -213,7 +213,7 @@ export default function ProductoDetailPage() {
                     key={index}
                     src={imagen}
                     alt={`${producto.nombre} ${index + 1}`}
-                    className="w-full h-20 object-cover rounded-lg"
+                    className="w-full h-20 object-contain bg-white p-1 rounded-lg"
                   />
                 ))}
               </div>
