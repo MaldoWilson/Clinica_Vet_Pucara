@@ -72,7 +72,7 @@ export default async function ServiciosPage() {
           <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {servicios.slice(0, 6).map((s: any) => (
+          {servicios.map((s: any) => (
             <ServiceCard
               key={s.id}
               service={{

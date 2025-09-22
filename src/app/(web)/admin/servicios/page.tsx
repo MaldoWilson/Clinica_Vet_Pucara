@@ -63,23 +63,12 @@ export default function AdminServiciosPage() {
       setSaving(true);
       setError(null);
 
-      // 1) Si hay imagen, primero la subimos para obtener la URL pública
-      let image_url: string | null = null;
-      if (imageFile) {
-        const fd = new FormData();
-        fd.append("file", imageFile);
-        const up = await fetch("/api/servicios/upload", { method: "POST", body: fd });
-        const upJson = await up.json();
-        if (!up.ok || upJson.error) throw new Error(upJson.error || "Error al subir imagen");
-        image_url = upJson.image_url || null;
-      }
-
       const payload: any = {
         nombre: form.nombre.trim(),
         descripcion: form.descripcion.trim() || null,
         precio_clp: form.precio_clp ? Number(form.precio_clp) : null,
         duracion_min: form.duracion_min ? Number(form.duracion_min) : null,
-        image_url,
+        image_url: null, // Inicialmente null, se actualizará después si hay imagen
       };
 
       let url = "/api/servicios";
@@ -87,8 +76,13 @@ export default function AdminServiciosPage() {
       if (isEdit && editing) {
         method = "PUT";
         payload.id = editing.id;
+        // En modo edición, mantener la imagen actual si no hay nueva
+        if (!imageFile && editing.image_url) {
+          payload.image_url = editing.image_url;
+        }
       }
 
+      // 1) Crear/actualizar el servicio primero
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -96,6 +90,32 @@ export default function AdminServiciosPage() {
       });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "Error guardando");
+
+      const servicioId = json.data?.id;
+
+      // 2) Si hay imagen nueva, subirla después de crear el servicio
+      if (imageFile && servicioId) {
+        const fd = new FormData();
+        fd.append("file", imageFile);
+        fd.append("servicioId", servicioId);
+        const up = await fetch("/api/servicios/upload", { method: "POST", body: fd });
+        const upJson = await up.json();
+        if (!up.ok || upJson.error) throw new Error(upJson.error || "Error al subir imagen");
+        
+        // Actualizar el servicio con la nueva URL de imagen
+        const updateRes = await fetch("/api/servicios", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: servicioId,
+            image_url: upJson.image_url,
+          }),
+        });
+        const updateJson = await updateRes.json();
+        if (!updateRes.ok || !updateJson.ok) {
+          console.warn("Error actualizando URL de imagen:", updateJson.error);
+        }
+      }
 
       if (!isEdit) {
         // Si es nuevo, resetea el form
