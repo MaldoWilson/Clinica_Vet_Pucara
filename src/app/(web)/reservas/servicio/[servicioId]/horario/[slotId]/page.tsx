@@ -4,7 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import WhatsAppButton from "@/components/whatsapp";
 
-type Servicio = { id: string; nombre: string };
+type Servicio = { 
+  id: string; 
+  nombre: string; 
+  descripcion?: string;
+  precio_clp?: number;
+  duracion_min?: number;
+};
 type Slot = {
   id: string;
   inicio: string;
@@ -13,7 +19,11 @@ type Slot = {
   veterinario?: { id: string; nombre: string } | null;
 };
 
-export default function ReservarSlot({ params }: { params: { slotId: string } }) {
+export default function ReservarSlotConServicio({ 
+  params 
+}: { 
+  params: { servicioId: string; slotId: string } 
+}) {
   const [servicios, setServicios] = useState<Servicio[]>([]);
   const [slot, setSlot] = useState<Slot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,17 +36,20 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
   const fmtHora = (iso?: string) =>
     iso ? new Date(iso).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" }) : "-";
 
+  // Obtener servicio seleccionado
+  const servicioSeleccionado = useMemo(() => {
+    return servicios.find(s => s.id === params.servicioId) || null;
+  }, [servicios, params.servicioId]);
+
   // Carga servicios y detalle del slot
   useEffect(() => {
     setLoading(true);
     Promise.all([
       fetch("/api/servicios").then((r) => r.json()).catch(() => ({ data: [] })),
-      // Si tu /api/horarios soporta filtro por id, intenta obtener el slot
       fetch(`/api/horarios?slotId=${params.slotId}`).then((r) => r.json()).catch(() => ({ data: [] })),
     ])
       .then(([srv, s]) => {
         setServicios(srv?.data || []);
-        // si el API devuelve un objeto o un array, normalizamos
         const maybe = Array.isArray(s?.data) ? s.data[0] : s?.data || null;
         setSlot(maybe || null);
       })
@@ -55,7 +68,6 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
     setError(null);
 
     const f = new FormData(e.currentTarget);
-    const servicioId = String(f.get("servicioId") || "");
     const tutorNombre = String(f.get("tutorNombre") || "");
     const tutorTelefono = String(f.get("tutorTelefono") || "");
     const tutorEmail = String(f.get("tutorEmail") || "");
@@ -63,7 +75,6 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
     const notas = String(f.get("notas") || "");
 
     // Validaciones
-    if (!servicioId) return setError("Selecciona un servicio.");
     if (!tutorNombre.trim()) return setError("Ingresa tu nombre.");
     if (!mascotaNombre.trim()) return setError("Ingresa el nombre de tu mascota.");
     if (!tutorTelefono.trim() && !tutorEmail.trim()) {
@@ -74,7 +85,7 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
     try {
       const payload = {
         horarioId: params.slotId,
-        servicioId,
+        servicioId: params.servicioId,
         tutorNombre,
         tutorTelefono,
         tutorEmail,
@@ -98,6 +109,16 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
     }
   };
 
+  const formatPrice = (precio?: number) => {
+    if (!precio) return "Consultar precio";
+    return `$${precio.toLocaleString("es-CL")}`;
+  };
+
+  const formatDuration = (duracion?: number) => {
+    if (!duracion) return "";
+    return `${duracion} min`;
+  };
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       {/* Breadcrumb */}
@@ -106,12 +127,38 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
           Servicios
         </Link>
         <span>›</span>
+        <Link href={`/reservas/servicio/${params.servicioId}`} className="hover:text-indigo-500">
+          Horarios
+        </Link>
+        <span>›</span>
         <span className="text-gray-800 font-medium">Reservar</span>
       </div>
 
       <h1 className="text-2xl md:text-3xl font-semibold mb-2">
         {loading ? "Cargando…" : encabezadoSlot}
       </h1>
+
+      {/* Información del servicio seleccionado */}
+      {servicioSeleccionado && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-6">
+          <h3 className="font-semibold text-indigo-800 mb-2">Servicio seleccionado:</h3>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-indigo-900">{servicioSeleccionado.nombre}</p>
+              {servicioSeleccionado.descripcion && (
+                <p className="text-sm text-indigo-700">{servicioSeleccionado.descripcion}</p>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-indigo-600">{formatPrice(servicioSeleccionado.precio_clp)}</p>
+              {servicioSeleccionado.duracion_min && (
+                <p className="text-xs text-indigo-600">{formatDuration(servicioSeleccionado.duracion_min)}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {!loading && !slot && (
         <p className="text-red-600 mb-4">
           No se pudo cargar el detalle del horario. Puedes continuar, pero asegúrate de haber
@@ -125,17 +172,6 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
       )}
 
       <form onSubmit={submit} className="space-y-4">
-        <div className="bg-gray-50 border rounded-xl p-4">
-          <h3 className="font-semibold text-gray-800 mb-3">Seleccionar servicio</h3>
-          <select name="servicioId" required className="w-full border rounded-xl p-3" disabled={sending} aria-label="Seleccionar servicio">
-            <option value="">Selecciona un servicio…</option>
-            {servicios.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
         <div className="bg-gray-50 border rounded-xl p-4">
           <h3 className="font-semibold text-gray-800 mb-3">Información del tutor</h3>
           <div className="space-y-3">
@@ -182,20 +218,23 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
           </div>
         </div>
 
-        <button disabled={sending} className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300 disabled:opacity-50">
+        <button 
+          disabled={sending} 
+          className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300 disabled:opacity-50"
+        >
           {sending ? "Creando reserva…" : "Confirmar Reserva"}
         </button>
-        <p className="text-sm text-gray-600 mt-2">
+
+        <p className="text-sm text-gray-600 text-center">
           * Si tu mascota requiere atención urgente, contáctanos directamente por WhatsApp para una atención más rápida.
         </p>
       </form>
 
       <WhatsAppButton
-        phone="569"   // Pongamos numero para probar
+        phone="569"
         text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
-        floating // botón flotante abajo a la derecha
+        floating
       />
-
     </div>
   );
 }

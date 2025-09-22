@@ -20,7 +20,7 @@ function endDay(d: Date)   { const x = new Date(d); x.setHours(23,59,59,999); re
 function addDays(d: Date, n: number) { const x = new Date(d); x.setDate(x.getDate()+n); return x; }
 function ymd(d: Date) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 
-export default function VetCardsDay() {
+export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}) {
   const [day, setDay] = useState<Date>(startDay(new Date()));
   const [slots, setSlots] = useState<Slot[]>([]);
   const [allVets, setAllVets] = useState<Vet[]>([]);
@@ -136,7 +136,7 @@ export default function VetCardsDay() {
                               {fmtHora(s.inicio)}
                             </span>
                           ) : (
-                            <Link key={s.id} href={`/reservas/${s.id}`} className="px-3 py-1 rounded-full bg-white text-indigo-700 text-sm border border-indigo-500 hover:bg-teal-50">
+                            <Link key={s.id} href={servicioId ? `/reservas/servicio/${servicioId}/horario/${s.id}` : `/reservas/${s.id}`} className="px-3 py-1 rounded-full bg-white text-indigo-700 text-sm border border-indigo-500 hover:bg-teal-50">
                               {fmtHora(s.inicio)}
                             </Link>
                           ))}
@@ -160,7 +160,7 @@ export default function VetCardsDay() {
                           {fmtHora(s.inicio)}
                         </span>
                       ) : (
-                        <Link key={s.id} href={`/reservas/${s.id}`} className="w-full max-w-[120px] text-center rounded-full py-1 bg-white text-indigo-400 text-sm border border-transparent hover:bg-teal-50">
+                        <Link key={s.id} href={servicioId ? `/reservas/servicio/${servicioId}/horario/${s.id}` : `/reservas/${s.id}`} className="w-full max-w-[120px] text-center rounded-full py-1 bg-white text-indigo-400 text-sm border border-transparent hover:bg-teal-50">
                           {fmtHora(s.inicio)}
                         </Link>
                       )
