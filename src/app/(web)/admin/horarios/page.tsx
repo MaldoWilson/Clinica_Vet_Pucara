@@ -3,7 +3,22 @@
 import { useEffect, useMemo, useState } from "react";
 
 type Vet = { id: string; nombre: string; especialidad?: string | null };
-type Slot = { id: string; inicio: string; fin: string; reservado: boolean; veterinario_id: string };
+type Slot = { 
+  id: string; 
+  inicio: string; 
+  fin: string; 
+  reservado: boolean; 
+  veterinario_id: string;
+  citas?: {
+    id: string;
+    tutor_nombre: string;
+    servicio_id: string;
+    servicios: {
+      id: string;
+      nombre: string;
+    };
+  };
+};
 
 function ymd(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -206,19 +221,26 @@ export default function AdminHorariosPage() {
                 <tr>
                   <th className="text-left p-2">Hora</th>
                   <th className="text-left p-2">Estado</th>
+                  <th className="text-left p-2">Servicio</th>
+                  <th className="text-left p-2">Cliente</th>
                   <th className="text-left p-2"></th>
                 </tr>
               </thead>
               <tbody>
-                {slots.map(s => (
-                  <tr key={s.id} className="border-t">
-                    <td className="p-2">{fmtHora(s.inicio)} - {fmtHora(s.fin)}</td>
-                    <td className="p-2">{s.reservado ? "Reservado" : "Libre"}</td>
-                    <td className="p-2">
-                      <button onClick={() => eliminar(s.id)} disabled={s.reservado} className={`px-3 py-1 rounded border ${s.reservado ? "opacity-50 cursor-not-allowed" : "text-red-600"}`}>Eliminar</button>
-                    </td>
-                  </tr>
-                ))}
+                {slots.map(s => {
+                  const cita = s.citas; // Acceder directamente al objeto cita
+                  return (
+                    <tr key={s.id} className="border-t">
+                      <td className="p-2">{fmtHora(s.inicio)} - {fmtHora(s.fin)}</td>
+                      <td className="p-2">{s.reservado ? "Reservado" : "Libre"}</td>
+                      <td className="p-2">{cita?.servicios?.nombre || "-"}</td>
+                      <td className="p-2">{cita?.tutor_nombre || "-"}</td>
+                      <td className="p-2">
+                        <button onClick={() => eliminar(s.id)} disabled={s.reservado} className={`px-3 py-1 rounded border ${s.reservado ? "opacity-50 cursor-not-allowed" : "text-red-600"}`}>Eliminar</button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

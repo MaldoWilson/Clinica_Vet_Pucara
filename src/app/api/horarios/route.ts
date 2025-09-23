@@ -67,9 +67,27 @@ export async function GET(req: Request) {
     // ---- Caso 2: lista de slots
     const q = supa
       .from("horarios")
-      .select(
-        `id, inicio, fin, reservado, veterinario_id, veterinario:veterinario_id ( id, nombre,especialidad )`
-      )
+      .select(`
+        id, 
+        inicio, 
+        fin, 
+        reservado, 
+        veterinario_id,
+        veterinario:veterinario_id (
+          id, 
+          nombre, 
+          especialidad
+        ),
+        citas (
+          id, 
+          tutor_nombre, 
+          servicio_id,
+          servicios:servicio_id (
+            id, 
+            nombre
+          )
+        )
+      `)
       .gte("inicio", from)
       .lte("fin", to)
       .order("inicio", { ascending: true })
