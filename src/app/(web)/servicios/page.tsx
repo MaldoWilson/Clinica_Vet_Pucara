@@ -3,6 +3,7 @@ import ServiceCard from "@/components/ServiceCard";
 import WhatsAppButton from "@/components/whatsapp";
 import Image from "next/image";
 import serviciosBanner from "@/app/img/servicio2.webp";
+import serviciosBg from "@/app/img/servicios3.png";
 
 async function getServicios() {
   try {
@@ -64,8 +65,20 @@ export default async function ServiciosPage() {
         </div>
       </section>
 
-      {/* Servicios Grid */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      {/* Servicios Grid con fondo personalizado */}
+      <section className="relative">
+        {/* Fondo */}
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src={serviciosBg}
+            alt="Fondo servicios"
+            fill
+            priority
+            className="object-cover"
+          />
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 py-12">
         <h2 className="text-4xl font-bold text-center mb-12">
           <span className="text-gray-800">Servicios </span>
           <span className="text-indigo-400">Disponibles</span>
@@ -79,13 +92,13 @@ export default async function ServiciosPage() {
                 id: s.id,
                 name: s.nombre,
                 description: s.descripcion,
-                price_clp: s.precio_clp,
                 imageUrl: s.image_url,
               }}
             />
           ))}
         </div>
-      </div>
+        </div>
+      </section>
 
       <WhatsAppButton
         phone="569"
