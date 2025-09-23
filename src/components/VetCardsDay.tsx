@@ -117,11 +117,14 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
       m.set(vet.id, { vet, slots: [] });
     }
     
-    // Luego, agregar los slots existentes (filtrados por duración del servicio)
+    // Luego, agregar los slots existentes (filtrados además por no estar en el pasado)
     for (const s of slots) {
       const v = s.veterinario || { id: "sin-vet", nombre: "Veterinario", foto_url: null, especialidad: null };
       if (!m.has(v.id)) m.set(v.id, { vet: v, slots: [] });
       
+      // Ocultar slots pasados del día actual
+      if (+new Date(s.inicio) < Date.now()) continue;
+
       // Solo agregar slots que pueden acomodar el servicio
       if (canAccommodateService(s, slots)) {
         m.get(v.id)!.slots.push(s);

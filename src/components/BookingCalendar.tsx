@@ -71,7 +71,7 @@ export default function BookingCalendar() {
   const selectedKey = selectedDay
     ? `${selectedDay.getFullYear()}-${String(selectedDay.getMonth()+1).padStart(2,"0")}-${String(selectedDay.getDate()).padStart(2,"0")}`
     : "";
-  const timesForDay = selectedKey ? (byDay[selectedKey] || []) : [];
+  const timesForDay = selectedKey ? (byDay[selectedKey] || []).filter(s => +new Date(s.inicio) >= +new Date()) : [];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 md:py-12">

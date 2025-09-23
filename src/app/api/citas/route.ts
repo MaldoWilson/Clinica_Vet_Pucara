@@ -34,7 +34,20 @@ export async function POST(req: Request) {
     const requiredSlots = Math.ceil(serviceDuration / slotDuration);
 
     if (requiredSlots === 1) {
-      // Si solo necesita 1 slot, usar la función original
+      // Si solo necesita 1 slot, primero validar que el slot no sea pasado
+      const { data: slot, error: slotErr } = await supa
+        .from("horarios")
+        .select("id, inicio, reservado")
+        .eq("id", body.horarioId)
+        .single();
+      if (slotErr) throw slotErr;
+      if (!slot) throw new Error("Horario no encontrado");
+      if (new Date(slot.inicio).getTime() < Date.now()) {
+        throw new Error("No es posible reservar un horario en el pasado");
+      }
+      if (slot.reservado) throw new Error("Este horario ya está reservado por otra cita");
+
+      // Usar la función original
       const { data, error } = await supa.rpc("crear_cita_atomica", {
         p_horario_id: body.horarioId,
         p_servicio_id: body.servicioId,
@@ -81,6 +94,11 @@ export async function POST(req: Request) {
 
         if (slotError) throw slotError;
 
+        // Evitar slots en el pasado
+        if (new Date(slotInicial.inicio).getTime() < Date.now()) {
+          throw new Error("No es posible reservar un horario en el pasado");
+        }
+
         // Buscar slots consecutivos del mismo veterinario
         const { data: slotsConsecutivos, error: slotsError } = await supa
           .from("horarios")
@@ -106,6 +124,18 @@ export async function POST(req: Request) {
           if (Math.abs(timeDiff) > 60000) { // Más de 1 minuto de diferencia
             throw new Error("Los horarios no son consecutivos");
           }
+        }
+
+        // Verificar que ninguno de los slots ya tenga una cita asociada
+        const slotIds = slotsConsecutivos.map(s => s.id);
+        const { data: citasConflictivas, error: citasConflictivasError } = await supa
+          .from("citas")
+          .select("id, horario_id")
+          .in("horario_id", slotIds)
+          .limit(1);
+        if (citasConflictivasError) throw citasConflictivasError;
+        if (citasConflictivas && citasConflictivas.length > 0) {
+          throw new Error("Uno o más horarios ya están asociados a otra cita");
         }
 
         // Crear la cita

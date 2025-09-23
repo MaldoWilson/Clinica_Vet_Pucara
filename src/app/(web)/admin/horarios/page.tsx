@@ -229,14 +229,15 @@ export default function AdminHorariosPage() {
               <tbody>
                 {slots.map(s => {
                   const cita = s.citas; // Acceder directamente al objeto cita
+                  const estaReservado = s.reservado || Boolean(cita);
                   return (
                     <tr key={s.id} className="border-t">
                       <td className="p-2">{fmtHora(s.inicio)} - {fmtHora(s.fin)}</td>
-                      <td className="p-2">{s.reservado ? "Reservado" : "Libre"}</td>
+                      <td className="p-2">{estaReservado ? "Reservado" : "Libre"}</td>
                       <td className="p-2">{cita?.servicios?.nombre || "-"}</td>
                       <td className="p-2">{cita?.tutor_nombre || "-"}</td>
                       <td className="p-2">
-                        <button onClick={() => eliminar(s.id)} disabled={s.reservado} className={`px-3 py-1 rounded border ${s.reservado ? "opacity-50 cursor-not-allowed" : "text-red-600"}`}>Eliminar</button>
+                        <button onClick={() => eliminar(s.id)} disabled={estaReservado} className={`px-3 py-1 rounded border ${estaReservado ? "opacity-50 cursor-not-allowed" : "text-red-600"}`}>Eliminar</button>
                       </td>
                     </tr>
                   );

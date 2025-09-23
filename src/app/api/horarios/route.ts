@@ -40,6 +40,13 @@ export async function GET(req: Request) {
       to = new Date(new Date(from).getTime() + maxMs).toISOString();
     }
 
+    // Para vistas públicas (onlyAvailable), no mostrar horarios en el pasado
+    if (onlyAvailable) {
+      if (new Date(from).getTime() < new Date(nowISO).getTime()) {
+        from = nowISO;
+      }
+    }
+
     const supa = supabaseServer();
 
     // ---- Caso 1: pedir un slot específico
@@ -53,7 +60,7 @@ export async function GET(req: Request) {
         .eq("id", slotId)
         .limit(1);
 
-      if (onlyAvailable) q.eq("reservado", false);
+      if (onlyAvailable) q.eq("reservado", false).gte("inicio", nowISO);
 
       const { data, error } = await q.single();
       if (error) throw error;
@@ -93,7 +100,7 @@ export async function GET(req: Request) {
       .order("inicio", { ascending: true })
       .range(offset, offset + limit - 1);
 
-    if (onlyAvailable) q.eq("reservado", false);
+    if (onlyAvailable) q.eq("reservado", false).is("citas.id", null).gte("inicio", from);
     if (vetId) q.eq("veterinario_id", vetId);
 
     const { data, error } = await q;
