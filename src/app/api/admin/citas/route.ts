@@ -81,9 +81,27 @@ export async function PATCH(req: Request) {
     }
 
     console.log("🔍 Debug API - Actualización exitosa");
-    return NextResponse.json({ ok: true });
+    return new NextResponse(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+        "Surrogate-Control": "no-store",
+      },
+    });
   } catch (e:any) {
     console.log("🔍 Debug API - Error general:", e);
-    return NextResponse.json({ ok:false, error: e.message }, { status: 400 });
+    return new NextResponse(JSON.stringify({ ok:false, error: e.message }), {
+      status: 400,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+        "Surrogate-Control": "no-store",
+      },
+    });
   }
 }
