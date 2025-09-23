@@ -27,11 +27,11 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Inicio" },
-    { href: "/servicios", label: "Servicios" },
-    { href: "/equipo", label: "Equipo" },
     { href: "/reservas", label: "Reservas" },
-    { href: "/contacto", label: "Contacto" },
-    { href: "/productos", label: "Productos" }
+    { href: "/servicios", label: "Servicios" },
+    { href: "/productos", label: "Productos" },
+    { href: "/equipo", label: "Equipo" },
+    { href: "/contacto", label: "Contacto" }
   ];
 
   const isActive = (href: string) => pathname === href;
