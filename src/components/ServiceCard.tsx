@@ -33,7 +33,11 @@ export default function ServiceCard({ service }: { service: Service }) {
   return (
     <>
     <div
-      className="relative overflow-hidden rounded-2xl border border-white/30 bg-white/35 backdrop-blur-md group transition-all duration-300 hover:shadow-2xl hover:scale-[1.04] active:scale-[1.06] cursor-pointer"
+      className="relative overflow-hidden rounded-2xl 
+  border-2 border-gray-400/70 shadow-md
+  bg-gradient-to-br from-white/80 via-white/60 to-white/40 
+  backdrop-blur-md group transition-all duration-300
+  hover:shadow-2xl hover:scale-[1.03] active:scale-[1.05] cursor-pointer"
       onClick={() => setIsOpen(true)}
       role="button"
       tabIndex={0}
@@ -78,13 +82,18 @@ export default function ServiceCard({ service }: { service: Service }) {
             onClick={(e) => e.stopPropagation()}
           >
             {service.imageUrl && (
-              <div className="relative h-48 w-full">
-                <Image src={service.imageUrl as string} alt={service.name ?? 'Servicio'} fill className="object-cover" />
+              <div className="relative w-full h-80 bg-black">
+                <Image 
+                  src={service.imageUrl as string} 
+                  alt={service.name ?? 'Servicio'} 
+                  fill 
+                  className="object-contain" 
+                />
               </div>
             )}
-            <div className="p-6">
+            <div className="p-8">
               <div className="flex items-start justify-between gap-4">
-                <h3 className="text-xl font-bold text-gray-900">{service.name}</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{service.name}</h3>
                 <button
                   onClick={() => setIsOpen(false)}
                   aria-label="Cerrar"
@@ -94,11 +103,12 @@ export default function ServiceCard({ service }: { service: Service }) {
                 </button>
               </div>
               {service.description && (
-                <p className="mt-3 text-gray-700 leading-relaxed">
+                <p className="mt-4 text-lg text-gray-700 leading-relaxed">
                   {service.description}
                 </p>
               )}
             </div>
+
           </div>
         </div>
       </div>
