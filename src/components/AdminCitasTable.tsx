@@ -14,6 +14,8 @@ type Cita = {
   notas: string | null;
   servicio_id: string | null;
   horario_id: string | null;
+  servicios?: { nombre: string } | null;
+  horarios?: { inicio: string; fin: string } | null;
 };
 
 export default function AdminCitasTable({
@@ -37,6 +39,9 @@ export default function AdminCitasTable({
   // Formatea fecha/hora
   const fmt = (iso?: string) =>
     iso ? new Date(iso).toLocaleString("es-CL", { dateStyle: "medium", timeStyle: "short" }) : "-";
+
+  const fmtHora = (iso?: string) =>
+    iso ? new Date(iso).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" }) : "-";
 
   // Cambia el filtro de estado (filtrado local)
   const onChangeEstado = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -227,6 +232,8 @@ export default function AdminCitasTable({
                 <th className="text-left p-3 font-semibold">📅 Fecha Creación</th>
                 <th className="text-left p-3 font-semibold">👤 Tutor</th>
                 <th className="text-left p-3 font-semibold">🐾 Mascota</th>
+                <th className="text-left p-3 font-semibold">💊 Servicio</th>
+                <th className="text-left p-3 font-semibold">🕒 Horario</th>
                 <th className="text-left p-3 font-semibold">📊 Estado</th>
                 <th className="text-left p-3 font-semibold">⚙️ Acciones</th>
               </tr>
@@ -250,6 +257,10 @@ export default function AdminCitasTable({
                       </div>
                     </td>
                     <td className="p-3 font-medium">{c.mascota_nombre}</td>
+                    <td className="p-3">{c.servicios?.nombre || "-"}</td>
+                    <td className="p-3">
+                      {c.horarios ? `${fmtHora(c.horarios.inicio)} - ${fmtHora(c.horarios.fin)}` : "-"}
+                    </td>
                     <td className="p-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         c.estado === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-800' :

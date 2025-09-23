@@ -16,13 +16,15 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
   const estado = searchParams.estado ?? "";
   const supa = supabaseServer();
 
-  // Consulta simplificada sin relaciones para evitar problemas
+  // Consulta con relaciones para obtener nombre de servicio y horario
   const query = supa
     .from("citas")
     .select(`
       id, estado, creado_en,
       tutor_nombre, tutor_telefono, tutor_email, mascota_nombre, notas,
-      servicio_id, horario_id
+      servicio_id, horario_id,
+      servicios:servicios(nombre),
+      horarios:horarios(inicio, fin)
     `)
     .order("creado_en", { ascending: false });
 

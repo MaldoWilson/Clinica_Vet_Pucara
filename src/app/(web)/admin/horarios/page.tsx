@@ -206,6 +206,36 @@ export default function AdminHorariosPage() {
 
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-xl font-semibold mb-4">Horarios del día</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-1">Veterinario</label>
+            <select
+              className="w-full rounded border px-3 py-2"
+              value={selectedVet}
+              onChange={(e) => setSelectedVet(e.target.value)}
+              required
+              aria-label="Seleccionar veterinario"
+              title="Seleccionar veterinario"
+            >
+              <option value="">Selecciona…</option>
+              {vets.map(v => (
+                <option key={v.id} value={v.id}>{v.nombre}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Fecha</label>
+            <input
+              type="date"
+              className="w-full rounded border px-3 py-2"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              aria-label="Fecha"
+              title="Fecha"
+            />
+          </div>
+        </div>
         <div className="mb-3 flex flex-wrap gap-2">
           <button onClick={eliminarLibresDelDia} className="px-3 py-2 rounded border text-red-600">Eliminar libres del día</button>
           <button onClick={reasignarLibresDelDia} className="px-3 py-2 rounded border">Reasignar libres a otro veterinario</button>
