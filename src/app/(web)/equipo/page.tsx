@@ -1,7 +1,7 @@
 import VetCard from "@/components/VetCard";
 import WhatsAppButton from "@/components/whatsapp";
 import Image from "next/image";
-import equipoBanner from "@/app/img/equipo.webp";
+import equipoBanner from "@/app/img/equipos.webp";
 
 async function getVeterinarios() {
   try {

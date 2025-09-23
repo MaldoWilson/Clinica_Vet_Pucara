@@ -3,7 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import MapVet from "@/components/MapaVet";
 import WhatsAppButton from "@/components/whatsapp";
-import contactoBg from "@/app/img/contacto.png";
+import contactoBg from "@/app/img/Contacto2.png";
 
 export default function ContactoPage() {
   const direccion = "Esmeralda 97, San Bernardo, Santiago, Chile";
@@ -78,7 +78,7 @@ export default function ContactoPage() {
       <div className="fixed inset-0 -z-10 bg-cover bg-center contacto-bg"
         style={{ '--contacto-bg': `url(${(contactoBg as unknown as { src: string }).src})` } as React.CSSProperties}
       />
-      <div className="fixed inset-0 -z-10 bg-teal-900/60" />
+   
 
       <section className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 md:pb-20">
