@@ -101,7 +101,6 @@ export default async function ServiciosPage() {
       </section>
 
       <WhatsAppButton
-        phone="569"
         text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
         floating
       />

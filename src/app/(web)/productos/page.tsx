@@ -253,7 +253,6 @@ export default function ProductosPage() {
         </div>
       </div>
       <WhatsAppButton
-        phone="569"
         text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
         floating
       />
