@@ -40,7 +40,7 @@ export default function AdminEditableTable<T extends { id: string }>(props: Admi
             items.map((item) => (
               <tr key={item.id}>
                 {columns.map((c) => (
-                  <td key={c.key} className="px-4 py-2">{c.render(item)}</td>
+                  <td key={c.key} className={`px-4 py-2 ${c.className || ""}`}>{c.render(item)}</td>
                 ))}
                 {(onEdit || onDelete) && (
                   <td className="px-4 py-2">

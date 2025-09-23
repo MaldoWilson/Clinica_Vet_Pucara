@@ -289,6 +289,7 @@ export default function AdminServiciosPage() {
           {
             key: "imagen",
             header: "Imagen",
+            className: "w-[150px] whitespace-nowrap",
             render: (s: Servicio) => (
               <div className="flex items-center gap-3">
                 {s.image_url ? (
@@ -314,7 +315,9 @@ export default function AdminServiciosPage() {
               </div>
             ),
           },
-          { key: "nombre", header: "Nombre", render: (s: Servicio) => <span className="font-medium">{s.nombre}</span> },
+          { key: "nombre", header: "Nombre", className: "min-w-[180px] max-w-[260px]", render: (s: Servicio) => (
+            <span className="font-medium block truncate" title={s.nombre}>{s.nombre}</span>
+          ) },
           { key: "descripcion", header: "Descripción", render: (s: Servicio) => <span className="text-sm text-gray-600 max-w-[360px] truncate inline-block">{s.descripcion}</span> },
           { key: "precio", header: "Precio", render: (s: Servicio) => (s.precio_clp != null ? `$${s.precio_clp}` : "-") },
           { key: "duracion", header: "Duración", render: (s: Servicio) => (s.duracion_min != null ? `${s.duracion_min} min` : "-") },

@@ -8,6 +8,8 @@ import contactoBg from "@/app/img/contacto.png";
 export default function ContactoPage() {
   const direccion = "Esmeralda 97, San Bernardo, Santiago, Chile";
   const [sending, setSending] = useState(false);
+  const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "";
+  const WHATSAPP_PHONE = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "";
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,11 +92,11 @@ export default function ContactoPage() {
               <div className="space-y-2 mb-6">
                 <p className="flex items-center gap-2 text-teal-50/90">
                   <svg className="w-5 h-5 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                  medicoveterinariodomicilio@gmail.com
+                  {CONTACT_EMAIL || "contacto@clinicapucara.cl"}
                 </p>
                 <p className="flex items-center gap-2 text-teal-50/90">
                   <svg className="w-5 h-5 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h2l3.6 7.59a1 1 0 00.9.57H17a1 1 0 001-1V7a1 1 0 00-1-1h-6"/></svg>
-                  +56 9 9272 9827
+                  {WHATSAPP_PHONE ? `+${WHATSAPP_PHONE.replace(/^(?!\+)/, "")}` : "+56 9 9272 9827"}
                 </p>
               </div>
 
@@ -161,7 +163,7 @@ export default function ContactoPage() {
       </section>
 
       <WhatsAppButton
-        phone="569"
+        phone={WHATSAPP_PHONE}
         text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
         floating
       />

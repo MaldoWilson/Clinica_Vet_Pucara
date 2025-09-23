@@ -25,6 +25,7 @@ export default function ProductoDetailPage() {
   const [mainImage, setMainImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const WHATSAPP_PHONE = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "";
 
   useEffect(() => {
     const fetchProducto = async () => {
@@ -269,27 +270,37 @@ export default function ProductoDetailPage() {
               </div>
             </div>
 
-            {/* Botón de contacto */}
+            {/* Botón de consulta por WhatsApp */}
             <div className="pt-6 border-t">
-              <Link
-                href="/contacto"
-                className="inline-flex items-center px-8 py-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-lg"
-              >
-                <svg 
-                  className="mr-2 w-5 h-5" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" 
-                  />
-                </svg>
-                Consultar Disponibilidad
-              </Link>
+              {(() => {
+                const envPhone = WHATSAPP_PHONE;
+                const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+                const message = `Hola, quisiera consultar la disponibilidad del producto "${producto.nombre}" (SKU: ${producto.sku}). Precio: ${formatPrice(producto.precio)}. Link: ${currentUrl}`;
+                const href = envPhone ? `https://wa.me/${envPhone}?text=${encodeURIComponent(message)}` : "/contacto";
+                return (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-8 py-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-lg"
+                  >
+                    <svg 
+                      className="mr-2 w-5 h-5" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" 
+                      />
+                    </svg>
+                    Consultar Disponibilidad
+                  </a>
+                );
+              })()}
             </div>
 
             {/* Información adicional */}

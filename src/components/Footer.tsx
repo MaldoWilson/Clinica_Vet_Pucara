@@ -11,6 +11,8 @@ export default function Footer() {
     informacion: false,
     sobre: false,
   });
+  const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contacto@clinicapucara.cl";
+  const WHATSAPP_PHONE = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "5628592840";
 
   function toggleSection(key: keyof typeof openSections) {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -51,8 +53,8 @@ export default function Footer() {
               {/* Información de contacto */}
               <div className="text-center lg:text-left space-y-1 sm:space-y-2 text-sm sm:text-base text-slate-300">
                 <p>📍 Esmeralda 97, San Bernardo, Región Metropolitana</p>
-                <p>📞 +56 2 859 2840</p>
-                <p>✉️ contacto@clinicapucara.cl</p>
+                <p>📞 {WHATSAPP_PHONE ? `+${WHATSAPP_PHONE.replace(/^(?!\+)/, "")}` : "+56 2 859 2840"}</p>
+                <p>✉️ {CONTACT_EMAIL}</p>
               </div>
             </div>
 

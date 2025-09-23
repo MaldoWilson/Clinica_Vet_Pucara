@@ -1,12 +1,16 @@
 // Componente de whatsapp
 type Props = {
-  phone: string;     
+  phone?: string;     
   text?: string;        // mensaje opcional
   floating?: boolean;   // para botón flotante
 };
 
 export default function WhatsAppButton({ phone, text, floating = true }: Props) {
-  const href = `https://wa.me/${phone}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
+  const envPhone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "";
+  const phoneNumber = (phone && phone.trim()) ? phone : envPhone;
+  const href = phoneNumber
+    ? `https://wa.me/${phoneNumber}${text ? `?text=${encodeURIComponent(text)}` : ""}`
+    : "#";
 
   return (
     <a
