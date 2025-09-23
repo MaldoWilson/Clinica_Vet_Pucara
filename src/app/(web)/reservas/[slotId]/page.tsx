@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import WhatsAppButton from "@/components/whatsapp";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 type Servicio = { id: string; nombre: string };
 type Slot = {
@@ -19,6 +20,8 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [formData, setFormData] = useState<any>(null);
 
   // Formateadores
   const fmtFecha = (iso?: string) =>
@@ -50,7 +53,7 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
     return `${fmtFecha(slot.inicio)} ${fmtHora(slot.inicio)}–${fmtHora(slot.fin)}${vet}`;
   }, [slot]);
 
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
@@ -70,29 +73,59 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
       return setError("Indica al menos un medio de contacto (teléfono o correo).");
     }
 
+    // Guardar datos del formulario y mostrar modal de confirmación
+    setFormData({
+      horarioId: params.slotId,
+      servicioId,
+      tutorNombre,
+      tutorTelefono,
+      tutorEmail,
+      mascotaNombre,
+      notas,
+    });
+    setShowConfirmation(true);
+  };
+
+  const confirmReservation = async () => {
+    if (!formData) return;
+
     setSending(true);
     try {
-      const payload = {
-        horarioId: params.slotId,
-        servicioId,
-        tutorNombre,
-        tutorTelefono,
-        tutorEmail,
-        mascotaNombre,
-        notas,
-      };
       const res = await fetch("/api/citas", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formData),
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || j?.ok === false) {
         throw new Error(j?.error || "No se pudo crear la reserva.");
       }
-      alert("✅ Reserva creada con éxito");
-      window.location.href = "/reservas";
+      
+      // Mostrar modal de éxito en lugar de alert
+      setShowConfirmation(false);
+      setFormData(null);
+      
+      // Crear modal de éxito
+      const successModal = document.createElement('div');
+      successModal.className = 'fixed inset-0 z-50 flex items-center justify-center';
+      successModal.innerHTML = `
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 text-center">
+          <div class="text-green-500 text-6xl mb-4">✅</div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">¡Reserva creada con éxito!</h3>
+          <p class="text-gray-600 mb-6">Tu cita ha sido confirmada. Te contactaremos pronto.</p>
+          <button 
+            onclick="this.closest('.fixed').remove(); window.location.href='/reservas';"
+            class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Continuar
+          </button>
+        </div>
+      `;
+      document.body.appendChild(successModal);
+      
     } catch (err: any) {
       setError(err?.message || "Ocurrió un error al reservar.");
+      setShowConfirmation(false);
     } finally {
       setSending(false);
     }
@@ -194,6 +227,27 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
         phone="569"   // Pongamos numero para probar
         text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
         floating // botón flotante abajo a la derecha
+      />
+
+      {/* Modal de confirmación */}
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        onClose={() => {
+          setShowConfirmation(false);
+          setFormData(null);
+        }}
+        onConfirm={confirmReservation}
+        title="Confirmar reserva"
+        message={`¿Estás seguro de que quieres reservar este horario?
+
+${encabezadoSlot}
+
+${formData?.servicioId ? `Servicio seleccionado: ${servicios.find(s => s.id === formData.servicioId)?.nombre || 'Servicio'}` : ''}
+
+Una vez confirmada, recibirás un mensaje de confirmación.`}
+        confirmText="Confirmar reserva"
+        cancelText="Cancelar"
+        isLoading={sending}
       />
 
     </div>

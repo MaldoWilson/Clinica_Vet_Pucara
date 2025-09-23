@@ -24,6 +24,7 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
   const [day, setDay] = useState<Date>(startDay(new Date()));
   const [slots, setSlots] = useState<Slot[]>([]);
   const [allVets, setAllVets] = useState<Vet[]>([]);
+  const [servicio, setServicio] = useState<{ duracion_min?: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const days = Array.from({ length: 14 }, (_, i) => addDays(startDay(new Date()), i));
@@ -38,21 +39,74 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
 
     setLoading(true);
     
-    // Obtener tanto los horarios como todos los veterinarios
-    Promise.all([
+    // Obtener horarios, veterinarios y servicio (si hay servicioId)
+    const promises = [
       fetch(`/api/horarios?${qs}`).then(r => r.json()).catch(() => ({ data: [] })),
       fetch(`/api/Veterinarios`).then(r => r.json()).catch(() => ({ data: [] }))
-    ])
-      .then(([horariosRes, vetsRes]) => {
+    ];
+    
+    if (servicioId) {
+      promises.push(
+        fetch(`/api/servicios`).then(r => r.json()).catch(() => ({ data: [] }))
+      );
+    }
+    
+    Promise.all(promises)
+      .then(([horariosRes, vetsRes, serviciosRes]) => {
         setSlots(horariosRes?.data || []);
         setAllVets(vetsRes?.data || []);
+        
+        if (servicioId && serviciosRes?.data) {
+          const servicioEncontrado = serviciosRes.data.find((s: any) => s.id === servicioId);
+          setServicio(servicioEncontrado || null);
+        } else {
+          setServicio(null);
+        }
       })
       .catch(() => {
         setSlots([]);
         setAllVets([]);
+        setServicio(null);
       })
       .finally(() => setLoading(false));
-  }, [day]);
+  }, [day, servicioId]);
+
+  // Función para verificar si un slot puede acomodar la duración del servicio
+  const canAccommodateService = (slot: Slot, allSlots: Slot[]): boolean => {
+    if (!servicio?.duracion_min) return true; // Si no hay servicio específico, mostrar todos
+    
+    const slotDuration = 30; // Duración fija de los slots (30 minutos)
+    const requiredSlots = Math.ceil(servicio.duracion_min / slotDuration);
+    
+    if (requiredSlots === 1) return true; // Si solo necesita 1 slot, está bien
+    
+    // Buscar slots consecutivos del mismo veterinario
+    const vetSlots = allSlots
+      .filter(s => s.veterinario?.id === slot.veterinario?.id && !s.reservado)
+      .sort((a, b) => +new Date(a.inicio) - +new Date(b.inicio));
+    
+    const slotIndex = vetSlots.findIndex(s => s.id === slot.id);
+    if (slotIndex === -1) return false;
+    
+    // Verificar si hay suficientes slots consecutivos disponibles
+    for (let i = 0; i < requiredSlots; i++) {
+      const checkSlot = vetSlots[slotIndex + i];
+      if (!checkSlot) return false; // No hay suficientes slots
+      
+      // Verificar que el slot siguiente sea consecutivo (30 minutos después)
+      if (i < requiredSlots - 1) {
+        const nextSlot = vetSlots[slotIndex + i + 1];
+        if (!nextSlot) return false; // No hay slot siguiente
+        
+        const currentEnd = new Date(checkSlot.fin);
+        const nextStart = new Date(nextSlot.inicio);
+        const timeDiff = nextStart.getTime() - currentEnd.getTime();
+        if (Math.abs(timeDiff) > 60000) return false; // Más de 1 minuto de diferencia
+      }
+    }
+    
+    return true;
+  };
 
   // agrupar por veterinario - incluir todos los veterinarios
   const groups = useMemo(() => {
@@ -63,18 +117,22 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
       m.set(vet.id, { vet, slots: [] });
     }
     
-    // Luego, agregar los slots existentes
+    // Luego, agregar los slots existentes (filtrados por duración del servicio)
     for (const s of slots) {
       const v = s.veterinario || { id: "sin-vet", nombre: "Veterinario", foto_url: null, especialidad: null };
       if (!m.has(v.id)) m.set(v.id, { vet: v, slots: [] });
-      m.get(v.id)!.slots.push(s);
+      
+      // Solo agregar slots que pueden acomodar el servicio
+      if (canAccommodateService(s, slots)) {
+        m.get(v.id)!.slots.push(s);
+      }
     }
     
     const arr = Array.from(m.values());
     arr.forEach(g => g.slots.sort((a,b) => +new Date(a.inicio) - +new Date(b.inicio)));
     arr.sort((a,b) => (a.vet.nombre || "").localeCompare(b.vet.nombre || "", "es"));
     return arr;
-  }, [slots, allVets]);
+  }, [slots, allVets, servicio]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-9">
