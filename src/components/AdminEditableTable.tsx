@@ -26,9 +26,9 @@ export default function AdminEditableTable<T extends { id: string }>(props: Admi
         <thead className="bg-gray-50">
           <tr>
             {columns.map((c) => (
-              <th key={c.key} className={`px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase ${c.className || ""}`}>{c.header}</th>
+              <th key={c.key} className={`px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase ${c.className || ""}`}>{c.header}</th>
             ))}
-            {(onEdit || onDelete) && <th className="px-4 py-2"></th>}
+            {(onEdit || onDelete) && <th className="px-4 py-4"></th>}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
@@ -40,10 +40,10 @@ export default function AdminEditableTable<T extends { id: string }>(props: Admi
             items.map((item) => (
               <tr key={item.id}>
                 {columns.map((c) => (
-                  <td key={c.key} className={`px-4 py-2 ${c.className || ""}`}>{c.render(item)}</td>
+                  <td key={c.key} className={`px-4 py-4 ${c.className || ""}`}>{c.render(item)}</td>
                 ))}
                 {(onEdit || onDelete) && (
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
                       {onEdit && (
                         <button onClick={() => onEdit(item)} className="px-3 py-1 rounded border">Editar</button>

@@ -260,33 +260,35 @@ export default function BlogsForm() {
           onEdit={(b) => handleEdit(b)}
           onDelete={(id) => handleDelete(id)}
           columns={[
-            { key: "imagen", header: "Imagen", render: (b) => (
-              <div className="flex items-center gap-3">
-                {b.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={b.image_url} alt={b.titulo} className="w-14 h-14 object-cover rounded" />
-                ) : (
-                  <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>
-                )}
-                <label className="text-xs text-blue-600 cursor-pointer">
-                  Subir
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      try {
-                        await handleUploadImage(b.id, file);
-                      } catch (err: any) {
-                        alert(err.message || "Error subiendo imagen");
-                      } finally {
-                        e.currentTarget.value = "";
-                      }
-                    }}
-                  />
-                </label>
+            { key: "imagen", header: "Imagen", className: "w-[140px]", render: (b) => (
+              <div className="flex">
+                <div className="flex flex-col items-center w-16">
+                  {b.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={b.image_url} alt={b.titulo} className="w-14 h-14 object-cover rounded" />
+                  ) : (
+                    <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>
+                  )}
+                  <label className="mt-1 text-xs text-blue-600 cursor-pointer">
+                    Subir
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          await handleUploadImage(b.id, file);
+                        } catch (err: any) {
+                          alert(err.message || "Error subiendo imagen");
+                        } finally {
+                          e.currentTarget.value = "";
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
             ) },
             { key: "titulo", header: "Título", render: (b) => b.titulo },

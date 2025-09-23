@@ -33,6 +33,7 @@ export default function ProductosForm() {
   const [loadingList, setLoadingList] = useState(false);
   const [selectedEstados, setSelectedEstados] = useState<string[]>([]); // "Agotados" | "Disponibles"
   const [selectedCategorias, setSelectedCategorias] = useState<string[]>([]); // "Alimentos" | "Medicamentos" | "Accesorios"
+  const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<null | { 
     id: string; 
     created_at: string; 
@@ -86,6 +87,20 @@ export default function ProductosForm() {
   useEffect(() => {
     fetchProductos();
   }, []);
+
+  async function handleAdjustStock(id: string, currentStock: number, delta: number) {
+    const next = Math.max(0, (currentStock || 0) + delta);
+    try {
+      await fetch("/api/productos", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, stock: next })
+      });
+      await fetchProductos();
+    } catch (err) {
+      // silencio en UI, el recargado mostrará estado actual
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -504,8 +519,16 @@ export default function ProductosForm() {
               })}
             </div>
           </div>
-          <div className="text-sm text-gray-600">
-            <span className="font-medium">{
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-64 border rounded px-2 py-1"
+              placeholder="Buscar por nombre o SKU"
+            />
+            <div className="text-sm text-gray-600">
+              <span className="font-medium">{
               (() => {
                 const filtered = productos.filter((p) => {
                   const estadoOk = selectedEstados.length === 0 || selectedEstados.some((s) => (
@@ -513,11 +536,14 @@ export default function ProductosForm() {
                     (s === 'Disponibles' && (p.stock || 0) > 0)
                   ));
                   const categoriaOk = selectedCategorias.length === 0 || selectedCategorias.includes(p.categoria || '')
-                  return estadoOk && categoriaOk;
+                  const q = search.trim().toLowerCase();
+                  const searchOk = q.length === 0 || (p.nombre || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q);
+                  return estadoOk && categoriaOk && searchOk;
                 });
                 return filtered.length;
               })()
             }</span> ítem(s)
+            </div>
           </div>
         </div>
 
@@ -528,7 +554,9 @@ export default function ProductosForm() {
               (s === 'Disponibles' && (p.stock || 0) > 0)
             ));
             const categoriaOk = selectedCategorias.length === 0 || selectedCategorias.includes(p.categoria || '')
-            return estadoOk && categoriaOk;
+            const q = search.trim().toLowerCase();
+            const searchOk = q.length === 0 || (p.nombre || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q);
+            return estadoOk && categoriaOk && searchOk;
           });
           return (
             <AdminEditableTable
@@ -538,33 +566,35 @@ export default function ProductosForm() {
               onEdit={(p) => handleEdit(p)}
               onDelete={(id) => handleDelete(id)}
               columns={[
-                { key: "imagen", header: "Imagen", render: (p) => (
-                  <div className="flex items-center gap-3">
-                    {p.imagen_principal ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.imagen_principal} alt={p.nombre} className="w-14 h-14 object-cover rounded" />
-                    ) : (
-                      <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>
-                    )}
-                    <label className="text-xs text-blue-600 cursor-pointer">
-                      Subir
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          try {
-                            await handleUploadImage(p.id, file);
-                          } catch (err: any) {
-                            alert(err.message || "Error subiendo imagen");
-                          } finally {
-                            e.currentTarget.value = "";
-                          }
-                        }}
-                      />
-                    </label>
+                { key: "imagen", header: "Imagen", className: "w-[140px]", render: (p) => (
+                  <div className="flex">
+                    <div className="flex flex-col items-center w-16">
+                      {p.imagen_principal ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.imagen_principal} alt={p.nombre} className="w-14 h-14 object-cover rounded" />
+                      ) : (
+                        <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>
+                      )}
+                      <label className="mt-1 text-xs text-blue-600 cursor-pointer">
+                        Subir
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              await handleUploadImage(p.id, file);
+                            } catch (err: any) {
+                              alert(err.message || "Error subiendo imagen");
+                            } finally {
+                              e.currentTarget.value = "";
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
                   </div>
                 ) },
                 { key: "nombre", header: "Nombre", render: (p) => p.nombre },
@@ -573,6 +603,26 @@ export default function ProductosForm() {
                 { key: "stock", header: "Stock", render: (p) => p.stock },
                 { key: "categoria", header: "Categoría", render: (p) => p.categoria || "-" },
                 { key: "fecha", header: "Creado", render: (p) => new Date(p.created_at).toLocaleString() },
+                { key: "ajuste", header: "", render: (p) => (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="px-2 py-1 rounded border"
+                      title="Restar 1 del stock"
+                      onClick={() => handleAdjustStock(p.id, p.stock, -1)}
+                    >
+                      −
+                    </button>
+                    <button
+                      type="button"
+                      className="px-2 py-1 rounded border"
+                      title="Sumar 1 al stock"
+                      onClick={() => handleAdjustStock(p.id, p.stock, 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                ) },
               ]}
             />
           );

@@ -289,29 +289,31 @@ export default function AdminServiciosPage() {
           {
             key: "imagen",
             header: "Imagen",
-            className: "w-[150px] whitespace-nowrap",
+            className: "w-[140px]",
             render: (s: Servicio) => (
-              <div className="flex items-center gap-3">
-                {s.image_url ? (
-                  <Image src={s.image_url} alt={s.nombre} width={56} height={56} className="w-14 h-14 object-cover rounded" />
-                ) : (
-                  <div className="w-14 h-14 bg-gray-100 rounded grid place-items-center text-xs text-gray-400">Sin imagen</div>
-                )}
-                <label className="text-xs text-blue-600 cursor-pointer">
-                  Subir
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const input = e.currentTarget;
-                      await handleUpload(s.id, file);
-                      if (input) input.value = "";
-                    }}
-                  />
-                </label>
+              <div className="flex">
+                <div className="flex flex-col items-center w-16">
+                  {s.image_url ? (
+                    <Image src={s.image_url} alt={s.nombre} width={56} height={56} className="w-14 h-14 object-cover rounded" />
+                  ) : (
+                    <div className="w-14 h-14 bg-gray-100 rounded grid place-items-center text-xs text-gray-400">Sin imagen</div>
+                  )}
+                  <label className="mt-1 text-xs text-blue-600 cursor-pointer">
+                    Subir
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const input = e.currentTarget;
+                        await handleUpload(s.id, file);
+                        if (input) input.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
             ),
           },
