@@ -91,7 +91,8 @@ export async function GET(req: Request) {
           servicio_id,
           servicios:servicio_id (
             id, 
-            nombre
+            nombre,
+            duracion_min
           )
         )
       `)

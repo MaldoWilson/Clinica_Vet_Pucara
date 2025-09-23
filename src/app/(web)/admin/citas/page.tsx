@@ -23,7 +23,7 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
       id, estado, creado_en,
       tutor_nombre, tutor_telefono, tutor_email, mascota_nombre, notas,
       servicio_id, horario_id,
-      servicios:servicios(nombre),
+      servicios:servicios(nombre, duracion_min),
       horarios:horarios(inicio, fin)
     `)
     .order("creado_en", { ascending: false });

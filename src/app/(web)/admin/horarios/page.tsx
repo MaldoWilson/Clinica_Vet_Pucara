@@ -69,6 +69,32 @@ export default function AdminHorariosPage() {
 
   const fmtHora = (iso: string) => new Date(iso).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
 
+  // Mapa auxiliar para mostrar datos de cita también en slots consecutivos reservados
+  const citaPorSlot = useMemo(() => {
+    const map = new Map<string, Slot["citas"] | undefined>();
+    const sorted = [...slots].sort((a, b) => new Date(a.inicio).getTime() - new Date(b.inicio).getTime());
+    for (let i = 0; i < sorted.length; i++) {
+      const s = sorted[i];
+      if (!s.citas) continue;
+      const duracion = s.citas.servicios?.duracion_min ?? 30;
+      const stepMin = 30;
+      const required = Math.max(1, Math.ceil((duracion || stepMin) / stepMin));
+      // Propagar la misma cita a los siguientes slots contiguos
+      for (let k = 0; k < required; k++) {
+        const idx = i + k;
+        const curr = sorted[idx];
+        if (!curr) break;
+        if (k > 0) {
+          const prev = sorted[idx - 1];
+          const diff = new Date(curr.inicio).getTime() - new Date(prev.fin).getTime();
+          if (Math.abs(diff) > 60 * 1000) break; // deben ser contiguos
+        }
+        map.set(curr.id, s.citas);
+      }
+    }
+    return map;
+  }, [slots]);
+
   const crearLote = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -258,7 +284,7 @@ export default function AdminHorariosPage() {
               </thead>
               <tbody>
                 {slots.map(s => {
-                  const cita = s.citas; // Acceder directamente al objeto cita
+                  const cita = citaPorSlot.get(s.id) ?? s.citas;
                   const estaReservado = s.reservado || Boolean(cita);
                   return (
                     <tr key={s.id} className="border-t">

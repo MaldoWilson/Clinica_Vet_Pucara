@@ -14,7 +14,7 @@ type Cita = {
   notas: string | null;
   servicio_id: string | null;
   horario_id: string | null;
-  servicios?: { nombre: string } | null;
+  servicios?: { nombre: string; duracion_min?: number | null } | null;
   horarios?: { inicio: string; fin: string } | null;
 };
 
@@ -259,7 +259,12 @@ export default function AdminCitasTable({
                     <td className="p-3 font-medium">{c.mascota_nombre}</td>
                     <td className="p-3">{c.servicios?.nombre || "-"}</td>
                     <td className="p-3">
-                      {c.horarios ? `${fmtHora(c.horarios.inicio)} - ${fmtHora(c.horarios.fin)}` : "-"}
+                      {c.horarios ? (() => {
+                        const start = new Date(c.horarios!.inicio);
+                        const dur = c.servicios?.duracion_min ?? 30;
+                        const end = new Date(start.getTime() + (dur || 30) * 60 * 1000);
+                        return `${fmtHora(start.toISOString())} - ${fmtHora(end.toISOString())}`;
+                      })() : "-"}
                     </td>
                     <td className="p-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
