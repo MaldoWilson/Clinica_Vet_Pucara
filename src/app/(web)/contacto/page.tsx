@@ -14,8 +14,8 @@ export default function ContactoPage() {
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSending(true);
-    
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const nombre = formData.get("nombre") as string;
     const correo = formData.get("correo") as string;
     const telefono = formData.get("telefono") as string;
@@ -53,18 +53,22 @@ export default function ContactoPage() {
       mensaje: mensaje.trim(),
     };
 
-    const res = await fetch("/api/contacto", { 
-      method: "POST", 
-      headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify(payload) 
-    });
-    
-    setSending(false);
-    if (res.ok) {
-      alert("¡Mensaje enviado!");
-      e.currentTarget.reset();
-    } else {
-      alert("Error al enviar");
+    try {
+      const res = await fetch("/api/contacto", { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(payload) 
+      });
+      if (res.ok) {
+        alert("¡Mensaje enviado!");
+        form.reset();
+      } else {
+        alert("Error al enviar");
+      }
+    } catch (err) {
+      alert("No se pudo enviar. Revisa tu conexión.");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -136,12 +140,14 @@ export default function ContactoPage() {
                   type="email"
                   placeholder="Correo electrónico" 
                   className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                  required 
                 />
                 <input 
                   name="telefono" 
                   type="tel"
                   placeholder="Número de contacto" 
-                  className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+                  className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  required 
                 />
                 <textarea 
                   name="mensaje" 
