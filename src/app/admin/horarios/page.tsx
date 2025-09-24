@@ -13,10 +13,7 @@ type Slot = {
     id: string;
     tutor_nombre: string;
     servicio_id: string;
-    servicios: {
-      id: string;
-      nombre: string;
-    };
+    servicios: { id: string; nombre: string; };
   };
 };
 
@@ -69,7 +66,6 @@ export default function AdminHorariosPage() {
 
   const fmtHora = (iso: string) => new Date(iso).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
 
-  // Mapa auxiliar para mostrar datos de cita también en slots consecutivos reservados
   const citaPorSlot = useMemo(() => {
     const map = new Map<string, Slot["citas"] | undefined>();
     const sorted = [...slots].sort((a, b) => new Date(a.inicio).getTime() - new Date(b.inicio).getTime());
@@ -79,7 +75,6 @@ export default function AdminHorariosPage() {
       const duracion = s.citas.servicios?.duracion_min ?? 30;
       const stepMin = 30;
       const required = Math.max(1, Math.ceil((duracion || stepMin) / stepMin));
-      // Propagar la misma cita a los siguientes slots contiguos
       for (let k = 0; k < required; k++) {
         const idx = i + k;
         const curr = sorted[idx];
@@ -87,7 +82,7 @@ export default function AdminHorariosPage() {
         if (k > 0) {
           const prev = sorted[idx - 1];
           const diff = new Date(curr.inicio).getTime() - new Date(prev.fin).getTime();
-          if (Math.abs(diff) > 60 * 1000) break; // deben ser contiguos
+          if (Math.abs(diff) > 60 * 1000) break;
         }
         map.set(curr.id, s.citas);
       }
@@ -117,7 +112,6 @@ export default function AdminHorariosPage() {
       });
       const j = await res.json();
       if (!res.ok || j?.ok === false) throw new Error(j?.error || "No se pudo crear");
-      // recargar lista
       const r = await fetch(`/api/horarios?${qs}`);
       const jj = await r.json();
       setSlots(jj?.data || []);
@@ -187,9 +181,7 @@ export default function AdminHorariosPage() {
             <label className="block text-sm font-medium mb-1">Veterinario</label>
             <select className="w-full rounded border px-3 py-2" value={selectedVet} onChange={(e) => setSelectedVet(e.target.value)} required aria-label="Seleccionar veterinario" title="Seleccionar veterinario">
               <option value="">Selecciona…</option>
-              {vets.map(v => (
-                <option key={v.id} value={v.id}>{v.nombre}</option>
-              ))}
+              {vets.map(v => (<option key={v.id} value={v.id}>{v.nombre}</option>))}
             </select>
           </div>
           <div>
@@ -235,31 +227,14 @@ export default function AdminHorariosPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1">Veterinario</label>
-            <select
-              className="w-full rounded border px-3 py-2"
-              value={selectedVet}
-              onChange={(e) => setSelectedVet(e.target.value)}
-              required
-              aria-label="Seleccionar veterinario"
-              title="Seleccionar veterinario"
-            >
+            <select className="w-full rounded border px-3 py-2" value={selectedVet} onChange={(e) => setSelectedVet(e.target.value)} required aria-label="Seleccionar veterinario" title="Seleccionar veterinario">
               <option value="">Selecciona…</option>
-              {vets.map(v => (
-                <option key={v.id} value={v.id}>{v.nombre}</option>
-              ))}
+              {vets.map(v => (<option key={v.id} value={v.id}>{v.nombre}</option>))}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Fecha</label>
-            <input
-              type="date"
-              className="w-full rounded border px-3 py-2"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-              aria-label="Fecha"
-              title="Fecha"
-            />
+            <input type="date" className="w-full rounded border px-3 py-2" value={date} onChange={(e) => setDate(e.target.value)} required aria-label="Fecha" title="Fecha" />
           </div>
         </div>
         <div className="mb-3 flex flex-wrap gap-2">

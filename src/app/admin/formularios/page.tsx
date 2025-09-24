@@ -1,4 +1,4 @@
-// app/(web)/admin/formularios/page.tsx
+// app/admin/formularios/page.tsx
 import { supabaseServer } from "@/lib/supabaseClient";
 
 export const dynamic = "force-dynamic";

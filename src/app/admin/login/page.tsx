@@ -15,34 +15,24 @@ export default function AdminLoginPage() {
   const doLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const supa = createClientComponentClient();
-      console.log("Intentando login con:", { email, redirect });
-      
-      const { data, error } = await supa.auth.signInWithPassword({ 
-        email: email.trim(), 
-        password: pass 
+      const { data, error } = await supa.auth.signInWithPassword({
+        email: email.trim(),
+        password: pass,
       });
-      
       if (error) {
-        console.error("Error de login:", error);
         alert(error.message);
         setLoading(false);
         return;
       }
-
       if (data.user) {
-        console.log("Login exitoso, redirigiendo a:", redirect);
-        
-        // Pequeño delay para asegurar que las cookies se establezcan
         setTimeout(() => {
           router.replace(redirect);
           router.refresh();
         }, 100);
       }
     } catch (err: any) {
-      console.error("Error inesperado:", err);
       alert(err.message || "Error al ingresar");
       setLoading(false);
     }
@@ -56,24 +46,17 @@ export default function AdminLoginPage() {
           <h2 className="text-xl font-semibold text-gray-700">Panel de Administración</h2>
         </div>
       </div>
-
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <h3 className="text-lg font-medium text-gray-900 mb-6 text-center">
-            Iniciar Sesión
-          </h3>
-          
+          <h3 className="text-lg font-medium text-gray-900 mb-6 text-center">Iniciar Sesión</h3>
           {errorFlag && (
             <div className="mb-4 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md">
               Tu cuenta no está autorizada para acceder al panel de administración.
             </div>
           )}
-          
           <form onSubmit={doLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Correo electrónico
-              </label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
               <input
                 id="email"
                 type="email"
@@ -84,11 +67,8 @@ export default function AdminLoginPage() {
                 required
               />
             </div>
-            
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Contraseña
-              </label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
               <input
                 id="password"
                 type="password"
@@ -99,7 +79,6 @@ export default function AdminLoginPage() {
                 required
               />
             </div>
-            
             <button
               type="submit"
               disabled={loading}
@@ -108,17 +87,13 @@ export default function AdminLoginPage() {
               {loading ? "Ingresando..." : "Ingresar"}
             </button>
           </form>
-          
           <div className="mt-6 text-center">
-            <a
-              href="/"
-              className="text-sm text-blue-600 hover:text-blue-500"
-            >
-              ← Volver al sitio principal
-            </a>
+            <a href="/" className="text-sm text-blue-600 hover:text-blue-500">← Volver al sitio principal</a>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+

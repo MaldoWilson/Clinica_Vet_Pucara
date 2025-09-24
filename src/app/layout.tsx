@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ReactNode } from "react";
+import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_SITE_NAME || "Clínica Pucará",

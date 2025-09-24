@@ -16,7 +16,6 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
   const estado = searchParams.estado ?? "";
   const supa = supabaseServer();
 
-  // Consulta con relaciones para obtener nombre de servicio y horario
   const query = supa
     .from("citas")
     .select(`
@@ -31,14 +30,6 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
   if (estado) query.eq("estado", estado);
 
   const { data, error } = await query;
-
-  console.log("🔍 Debug - Consulta simplificada:", { data, error });
-
-  // Logs de depuración
-  console.log("🔍 Debug - Estado filtro:", estado);
-  console.log("🔍 Debug - Query error:", error);
-  console.log("🔍 Debug - Data recibida:", data);
-  console.log("🔍 Debug - Cantidad de citas:", data?.length || 0);
 
   if (error) {
     return (
@@ -58,11 +49,7 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
       <AdminPanel
         title="Mascotas"
         tabs={[
-          {
-            id: "citas",
-            label: "📅 Citas",
-            content: <AdminCitasTable initialCitas={(data ?? []) as any} initialEstado={estado} />,
-          },
+          { id: "citas", label: "📅 Citas", content: <AdminCitasTable initialCitas={(data ?? []) as any} initialEstado={estado} /> },
           { id: "fichas", label: "🐾 Fichas Mascota", content: <FichaForm /> },
           { id: "recetas", label: "💊 Recetas Médicas", content: <RecetaForm /> },
           { id: "certificados", label: "📄 Certificados", content: <CertificadoForm /> },
@@ -72,3 +59,5 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
     </div>
   );
 }
+
+

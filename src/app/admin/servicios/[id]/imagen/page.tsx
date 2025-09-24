@@ -32,17 +32,8 @@ export default function ImagenServicioAdmin({ params }: { params: { id: string }
     <div className="max-w-lg space-y-4">
       <h1 className="text-xl font-semibold">Imagen del Servicio</h1>
       <form onSubmit={onSubmit} className="space-y-3">
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          disabled={busy}
-          className="block w-full"
-        />
-        <button
-          disabled={busy || !file}
-          className="px-4 py-2 rounded-2xl shadow bg-black text-white disabled:opacity-60"
-        >
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={busy} className="block w-full" />
+        <button disabled={busy || !file} className="px-4 py-2 rounded-2xl shadow bg-black text-white disabled:opacity-60">
           {busy ? 'Subiendo…' : 'Subir / Reemplazar'}
         </button>
       </form>
@@ -51,3 +42,5 @@ export default function ImagenServicioAdmin({ params }: { params: { id: string }
     </div>
   );
 }
+
+

@@ -17,10 +17,7 @@ export default function AdminEquipoPage() {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<Veterinario | null>(null);
 
-  const [form, setForm] = useState({
-    nombre: "",
-    especialidad: "",
-  });
+  const [form, setForm] = useState({ nombre: "", especialidad: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -40,9 +37,7 @@ export default function AdminEquipoPage() {
     }
   };
 
-  useEffect(() => {
-    loadItems();
-  }, []);
+  useEffect(() => { loadItems(); }, []);
 
   const resetForm = () => {
     setEditing(null);
@@ -56,8 +51,6 @@ export default function AdminEquipoPage() {
     try {
       setSaving(true);
       setError(null);
-
-      // Primero crear/actualizar el registro para obtener id si es nuevo
       let payload: any = {
         nombre: form.nombre.trim(),
         especialidad: form.especialidad.trim() || null,
@@ -75,8 +68,6 @@ export default function AdminEquipoPage() {
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "Error guardando");
       const saved: Veterinario = json.data;
-
-      // Si hay imagen, subirla con la ruta de upload dedicada
       if (imageFile) {
         const fd = new FormData();
         fd.append("veterinarioId", saved.id);
@@ -85,7 +76,6 @@ export default function AdminEquipoPage() {
         const upJson = await up.json();
         if (!up.ok || upJson.error) throw new Error(upJson.error || "Error subiendo imagen");
       }
-
       resetForm();
       await loadItems();
     } catch (e: any) {
@@ -134,123 +124,55 @@ export default function AdminEquipoPage() {
 
   return (
     <div className="space-y-8">
-
-      {error && (
-        <div className="p-3 rounded border border-red-200 bg-red-50 text-red-700 text-sm">{error}</div>
-      )}
-
-      {/* Formulario */}
+      {error && (<div className="p-3 rounded border border-red-200 bg-red-50 text-red-700 text-sm">{error}</div>)}
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-xl font-semibold mb-4">{isEdit ? "Editar integrante" : "Nuevo integrante"}</h3>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Nombre</label>
-            <input
-              className="w-full rounded border px-3 py-2"
-              value={form.nombre}
-              onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
-              required
-              placeholder="Nombre"
-              aria-label="Nombre"
-            />
+            <input className="w-full rounded border px-3 py-2" value={form.nombre} onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))} required placeholder="Nombre" aria-label="Nombre" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Especialidad</label>
-            <input
-              className="w-full rounded border px-3 py-2"
-              value={form.especialidad}
-              onChange={(e) => setForm((f) => ({ ...f, especialidad: e.target.value }))}
-              placeholder="Especialidad"
-              aria-label="Especialidad"
-            />
+            <input className="w-full rounded border px-3 py-2" value={form.especialidad} onChange={(e) => setForm((f) => ({ ...f, especialidad: e.target.value }))} placeholder="Especialidad" aria-label="Especialidad" />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1">Foto</label>
             <div className="flex items-center gap-3">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setImageFile(file);
-                  setImagePreview(file ? URL.createObjectURL(file) : null);
-                }}
-                aria-label="Subir foto"
-              />
-              {imagePreview && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border" />
-              )}
+              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0] || null; setImageFile(file); setImagePreview(file ? URL.createObjectURL(file) : null); }} aria-label="Subir foto" />
+              {imagePreview && (<img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border" />)}
             </div>
             <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
           </div>
           <div className="flex items-end gap-2">
-            <button
-              type="submit"
-              className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
-              disabled={saving}
-            >
-              {saving ? "Guardando..." : isEdit ? "Actualizar" : "Crear Integrante"}
-            </button>
-            {isEdit && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="inline-flex items-center px-3 py-2 rounded border"
-              >
-                Cancelar
-              </button>
-            )}
+            <button type="submit" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300" disabled={saving}>{saving ? "Guardando..." : isEdit ? "Actualizar" : "Crear Integrante"}</button>
+            {isEdit && (<button type="button" onClick={resetForm} className="inline-flex items-center px-3 py-2 rounded border">Cancelar</button>)}
           </div>
         </form>
       </div>
-
       <AdminEditableTable
         items={items}
         loading={loading}
         emptyText="Sin integrantes"
         onEdit={(item) => handleEdit(item)}
         onDelete={(id) => handleDelete(id)}
-        onUploadImage={async (id, file) => {
-          try {
-            await handleUploadInline(id, file);
-          } catch (err: any) {
-            alert(err.message || "Error subiendo imagen");
-          }
-        }}
+        onUploadImage={async (id, file) => { try { await handleUploadInline(id, file); } catch (err: any) { alert(err.message || "Error subiendo imagen"); } }}
         columns={[
-          {
-            key: "foto",
-            header: "Foto",
-            className: "w-[140px]",
-            render: (v: Veterinario) => (
-              <div className="flex">
-                <div className="flex flex-col items-center w-16">
-                  {v.foto_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={v.foto_url} alt={v.nombre} className="w-14 h-14 object-cover rounded" />
-                  ) : (
-                    <div className="w-14 h-14 bg-gray-100 rounded grid place-items-center text-xs text-gray-400">Sin imagen</div>
-                  )}
-                  <label className="mt-1 text-xs text-blue-600 cursor-pointer">
-                    Subir
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        const input = e.currentTarget;
-                        await handleUploadInline(v.id, file);
-                        if (input) input.value = "";
-                      }}
-                    />
-                  </label>
-                </div>
+          { key: "foto", header: "Foto", className: "w-[140px]", render: (v: Veterinario) => (
+            <div className="flex">
+              <div className="flex flex-col items-center w-16">
+                {v.foto_url ? (
+                  <img src={v.foto_url} alt={v.nombre} className="w-14 h-14 object-cover rounded" />
+                ) : (
+                  <div className="w-14 h-14 bg-gray-100 rounded grid place-items-center text-xs text-gray-400">Sin imagen</div>
+                )}
+                <label className="mt-1 text-xs text-blue-600 cursor-pointer">
+                  Subir
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const input = e.currentTarget; await handleUploadInline(v.id, file); if (input) input.value = ""; }} />
+                </label>
               </div>
-            ),
-          },
+            </div>
+          ) },
           { key: "nombre", header: "Nombre", render: (v: Veterinario) => <span className="font-medium">{v.nombre}</span> },
           { key: "especialidad", header: "Especialidad", render: (v: Veterinario) => <span className="text-sm text-gray-600">{v.especialidad || "-"}</span> },
           { key: "creado", header: "Creado", render: (v: Veterinario) => <span className="text-sm text-gray-500">{v.creado_en ? new Date(v.creado_en).toLocaleString() : "-"}</span> },

@@ -6,7 +6,7 @@ const BROWSER_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
 export const supabaseBrowser = () => {
   if (!BROWSER_URL || !BROWSER_ANON) {
-    throw new Error("Faltan NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY. Revisa tu .env.local");
+    throw new Error("Faltan NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY. Revisa tu .env");
   }
   return createClient(BROWSER_URL, BROWSER_ANON);
 };
@@ -14,7 +14,7 @@ export const supabaseBrowser = () => {
 /** En servidor sí podemos leer dinámicamente */
 function requireEnv(name: string) {
   const v = process.env[name];
-  if (!v) throw new Error(`Falta la variable de entorno ${name}. Revisa tu .env.local`);
+  if (!v) throw new Error(`Falta la variable de entorno ${name}. Revisa tu .env`);
   return v;
 }
 

@@ -16,7 +16,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "baseUrl": ".",    
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
@@ -31,10 +31,10 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     ".next/types/**/*.ts"
-, "src/components/Carousel.jsx"  ],
+  ],
   "exclude": [
     "node_modules"
   ]
