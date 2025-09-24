@@ -80,8 +80,8 @@ export default async function Home() {
 
       <ImageCarousel
         images={[
-          { src: "/3.png", alt: "Clinica Vet Pucara" },
-          { src: "/4.png", alt: "Clinica Vet Pucara" },
+          { src: "/3.webp", alt: "Clinica Vet Pucara" },
+          { src: "/4.webp", alt: "Clinica Vet Pucara" },
          
           
         ]}

@@ -32,7 +32,7 @@ export default function Footer() {
               >
                 <div className="relative">
                   <Image
-                    src="/logo.png" 
+                    src="/logo.webp" 
                     alt="Clínica Pucará"
                     width={56}
                     height={56}

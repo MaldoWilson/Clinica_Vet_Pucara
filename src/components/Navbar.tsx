@@ -56,7 +56,7 @@ export default function Navbar() {
           >
             <div className="relative">
               <Image
-                src="/logo.png" 
+                src="/logo.webp" 
                 alt="Clínica Pucará"
                 width={48}
                 height={48}
