@@ -174,7 +174,6 @@ export default function BlogsForm() {
 
   return (
     <div className="space-y-8">
-      {/* Formulario */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">{editing ? "Editar Blog" : "Crear un Blog"}</h2>
         <form onSubmit={editing ? (e) => { e.preventDefault(); handleUpdate(); } : handleSubmit}>
@@ -250,7 +249,6 @@ export default function BlogsForm() {
         </form>
       </div>
 
-      {/* Tabla */}
       <div>
         <h3 className="text-lg font-semibold mb-2">Blogs</h3>
         <AdminEditableTable

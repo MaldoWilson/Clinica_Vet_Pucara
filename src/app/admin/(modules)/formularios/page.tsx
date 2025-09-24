@@ -1,9 +1,8 @@
-// app/admin/formularios/page.tsx
-import { supabaseServer } from "@/lib/supabaseClient";
-
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
+
+import { supabaseServer } from "@/lib/supabaseClient";
 
 type Mensaje = {
   id: string;
@@ -23,8 +22,7 @@ export default async function FormulariosPage() {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <h1 className="text-2xl md:text-3xl font-semibold mb-4">Admin · Formularios</h1>
+      <div className="px-4 py-12">
         <p className="text-red-600">Error cargando mensajes: {error.message}</p>
       </div>
     );
@@ -33,16 +31,14 @@ export default async function FormulariosPage() {
   const mensajes = (data || []) as Mensaje[];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12 space-y-4">
-      <h1 className="text-2xl md:text-3xl font-semibold">Admin · Formularios de Contacto</h1>
-
+    <div className="px-4 py-12 space-y-4">
       {mensajes.length === 0 ? (
-        <div className="border rounded-xl p-8 text-center text-gray-500">
+        <div className="border rounded-xl p-8 text-center text-gray-500 bg-white">
           <div className="text-4xl mb-2">📬</div>
           <p className="text-lg font-medium">No hay mensajes recibidos aún</p>
         </div>
       ) : (
-        <div className="overflow-x-auto border rounded-xl">
+        <div className="overflow-x-auto border rounded-xl bg-white">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-50 text-gray-700">
               <tr>
