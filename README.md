@@ -22,17 +22,18 @@ npm install
 2. Variables de entorno:
 - Crea el archivo `.env` y completa los valores.
 
--NEXT_PUBLIC_SUPABASE_URL=
--NEXT_PUBLIC_SUPABASE_ANON_KEY= 
--SUPABASE_SERVICE_ROLE_KEY= 
--NEXT_PUBLIC_SITE_NAME= Clinica Veterinaria Pucará
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY= 
+SUPABASE_SERVICE_ROLE_KEY= 
+NEXT_PUBLIC_SITE_NAME= Clinica Veterinaria Pucará
 
--ADMIN_EMAILS= "Email de los admin"
--SUPABASE_STORAGE_BUCKET=media
+ADMIN_EMAILS= "Email de los admin"
+SUPABASE_STORAGE_BUCKET=media
 
--NEXT_PUBLIC_WHATSAPP_PHONE= "Numero de contacto"
--NEXT_PUBLIC_CONTACT_EMAIL= "Correo del sitio web"
-
+NEXT_PUBLIC_WHATSAPP_PHONE= "Numero de contacto del sitio web"
+NEXT_PUBLIC_CONTACT_EMAIL= "Correo del sitio web"
+```
 
 3. Ejecuta en desarrollo:
 ```bash
