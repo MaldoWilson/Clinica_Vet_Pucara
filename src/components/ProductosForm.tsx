@@ -386,8 +386,8 @@ export default function ProductosForm() {
           
           <div className="mb-3">
             <label className="block font-medium">Imagen Principal</label>
-            <div className="flex items-center gap-3">
-              <input aria-label="..."
+            <div className="flex items-center gap-3 flex-wrap">
+              <input aria-label="..." className="block w-full sm:w-auto"
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
@@ -398,7 +398,7 @@ export default function ProductosForm() {
               />
               {imagePreview && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border" />
+                <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />
               )}
             </div>
             <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
@@ -409,8 +409,8 @@ export default function ProductosForm() {
             <label className="block font-medium">Imágenes adicionales (hasta 3)</label>
             <div className="grid grid-cols-1 gap-3 mt-1">
               {[0,1,2].map((idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <input
+                <div key={idx} className="flex items-center gap-3 flex-wrap">
+                  <input className="block w-full sm:w-auto"
                     type="file"
                     accept="image/*"
                     onChange={(e) => {
@@ -429,7 +429,7 @@ export default function ProductosForm() {
                   />
                   {(extraPreviews[idx]) && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={extraPreviews[idx] as string} alt={`extra-${idx+1}`} className="w-16 h-16 object-cover rounded border" />
+                    <img src={extraPreviews[idx] as string} alt={`extra-${idx+1}`} className="w-16 h-16 object-cover rounded border shrink-0" />
                   )}
                 </div>
               ))}

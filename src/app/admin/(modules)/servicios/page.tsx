@@ -148,9 +148,9 @@ export default function AdminServiciosPage() {
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1">Imagen</label>
-            <div className="flex items-center gap-3">
-              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0] || null; setImageFile(file); setImagePreview(file ? URL.createObjectURL(file) : null); }} aria-label="Subir imagen del servicio" />
-              {imagePreview && (<img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border" />)}
+            <div className="flex items-center gap-3 flex-wrap">
+              <input className="block w-full sm:w-auto" type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0] || null; setImageFile(file); setImagePreview(file ? URL.createObjectURL(file) : null); }} aria-label="Subir imagen del servicio" />
+              {imagePreview && (<img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />)}
             </div>
             <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
           </div>
