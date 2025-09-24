@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     }
 
     // Intentar crear la cita con reintentos para manejar condiciones de carrera
-    let citaId: string;
+    let citaId: string | null = null;
     let intentos = 0;
     const maxIntentos = 3;
 
@@ -198,6 +198,9 @@ export async function POST(req: Request) {
       }
     }
 
+    if (!citaId) {
+      throw new Error("No se pudo crear la cita");
+    }
     return NextResponse.json({ ok: true, citaId });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e.message ?? String(e) }, { status: 400 });

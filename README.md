@@ -17,9 +17,9 @@ npm install
 
 2. Variables de entorno:
 
-- Crea el archivo .env y coloca:
+- Crea el archivo .env y coloca las variables de entorno:
 
-# Supabase Veterinaria
+
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY= 
 SUPABASE_SERVICE_ROLE_KEY= 

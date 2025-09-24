@@ -13,7 +13,7 @@ type Slot = {
     id: string;
     tutor_nombre: string;
     servicio_id: string;
-    servicios: { id: string; nombre: string; };
+    servicios: { id: string; nombre: string; duracion_min?: number };
   };
 };
 
