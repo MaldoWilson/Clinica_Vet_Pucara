@@ -81,12 +81,12 @@ export default function ContactoPage() {
    
 
       <section className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24 md:pb-20">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
             {/* Columna izquierda: texto, datos y mapa */}
-            <div className="text-white order-2 lg:order-1">
+            <div className="text-white order-1 lg:order-1">
               <div className="flex items-center gap-3 mb-6">
-                <h1 className="text-3xl md:text-4xl font-bold leading-tight">¡Agenda tu cita con nosotros!</h1>
+                <h1 className="text-3xl md:text-4xl font-bold leading-tight">¡Contactate con nosotros!</h1>
               </div>
               <p className="text-teal-50/90 max-w-2xl mb-6">
                 Estamos aquí para cuidar de tu mascota. Completa el formulario y te contactaremos a la brevedad.
@@ -122,8 +122,8 @@ export default function ContactoPage() {
             </div>
 
             {/* Columna derecha: Formulario */}
-            <div className="order-1 lg:order-2">
-              <form onSubmit={submit} className="bg-white rounded-2xl shadow-xl p-6 md:p-8 space-y-4 sticky top-24">
+            <div className="order-2 lg:order-2">
+              <form onSubmit={submit} className="bg-white rounded-2xl shadow-xl p-6 md:p-8 space-y-4 lg:sticky lg:top-24">
                 <div>
                   <h2 className="text-2xl font-bold text-neutral-900">Formulario</h2>
                   <p className="text-sm text-neutral-600">¡Estamos aquí para ayudarte!</p>

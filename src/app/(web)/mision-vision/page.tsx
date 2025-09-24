@@ -1,5 +1,6 @@
 import Image from "next/image";
 import misionBanner from "@/app/img/blog.webp";
+import misionBg from "@/app/img/mision.webp";
 
 export const metadata = {
   title: "Misión y Visión | Clínica Veterinaria Pucará",
@@ -13,13 +14,15 @@ export default function MisionVisionPage() {
       <section className="relative h-72 md:h-[260px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
         {/* Imagen de fondo */}
         <div className="absolute inset-0 -z-20">
-          <Image
-            src={misionBanner}
-            alt="Misión y Visión"
-            fill
-            priority
-            className="object-cover"
-          />
+        <Image
+          src={misionBanner}
+          alt="Misión y Visión"
+          fill
+          priority
+          quality={95}
+          sizes="100vw"
+          className="object-cover"
+        />
         </div>
 
         
@@ -44,9 +47,23 @@ export default function MisionVisionPage() {
         </div>
       </section>
 
-      {/* Contenido principal */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      <div className="text-center mb-12">
+      {/* Contenido principal con fondo mision.webp */}
+      <section className="relative">
+        {/* Fondo */}
+        <div className="absolute inset-0 -z-10">
+        <Image
+          src={misionBg}
+          alt="Fondo misión y visión"
+          fill
+          priority
+          quality={95}
+          sizes="100vw"
+          className="object-cover"
+        />
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             <span className="text-gray-800">Misión </span>
             <span className="text-indigo-400">y Visión</span>
@@ -77,6 +94,7 @@ export default function MisionVisionPage() {
               gestión, la comunicación y el cuidado oportuno de cada paciente.
             </p>
           </div>
+        </div>
         </div>
       </section>
     </>
