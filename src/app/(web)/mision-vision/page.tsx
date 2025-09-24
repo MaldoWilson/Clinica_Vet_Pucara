@@ -48,18 +48,20 @@ export default function MisionVisionPage() {
       </section>
 
       {/* Contenido principal con fondo mision.webp */}
-      <section className="relative">
-        {/* Fondo */}
-        <div className="absolute inset-0 -z-10">
-        <Image
-          src={misionBg}
-          alt="Fondo misión y visión"
-          fill
-          priority
-          quality={95}
-          sizes="100vw"
-          className="object-cover"
-        />
+      <section
+        className="relative bg-white"
+        style={{
+          backgroundImage: `url('/mision.webp')`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "75%", // cámbialo a "cover" si prefieres
+        }}
+      >
+        {/* Overlay opcional para dar contraste al texto */}
+        <div className="absolute inset-0 -z-10 bg-white/70" />
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          {/* aquí va todo tu contenido de misión y visión */}
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
