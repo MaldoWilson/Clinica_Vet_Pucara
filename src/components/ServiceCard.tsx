@@ -33,7 +33,7 @@ export default function ServiceCard({ service }: { service: Service }) {
   return (
     <>
     <div
-      className="relative overflow-hidden rounded-2xl 
+      className="relative h-full flex flex-col overflow-hidden rounded-2xl 
   border-2 border-gray-400/70 shadow-md
   bg-gradient-to-br from-white/80 via-white/60 to-white/40 
   backdrop-blur-md group transition-all duration-300
@@ -45,7 +45,7 @@ export default function ServiceCard({ service }: { service: Service }) {
     >
       {/* Imagen en overlay: oculta por defecto y aparece en hover */}
       {service.imageUrl && (
-        <div className="absolute inset-0 z-0 opacity-0 scale-105 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500">
+        <div className="absolute inset-0 z-0 opacity-100 scale-100 md:opacity-0 md:scale-105 md:group-hover:opacity-100 md:group-hover:scale-100 transition-all duration-500">
           <Image
             src={service.imageUrl}
             alt={service.name ?? 'Servicio'}
@@ -53,18 +53,18 @@ export default function ServiceCard({ service }: { service: Service }) {
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          {/* velo para mantener legibilidad al inicio del hover */}
-          <div className="absolute inset-0 bg-black/20" />
+          {/* velo para mantener legibilidad (más fuerte en móvil) */}
+          <div className="absolute inset-0 bg-black/40 md:bg-black/20" />
         </div>
       )}
 
       {/* Contenido */}
-      <div className="relative z-10 p-6 text-center">
-        <h5 className="mb-2 text-xl md:text-2xl font-bold tracking-tight text-gray-900 group-hover:text-white transition-colors duration-300">
+      <div className="relative z-10 p-6 text-center flex-1 flex flex-col">
+        <h5 className="mb-2 text-xl md:text-2xl font-bold tracking-tight text-white md:text-gray-900 md:group-hover:text-white transition-colors duration-300">
           {service.name}
         </h5>
         {service.description && (
-          <p className="text-base text-gray-800 group-hover:text-white/90 transition-colors duration-300 line-clamp-3 mx-auto">
+          <p className="text-sm sm:text-base text-white/90 md:text-gray-800 md:group-hover:text-white/90 transition-colors duration-300 mx-auto">
             {service.description}
           </p>
         )}
@@ -83,11 +83,11 @@ export default function ServiceCard({ service }: { service: Service }) {
           >
             {service.imageUrl && (
               <div className="relative w-full h-80 bg-black">
-                <Image 
+            <Image 
                   src={service.imageUrl as string} 
                   alt={service.name ?? 'Servicio'} 
                   fill 
-                  className="object-contain" 
+              className="object-cover" 
                 />
               </div>
             )}

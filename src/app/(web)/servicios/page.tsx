@@ -84,7 +84,7 @@ export default async function ServiciosPage() {
           <span className="text-indigo-400">Disponibles</span>
           <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
         </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch auto-rows-fr">
           {servicios.map((s: any) => (
             <ServiceCard
               key={s.id}
