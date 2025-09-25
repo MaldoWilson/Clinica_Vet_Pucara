@@ -45,7 +45,6 @@ export default function AdminHome() {
           <h2 className="text-lg font-semibold text-gray-900">{group.section}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {group.items.map((item) => {
-              const Icon = item.icon;
               return (
                 <div key={item.title} className="border rounded-xl bg-white p-5 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between">
