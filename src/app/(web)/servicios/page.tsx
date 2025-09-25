@@ -7,7 +7,11 @@ import serviciosBg from "@/app/img/servicios3.png";
 
 async function getServicios() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/servicios`, {
+    // Durante el build, usar la URL absoluta de la API
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+    
+    const res = await fetch(`${baseUrl}/api/servicios`, {
       next: { revalidate: 3600 } // Revalidar cada hora
     });
     const data = await res.json();
