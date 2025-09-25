@@ -16,10 +16,34 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     const saved = typeof window !== "undefined" ? localStorage.getItem("admin_sidebar_collapsed") : null;
     if (saved) setCollapsed(saved === "1");
+  }, []);
+
+  // Detectar breakpoint para que en móvil siempre esté expandido
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    if (mq.addEventListener) {
+      mq.addEventListener("change", update);
+    } else {
+      // Safari/antiguos
+      // @ts-ignore
+      mq.addListener(update);
+    }
+    return () => {
+      if (mq.removeEventListener) {
+        mq.removeEventListener("change", update);
+      } else {
+        // @ts-ignore
+        mq.removeListener(update);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -70,16 +94,18 @@ export default function AdminSidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+  const isCollapsed = isDesktop && collapsed;
+
   return (
-    <aside className={`bg-white border-r transition-all duration-300 ${collapsed ? "w-16" : "w-64"} shrink-0`}> 
+    <aside className={`bg-white border-r transition-all duration-300 shrink-0 h-full w-64 ${isCollapsed ? "md:w-16" : "md:w-64"}`}> 
       <div className="h-16 flex items-center justify-between px-3 border-b">
         <Link href="/admin" className="flex items-center gap-2">
           <span className="text-lg">📊</span>
-          {!collapsed && (<span className="font-semibold text-gray-900">Dashboard</span>)}
+          {!isCollapsed && (<span className="font-semibold text-gray-900">Dashboard</span>)}
         </Link>
         <button
           aria-label="Contraer/expandir sidebar"
-          className="p-2 rounded hover:bg-gray-100"
+          className="p-2 rounded hover:bg-gray-100 hidden md:inline-flex"
           onClick={() => setCollapsed(v => !v)}
           title={collapsed ? "Expandir" : "Contraer"}
         >
@@ -91,11 +117,11 @@ export default function AdminSidebar() {
         {sections.map(section => (
           <div key={section.id}>
             <button
-              className={`w-full flex items-center ${collapsed ? "justify-center" : "justify-between"} px-3 py-2 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50`}
+              className={`w-full flex items-center ${isCollapsed ? "justify-center" : "justify-between"} px-3 py-2 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50`}
               onClick={() => setOpen(o => ({ ...o, [section.id]: !o[section.id] }))}
             >
-              {!collapsed && <span>{section.label}</span>}
-              {collapsed ? (
+              {!isCollapsed && <span>{section.label}</span>}
+              {isCollapsed ? (
                 <span className="sr-only">{section.label}</span>
               ) : (
                 <span className={`text-xs transition-transform ${open[section.id] ? "rotate-180 inline-block" : ""}`}>▼</span>
@@ -105,19 +131,19 @@ export default function AdminSidebar() {
               {section.items.map(item => {
                 const active = item.href !== "#" && pathname?.startsWith(item.href);
                 const isDisabled = item.disabled;
-                const className = `flex items-center gap-3 ${collapsed ? "justify-center" : "px-5"} py-2 text-sm ${active ? "text-indigo-500 font-medium" : "text-gray-700"} ${isDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"}`;
+                const className = `flex items-center gap-3 ${isCollapsed ? "justify-center" : "px-5"} py-2 text-sm ${active ? "text-indigo-500 font-medium" : "text-gray-700"} ${isDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"}`;
                 if (isDisabled) {
                   return (
                     <div key={item.label} className={className} title="Próximamente">
                       <span className="text-base">{item.emoji}</span>
-                      {!collapsed && <span>{item.label}</span>}
+                      {!isCollapsed && <span>{item.label}</span>}
                     </div>
                   );
                 }
                 return (
                   <Link key={item.href} href={item.href} className={className}>
                     <span className={`text-base ${active ? "" : "text-gray-500"}`}>{item.emoji}</span>
-                    {!collapsed && <span>{item.label}</span>}
+                    {!isCollapsed && <span>{item.label}</span>}
                   </Link>
                 );
               })}

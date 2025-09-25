@@ -12,6 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClientComponentClient();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isLoginPage = pathname === "/admin/login";
 
@@ -55,6 +56,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => subscription.unsubscribe();
   }, [router, pathname, supabase.auth, isLoginPage]);
 
+  // Cerrar el drawer móvil al cambiar la ruta
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   if (isLoginPage) return <>{children}</>;
   if (loading) {
     return (
@@ -71,8 +77,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex min-h-screen">
-        {/* Sidebar */}
-        <AdminSidebar />
+        {/* Sidebar - solo escritorio */}
+        <div className="hidden md:block">
+          <AdminSidebar />
+        </div>
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0">
@@ -80,6 +88,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center h-16">
                 <div className="flex items-center">
+                  <button
+                    aria-label="Abrir menú"
+                    className="p-2 mr-2 rounded hover:bg-gray-100 md:hidden"
+                    onClick={() => setMobileOpen(true)}
+                  >
+                    ☰
+                  </button>
                   <h1 className="text-lg md:text-xl font-semibold text-gray-900">Panel de Administración</h1>
                 </div>
                 <div className="flex items-center gap-3">
@@ -102,6 +117,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </main>
         </div>
       </div>
+      {/* Drawer móvil */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-white shadow-xl">
+            <div className="h-full overflow-y-auto">
+              <AdminSidebar />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

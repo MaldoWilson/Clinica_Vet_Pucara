@@ -173,9 +173,9 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
             const resto   = slots.slice(6);
 
             return (
-              <div key={vet.id} className="rounded-2xl border shadow-sm overflow-hidden grid grid-cols-[1fr,160px] bg-white">
+              <div key={vet.id} className="rounded-2xl border shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-[1fr,160px] bg-white">
                 {/* izquierda: foto + info */}
-                <div className="p-5 flex gap-3">
+                <div className="p-5 flex flex-col items-center md:flex-row md:items-start gap-3">
                   {vet.foto_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={vet.foto_url} alt={vet.nombre} className="w-16 h-16 rounded object-cover border" />
@@ -184,7 +184,7 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
                       {(vet.nombre || "?").slice(0,1)}
                     </div>
                   )}
-                  <div className="min-w-0">
+                  <div className="min-w-0 text-center md:text-left mt-3 md:mt-0">
                     <div className="font-medium leading-snug">{vet.nombre}</div>
                     <div className="text-xs text-neutral-500">{vet.especialidad}</div>
 
