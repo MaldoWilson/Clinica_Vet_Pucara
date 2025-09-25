@@ -6,7 +6,7 @@ import equipoBanner from "@/app/img/equipos.webp";
 async function getVeterinarios() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/Veterinarios`, {
-      cache: 'no-store'
+      next: { revalidate: 3600 } // Revalidar cada hora
     });
     const data = await res.json();
     if (!res.ok || !data.ok) {
