@@ -67,13 +67,35 @@ export async function GET(req: NextRequest) {
         String(o.nombre || ""),
         String(o.apellido || ""),
         String(o.rut || ""),
+        String(o.direccion || ""),
         // sexo es booleano: true = macho, false = hembra
         it.sexo === true ? "macho" : it.sexo === false ? "hembra" : "",
         especieStr,
       ].join(" ").toLowerCase();
       // soporte a búsqueda por rut sin formato
       const searchRutPlain = normalizeRutPlain(search).toLowerCase();
-      return fields.includes(search) || (o.rut || "").toLowerCase().includes(searchRutPlain);
+      if (fields.includes(search)) return true;
+      if (searchRutPlain && /\d/.test(searchRutPlain)) {
+        if ((o.rut || "").toLowerCase().includes(searchRutPlain)) return true;
+      }
+      // soporte a búsqueda por teléfono: permitir 9 dígitos (móvil/2+8) o 8 últimos
+      let searchDigits = search.replace(/\D/g, "");
+      if (searchDigits.length >= 10) {
+        // si viene con código país (ej: +56 9...), nos quedamos con los últimos 9
+        searchDigits = searchDigits.slice(-9);
+      }
+      if (searchDigits.length >= 8 && searchDigits.length <= 9) {
+        const phoneDigits = String(o.telefono || "").replace(/\D/g, "");
+        if (!phoneDigits) return false;
+        const local9 = phoneDigits.slice(-9); // últimos 9 dígitos locales
+        if (searchDigits.length === 8) {
+          return local9.slice(-8) === searchDigits || local9.includes(searchDigits);
+        }
+        if (searchDigits.length === 9) {
+          return local9 === searchDigits || local9.includes(searchDigits);
+        }
+      }
+      return false;
     });
 
     const total = filtered.length;

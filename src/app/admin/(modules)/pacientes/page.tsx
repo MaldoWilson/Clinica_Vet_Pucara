@@ -39,9 +39,10 @@ export default function PacientesPage() {
       const params = new URLSearchParams();
       if (query.trim()) {
         const q = query.trim();
-        // si parece un rut (contiene k o números largos), normalizamos a formato plano para que el backend lo encuentre
-        const isRutish = /\d{5,}|[kK]/.test(q);
-        params.set("search", isRutish ? normalizeRutPlain(q) : q);
+        // Candidato a RUT: sólo dígitos y/o K, largo razonable (7-9) incluyendo DV
+        const stripped = q.replace(/[\.\-\s]/g, '').toUpperCase();
+        const isRutCandidate = /^[0-9]+[0-9K]$/.test(stripped) && stripped.length >= 7 && stripped.length <= 9;
+        params.set("search", isRutCandidate ? normalizeRutPlain(q) : q);
       }
       params.set("page", String(Math.max(1, p)));
       params.set("pageSize", "9");
@@ -82,11 +83,11 @@ export default function PacientesPage() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Buscar por nombre/apellido propietario, nombre mascota, sexo, raza, RUT..."
+                placeholder="Buscar: mascota, propietario, RUT, sexo, raza, teléfono, dirección"
                 className="w-full border rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') fetchPacientes(search); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') fetchPacientes(search, 1); }}
               />
               <button
                 className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"

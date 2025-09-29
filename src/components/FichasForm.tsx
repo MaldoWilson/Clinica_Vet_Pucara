@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { cleanRutInput, formatRutPretty, normalizeRutPlain, isValidRut } from "@/lib/rut";
+import { formatIntlPhone, isValidIntlPhone } from "@/lib/phone";
 
 type Owner = {
   propietario_id: string;
@@ -20,7 +21,8 @@ export default function FichaForm() {
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [ownerNombre, setOwnerNombre] = useState("");
   const [ownerApellido, setOwnerApellido] = useState("");
-  const [ownerTelefono, setOwnerTelefono] = useState("");
+  const [ownerTelefono, setOwnerTelefono] = useState("+56 ");
+  const [phoneValido, setPhoneValido] = useState<boolean | null>(null);
   const [ownerDireccion, setOwnerDireccion] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
 
@@ -156,6 +158,10 @@ export default function FichaForm() {
     setSuccess(null);
     try {
       if (!nombre.trim()) throw new Error("El nombre de la mascota es obligatorio");
+      const rutOk = isValidRut(normalizeRutPlain(rut.trim()));
+      if (!rutOk) throw new Error("RUT inválido (dígito verificador)");
+      const phoneOk = isValidIntlPhone(ownerTelefono.trim());
+      if (!phoneOk) throw new Error("Teléfono inválido. Usa +CC y 9 dígitos (ej: +56 9XXXXXXXX)");
 
       // Asegurar propietario
       const propietarioId = await ensureOwner();
@@ -267,9 +273,14 @@ export default function FichaForm() {
                   type="text"
                   className="w-full border rounded px-2 py-1"
                   value={ownerTelefono}
-                  onChange={(e) => setOwnerTelefono(e.target.value)}
-                  placeholder="+56 9 XXXX XXXX"
+                  onChange={(e) => {
+                    const v = formatIntlPhone(e.target.value);
+                    setOwnerTelefono(v);
+                    setPhoneValido(isValidIntlPhone(v));
+                  }}
+                  placeholder="Ej: +56 912345678"
                 />
+                {phoneValido === false && <p className="text-xs text-red-600 mt-1">Formato requerido: +CC y 9 dígitos. Ej: +56 912345678</p>}
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
@@ -402,22 +413,29 @@ export default function FichaForm() {
           {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
           {success && <p className="text-sm text-green-600 mt-3">{success}</p>}
 
-          <div className="flex items-center gap-2 mt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 rounded-lg font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
-            >
-              {loading ? "Guardando..." : "Guardar Ficha"}
-            </button>
-            <button
-              type="button"
-              className="px-3 py-2 rounded border"
-              onClick={limpiarFormulario}
-            >
-              Limpiar
-            </button>
-          </div>
+          {(() => {
+            const rutOk = isValidRut(normalizeRutPlain(rut.trim()));
+            const phoneOk = isValidIntlPhone(ownerTelefono.trim());
+            const submitDisabled = loading || !rutOk || !phoneOk;
+            return (
+              <div className="flex items-center gap-2 mt-4">
+                <button
+                  type="submit"
+                  disabled={submitDisabled}
+                  className={`px-6 py-3 rounded-lg font-semibold transition-colors ${submitDisabled ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-emerald-600 hover:bg-emerald-700'}`}
+                >
+                  {loading ? "Guardando..." : "Guardar Ficha"}
+                </button>
+                <button
+                  type="button"
+                  className="px-3 py-2 rounded border"
+                  onClick={limpiarFormulario}
+                >
+                  Limpiar
+                </button>
+              </div>
+            );
+          })()}
         </form>
       </div>
     </div>
