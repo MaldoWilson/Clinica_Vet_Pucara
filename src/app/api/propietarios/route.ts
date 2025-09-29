@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseClient";
+import { normalizeRutPlain } from "@/lib/rut";
 
 // GET /api/propietarios?rut=11111111-1 | ?id=123
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const rut = searchParams.get("rut");
+    let rut = searchParams.get("rut");
     const id = searchParams.get("id");
     const supa = supabaseServer();
 
     if (!rut && !id) {
       return NextResponse.json({ ok: false, error: "Falta rut o id" }, { status: 400 });
     }
+
+    if (rut) rut = normalizeRutPlain(rut);
 
     const query = supa
       .from("propietario")
@@ -37,7 +40,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const nombre = String(body?.nombre || "").trim();
     const apellido = String(body?.apellido || "").trim();
-    const rut = String(body?.rut || "").trim();
+    const rut = normalizeRutPlain(String(body?.rut || "").trim());
     const telefono = body?.telefono ? String(body.telefono) : null;
     const direccion = body?.direccion ? String(body.direccion) : null;
     const correo_electronico = body?.correo_electronico ? String(body.correo_electronico) : null;
@@ -85,7 +88,7 @@ export async function PUT(req: NextRequest) {
     const updates: any = {};
     if (typeof body.nombre === "string") updates.nombre = body.nombre.trim();
     if (typeof body.apellido === "string") updates.apellido = body.apellido.trim();
-    if (typeof body.rut === "string") updates.rut = body.rut.trim();
+    if (typeof body.rut === "string") updates.rut = normalizeRutPlain(body.rut.trim());
     if (typeof body.telefono === "string") updates.telefono = body.telefono.trim();
     if (typeof body.direccion === "string") updates.direccion = body.direccion.trim();
     if (typeof body.correo_electronico === "string") updates.correo_electronico = body.correo_electronico.trim();

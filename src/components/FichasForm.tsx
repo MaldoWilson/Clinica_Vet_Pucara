@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { cleanRutInput, formatRutPretty, normalizeRutPlain, isValidRut } from "@/lib/rut";
 
 type Owner = {
   propietario_id: string;
@@ -39,6 +40,7 @@ export default function FichaForm() {
   const [success, setSuccess] = useState<string | null>(null);
   const [ownerLookupLoading, setOwnerLookupLoading] = useState(false);
   const [ownerFound, setOwnerFound] = useState(false);
+  const [rutValido, setRutValido] = useState<boolean | null>(null);
 
   function limpiarFormulario() {
     setRut("");
@@ -69,9 +71,13 @@ export default function FichaForm() {
     setOwnerFound(false);
     setOwnerId(null);
     try {
-      const q = rut.trim();
+      const q = normalizeRutPlain(rut.trim());
       if (!q) {
         setError("Ingrese un RUT para buscar");
+        return;
+      }
+      if (!isValidRut(q)) {
+        setError("RUT inválido (dígito verificador)");
         return;
       }
       const res = await fetch(`/api/propietarios?rut=${encodeURIComponent(q)}`);
@@ -108,7 +114,7 @@ export default function FichaForm() {
     // Crear propietario con los datos llenados
     const nombreTrim = ownerNombre.trim();
     const apellidoTrim = ownerApellido.trim();
-    const rutTrim = rut.trim();
+    const rutTrim = normalizeRutPlain(rut.trim());
     if (!nombreTrim || !apellidoTrim || !rutTrim) {
       throw new Error("Complete nombre, apellido y RUT del propietario");
     }
@@ -207,7 +213,14 @@ export default function FichaForm() {
                     type="text"
                     className="w-full border rounded px-2 py-1"
                     value={rut}
-                    onChange={(e) => setRut(e.target.value)}
+                    onChange={(e) => {
+                      const cleaned = cleanRutInput(e.target.value);
+                      const pretty = formatRutPretty(cleaned);
+                      setRut(pretty);
+                      // validar si ya tiene DV
+                      const normalized = normalizeRutPlain(pretty);
+                      setRutValido(normalized.length > 2 ? isValidRut(normalized) : null);
+                    }}
                     placeholder="12.345.678-9"
                   />
                   <button
@@ -220,9 +233,11 @@ export default function FichaForm() {
                     {ownerLookupLoading ? "Buscando..." : "Buscar"}
                   </button>
                 </div>
-                {ownerFound && (
-                  <p className="text-sm text-green-700 mt-1">Propietario encontrado</p>
-                )}
+                <div className="mt-1 text-sm">
+                  {rutValido === false && <p className="text-red-600">RUT inválido</p>}
+                  {rutValido === true && !ownerFound && <p className="text-gray-500">RUT válido</p>}
+                  {ownerFound && <p className="text-green-700">Propietario encontrado</p>}
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">

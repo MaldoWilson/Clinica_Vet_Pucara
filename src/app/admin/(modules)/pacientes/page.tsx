@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { normalizeRutPlain, formatRutPretty } from "@/lib/rut";
 
 type Paciente = {
   mascotas_id: string;
@@ -36,7 +37,12 @@ export default function PacientesPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (query.trim()) params.set("search", query.trim());
+      if (query.trim()) {
+        const q = query.trim();
+        // si parece un rut (contiene k o números largos), normalizamos a formato plano para que el backend lo encuentre
+        const isRutish = /\d{5,}|[kK]/.test(q);
+        params.set("search", isRutish ? normalizeRutPlain(q) : q);
+      }
       params.set("page", String(Math.max(1, p)));
       params.set("pageSize", "9");
       const qp = params.toString();
@@ -99,7 +105,7 @@ export default function PacientesPage() {
 
       <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {items.map((p) => {
-          const o = p.propietario || {};
+          const o = (p.propietario || {}) as NonNullable<Paciente['propietario']>;
           const sexo = p.sexo === true ? "Macho" : p.sexo === false ? "Hembra" : "-";
           const especie = p.especie === true ? "Gato" : p.especie === false ? "Perro" : "-";
           return (
@@ -112,7 +118,7 @@ export default function PacientesPage() {
                     <h3 className="text-sm font-semibold text-gray-700 mb-1">Propietario</h3>
                     <div className="text-sm text-gray-700">
                       <div className="font-medium">{[o.nombre, o.apellido].filter(Boolean).join(" ") || "-"}</div>
-                      <div className="text-gray-500">RUT: {o.rut || "-"}</div>
+                      <div className="text-gray-500">RUT: {o.rut ? formatRutPretty(o.rut) : "-"}</div>
                       <div className="text-gray-500">Tel: {o.telefono || "-"}</div>
                       <div className="text-gray-500 line-clamp-1" title={o.direccion || undefined}>Dir: {o.direccion || "-"}</div>
                     </div>

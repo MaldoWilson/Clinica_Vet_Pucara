@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { formatRutPretty, isValidRut } from "@/lib/rut";
 
 type Owner = {
   propietario_id: string;
@@ -160,10 +161,10 @@ export default function PacienteDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Mascota */}
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-900">Paciente</h3>
-                  <button className="text-gray-400 hover:text-gray-600 text-sm" title="Editar paciente" onClick={() => setEditPet((v) => !v)}>✎</button>
-                </div>
+                 <div className="flex items-center justify-between mb-3">
+                   <h3 className="text-sm font-semibold text-gray-900">Paciente</h3>
+                   <button className="text-gray-400 hover:text-gray-600 text-sm" title="Editar paciente" onClick={() => setEditPet((v) => !v)}>✎</button>
+                 </div>
                 {!editPet ? (
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                     <div><dt className="text-gray-500">Nombre</dt><dd className="font-medium">{data.nombre}</dd></div>
@@ -182,13 +183,13 @@ export default function PacienteDetailPage() {
 
               {/* Propietario */}
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-900">Tutor</h3>
-                  <button className="text-gray-400 hover:text-gray-600 text-sm" title="Editar tutor" onClick={() => setEditOwner((v) => !v)}>✎</button>
-                </div>
+                 <div className="flex items-center justify-between mb-3">
+                   <h3 className="text-sm font-semibold text-gray-900">Tutor</h3>
+                   <button className="text-gray-400 hover:text-gray-600 text-sm" title="Editar tutor" onClick={() => setEditOwner((v) => !v)}>✎</button>
+                 </div>
                 {!editOwner ? (
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                    <div><dt className="text-gray-500">RUT</dt><dd className="font-medium">{o.rut || '-'}</dd></div>
+                    <div><dt className="text-gray-500">RUT</dt><dd className="font-medium">{o.rut ? formatRutPretty(o.rut) : '-'}</dd></div>
                     <div><dt className="text-gray-500">Email</dt><dd className="font-medium">{o.correo_electronico || '-'}</dd></div>
                     <div><dt className="text-gray-500">Nombre</dt><dd className="font-medium">{[o.nombre, o.apellido].filter(Boolean).join(' ') || '-'}</dd></div>
                     <div><dt className="text-gray-500">Teléfono</dt><dd className="font-medium">{o.telefono || '-'}</dd></div>

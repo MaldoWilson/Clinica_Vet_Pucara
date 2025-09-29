@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseClient";
+import { normalizeRutPlain } from "@/lib/rut";
 
 // GET /api/mascotas?search=...
 // Lista mascotas con datos del propietario, con filtro de texto por: nombre mascota, raza, rut, nombre/apellido propietario, sexo
@@ -70,7 +71,9 @@ export async function GET(req: NextRequest) {
         it.sexo === true ? "macho" : it.sexo === false ? "hembra" : "",
         especieStr,
       ].join(" ").toLowerCase();
-      return fields.includes(search);
+      // soporte a búsqueda por rut sin formato
+      const searchRutPlain = normalizeRutPlain(search).toLowerCase();
+      return fields.includes(search) || (o.rut || "").toLowerCase().includes(searchRutPlain);
     });
 
     const total = filtered.length;
