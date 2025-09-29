@@ -71,6 +71,7 @@ export default function BlogPage() {
     </section>
   );
 
+  
   if (loading) {
     return (
       <>
