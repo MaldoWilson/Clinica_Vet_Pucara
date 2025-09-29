@@ -75,4 +75,40 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// PUT /api/propietarios  { propietario_id, ...campos }
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const propietario_id = body?.propietario_id ? String(body.propietario_id) : null;
+    if (!propietario_id) return NextResponse.json({ ok: false, error: "propietario_id requerido" }, { status: 400 });
+
+    const updates: any = {};
+    if (typeof body.nombre === "string") updates.nombre = body.nombre.trim();
+    if (typeof body.apellido === "string") updates.apellido = body.apellido.trim();
+    if (typeof body.rut === "string") updates.rut = body.rut.trim();
+    if (typeof body.telefono === "string") updates.telefono = body.telefono.trim();
+    if (typeof body.direccion === "string") updates.direccion = body.direccion.trim();
+    if (typeof body.correo_electronico === "string") updates.correo_electronico = body.correo_electronico.trim();
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ ok: false, error: "Sin cambios" }, { status: 400 });
+    }
+
+    const supa = supabaseServer();
+    const { data, error } = await supa
+      .from("propietario")
+      .update(updates)
+      .eq("propietario_id", propietario_id)
+      .select("propietario_id, nombre, apellido, rut, telefono, direccion, correo_electronico, created_at")
+      .single();
+    if (error) throw error;
+    return NextResponse.json({ ok: true, data });
+  } catch (e: any) {
+    if (String(e?.message || e).toLowerCase().includes("duplicate")) {
+      return NextResponse.json({ ok: false, error: "RUT ya registrado" }, { status: 409 });
+    }
+    return NextResponse.json({ ok: false, error: e.message || String(e) }, { status: 500 });
+  }
+}
+
 

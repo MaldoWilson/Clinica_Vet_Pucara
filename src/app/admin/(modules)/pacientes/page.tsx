@@ -29,25 +29,36 @@ export default function PacientesPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<Paciente[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  async function fetchPacientes(query: string) {
+  async function fetchPacientes(query: string, p: number = 1) {
     setLoading(true);
     try {
-      const url = "/api/mascotas" + (query.trim() ? `?search=${encodeURIComponent(query.trim())}` : "");
+      const params = new URLSearchParams();
+      if (query.trim()) params.set("search", query.trim());
+      params.set("page", String(Math.max(1, p)));
+      params.set("pageSize", "9");
+      const qp = params.toString();
+      const url = "/api/mascotas" + (qp ? `?${qp}` : "");
       const res = await fetch(url);
       const json = await res.json();
       if (!res.ok || json?.ok === false) throw new Error(json?.error || "Error al obtener pacientes");
       setItems(json?.data || []);
+      setPage(json?.page || 1);
+      setTotalPages(json?.totalPages || 1);
     } catch (e: any) {
       // podríamos exponer error en UI si se desea
       setItems([]);
+      setPage(1);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    fetchPacientes("");
+    fetchPacientes("", 1);
   }, []);
 
   const total = items.length;
@@ -73,7 +84,7 @@ export default function PacientesPage() {
               />
               <button
                 className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-                onClick={() => fetchPacientes(search)}
+                onClick={() => fetchPacientes(search, 1)}
                 title="Buscar"
               >
                 Buscar
@@ -92,7 +103,7 @@ export default function PacientesPage() {
           const sexo = p.sexo === true ? "Macho" : p.sexo === false ? "Hembra" : "-";
           const especie = p.especie === true ? "Gato" : p.especie === false ? "Perro" : "-";
           return (
-            <div key={p.mascotas_id} className="group relative overflow-hidden rounded-2xl border bg-white shadow-sm hover:shadow-xl transition-all">
+            <a href={`/admin/pacientes/${p.mascotas_id}`} key={p.mascotas_id} className="group relative overflow-hidden rounded-2xl border bg-white shadow-sm hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/60 via-white/40 to-white/0 pointer-events-none" />
               <div className="relative z-10 p-5">
                 <div className="flex gap-4">
@@ -127,9 +138,57 @@ export default function PacientesPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </a>
           );
         })}
+      </div>
+
+      {/* Paginación */}
+      <div className="mt-8 flex items-center justify-center gap-2">
+        <button
+          className="px-3 py-2 rounded border bg-white disabled:opacity-50"
+          onClick={() => fetchPacientes(search, Math.max(1, page - 1))}
+          disabled={page <= 1 || loading}
+        >
+          Anterior
+        </button>
+        <div className="flex items-center gap-1">
+          {Array.from({ length: totalPages }).slice(0, 7).map((_, i) => {
+            const idx = i + 1;
+            if (totalPages > 7 && idx > 5 && idx < totalPages) {
+              return null;
+            }
+            return (
+              <button
+                key={idx}
+                onClick={() => fetchPacientes(search, idx)}
+                className={`min-w-9 h-9 px-3 py-2 rounded border text-sm ${page === idx ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white hover:bg-gray-50'}`}
+                disabled={loading}
+              >
+                {idx}
+              </button>
+            );
+          })}
+          {totalPages > 7 && (
+            <>
+              <span className="px-1">…</span>
+              <button
+                onClick={() => fetchPacientes(search, totalPages)}
+                className={`min-w-9 h-9 px-3 py-2 rounded border text-sm ${page === totalPages ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white hover:bg-gray-50'}`}
+                disabled={loading}
+              >
+                {totalPages}
+              </button>
+            </>
+          )}
+        </div>
+        <button
+          className="px-3 py-2 rounded border bg-white disabled:opacity-50"
+          onClick={() => fetchPacientes(search, Math.min(totalPages, page + 1))}
+          disabled={page >= totalPages || loading}
+        >
+          Siguiente
+        </button>
       </div>
 
       {!loading && items.length === 0 && (
