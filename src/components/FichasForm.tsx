@@ -306,7 +306,7 @@ export default function FichaForm() {
                   <option value="gato">Gato</option>
                   <option value="perro">Perro</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Se almacenará como booleano: Gato = true, Perro = false.</p>
+               
               </div>
               <div>
                 <label className="block font-medium">Raza</label>
@@ -331,7 +331,7 @@ export default function FichaForm() {
                   <option value="macho">Macho</option>
                   <option value="hembra">Hembra</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Se almacenará como booleano: Macho = true, Hembra = false.</p>
+      
               </div>
               <div>
                 <label className="block font-medium">Color</label>
@@ -378,7 +378,7 @@ export default function FichaForm() {
                       className={`inline-block w-7 h-7 transform bg-white rounded-full shadow transition-transform ${esterilizado ? 'translate-x-6' : 'translate-x-1'}`}
                     />
                   </button>
-                  <p className="text-xs text-gray-500 mt-1">Pulsa el switch para marcar/desmarcar.</p>
+          
                 </div>
               </div>
             </div>

@@ -127,13 +127,7 @@ export default function PacienteDetailPage() {
           <div className="flex-1">
             <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
               {data.nombre}
-              <button
-                className="text-gray-400 hover:text-gray-600 text-sm"
-                title="Editar datos de la mascota"
-                onClick={() => setEditPet((v) => !v)}
-              >
-                ✎
-              </button>
+
             </h1>
             <div className="text-gray-600 flex flex-wrap gap-4 mt-1 text-sm">
               <span>{especie}{data.raza ? ` · ${data.raza}` : ""}</span>
