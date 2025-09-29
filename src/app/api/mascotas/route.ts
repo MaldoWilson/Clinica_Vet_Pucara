@@ -1,6 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseClient";
 
+// GET /api/mascotas?search=...
+// Lista mascotas con datos del propietario, con filtro de texto por: nombre mascota, raza, rut, nombre/apellido propietario, sexo
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const search = (searchParams.get("search") || "").trim().toLowerCase();
+    const supa = supabaseServer();
+
+    // Primero obtenemos todas las mascotas y propietarios necesarios.
+    // Nota: Si hay muchas filas, en el futuro se puede paginar y/o usar RPC/materialized view.
+    const { data: mascotas, error } = await supa
+      .from("mascotas")
+      .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, propietario_id, created_at")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+
+    // Cargar propietarios relacionados en un segundo query (evitamos N+1 usando in)
+    const ownerIds = Array.from(new Set((mascotas || []).map(m => m.propietario_id).filter(Boolean)));
+    let propietariosById: Record<string, any> = {};
+    if (ownerIds.length > 0) {
+      const { data: owners, error: ownerErr } = await supa
+        .from("propietario")
+        .select("propietario_id, nombre, apellido, rut, telefono, direccion, correo_electronico")
+        .in("propietario_id", ownerIds);
+      if (ownerErr) throw ownerErr;
+      propietariosById = Object.fromEntries((owners || []).map(o => [String(o.propietario_id), o]));
+    }
+
+    const items = (mascotas || []).map(m => ({
+      ...m,
+      propietario: propietariosById[String(m.propietario_id)] || null,
+    }));
+
+    const filtered = search.length === 0 ? items : items.filter((it) => {
+      const o = it.propietario || {};
+      const fields = [
+        String(it.nombre || ""),
+        String(it.raza || ""),
+        String(o.nombre || ""),
+        String(o.apellido || ""),
+        String(o.rut || ""),
+        // sexo es booleano: true = macho, false = hembra
+        it.sexo === true ? "macho" : it.sexo === false ? "hembra" : "",
+      ].join(" ").toLowerCase();
+      return fields.includes(search);
+    });
+
+    return NextResponse.json({ ok: true, data: filtered });
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e.message || String(e) }, { status: 500 });
+  }
+}
+
 // POST /api/mascotas  Crea ficha de mascota
 // Body: {
 //  nombre, especie, raza, sexo (boolean), color, fecha_nacimiento (YYYY-MM-DD), numero_microchip,
