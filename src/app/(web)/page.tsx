@@ -82,7 +82,6 @@ export default async function Home() {
         images={[
           { src: "/3.webp", alt: "Clinica Vet Pucara" },
           { src: "/4.webp", alt: "Clinica Vet Pucara" },
-         
           
         ]}
         aspectRatio="aspect-[3/1]"
