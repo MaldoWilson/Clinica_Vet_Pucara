@@ -63,6 +63,21 @@ export default function PacienteDetailPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [consultaOpen, setConsultaOpen] = useState(false);
+  const [consultas, setConsultas] = useState<any[]>([]);
+  const [ultimaConsultaId, setUltimaConsultaId] = useState<string | null>(null);
+  const [savingConsulta, setSavingConsulta] = useState(false);
+  const [consultaForm, setConsultaForm] = useState({
+    fecha: new Date().toISOString().slice(0, 10),
+    motivo: "",
+    tipo_atencion: "",
+    anamnesis: "",
+    diagnostico: "",
+    tratamiento: "",
+    proximo_control: "",
+    observaciones: "",
+  });
+  const [fabOpen, setFabOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -79,6 +94,18 @@ export default function PacienteDetailPage() {
       }
     };
     if (id) load();
+  }, [id]);
+
+  // Cargar consultas existentes
+  useEffect(() => {
+    const loadConsultas = async () => {
+      try {
+        const res = await fetch(`/api/consultas?mascota_id=${encodeURIComponent(String(id))}`);
+        const json = await res.json();
+        if (res.ok && json?.ok) setConsultas(json.data || []);
+      } catch {}
+    };
+    if (id) loadConsultas();
   }, [id]);
 
   // Cargar antecedentes de la mascota
@@ -124,6 +151,27 @@ export default function PacienteDetailPage() {
     } catch (e: any) {
       setError(e?.message || "Error inesperado");
     } finally { setSaving(false); }
+  }
+
+  async function crearConsulta() {
+    if (!data?.mascotas_id) return;
+    setSavingConsulta(true); setError(null); setSuccess(null);
+    try {
+      const res = await fetch("/api/consultas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mascota_id: data.mascotas_id, ...consultaForm }),
+      });
+      const json = await res.json();
+      if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo crear la consulta");
+      setSuccess("Consulta creada.");
+      setConsultas((prev) => [{ id: json.data.id, fecha: json.data.fecha }, ...prev]);
+      setUltimaConsultaId(String(json.data.id));
+    } catch (e: any) {
+      setError(e?.message || "Error inesperado");
+    } finally {
+      setSavingConsulta(false);
+    }
   }
 
   async function savePet(updates: Partial<Mascota>) {
@@ -203,19 +251,19 @@ export default function PacienteDetailPage() {
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />
         <div className="absolute -inset-1 opacity-0 group-hover:opacity-5 pointer-events-none" />
         <div className="relative p-6">
-          <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-50 to-white ring-1 ring-indigo-100 overflow-hidden flex items-center justify-center shadow-sm">
-              <Image
-                src={data.especie ? "/gato.webp" : "/perro.webp"}
-                alt={data.especie ? "Gato" : "Perro"}
-                width={160}
-                height={160}
-                className="w-full h-full object-cover object-center"
-                priority
-                quality={100}
-              />
-            </div>
-            <div className="flex-1">
+            <Image
+              src={data.especie ? "/gato.webp" : "/perro.webp"}
+              alt={data.especie ? "Gato" : "Perro"}
+              width={160}
+              height={160}
+              className="w-full h-full object-cover object-center"
+              priority
+              quality={100}
+            />
+          </div>
+          <div className="flex-1">
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">{data.nombre}</h1>
                 {data.esterilizado === true && (
@@ -341,6 +389,67 @@ export default function PacienteDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Carta independiente para Consulta */}
+          <div className="mt-6 rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6">
+            <div className="w-full flex justify-center">
+              {!consultaOpen ? (
+                <button onClick={() => setConsultaOpen(true)} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">Generar consulta</button>
+              ) : (
+                <div className="w-full max-w-4xl">
+                  <h4 className="text-sm font-semibold text-indigo-600 mb-3 text-center">Nueva consulta</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Fecha</label>
+                      <input type="date" className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.fecha} onChange={(e) => setConsultaForm({ ...consultaForm, fecha: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Tipo de atención</label>
+                      <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.tipo_atencion} onChange={(e) => setConsultaForm({ ...consultaForm, tipo_atencion: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Motivo</label>
+                      <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.motivo} onChange={(e) => setConsultaForm({ ...consultaForm, motivo: e.target.value })} />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Anamnesis</label>
+                      <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.anamnesis} onChange={(e) => setConsultaForm({ ...consultaForm, anamnesis: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Diagnóstico</label>
+                      <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.diagnostico} onChange={(e) => setConsultaForm({ ...consultaForm, diagnostico: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Tratamiento</label>
+                      <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.tratamiento} onChange={(e) => setConsultaForm({ ...consultaForm, tratamiento: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Próximo control</label>
+                      <input type="date" className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.proximo_control} onChange={(e) => setConsultaForm({ ...consultaForm, proximo_control: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
+                      <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.observaciones} onChange={(e) => setConsultaForm({ ...consultaForm, observaciones: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="w-full flex justify-center mt-3">
+                    <button onClick={crearConsulta} disabled={savingConsulta} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">{savingConsulta ? 'Guardando...' : 'Guardar consulta'}</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {ultimaConsultaId && (
+              <div className="w-full flex justify-center mt-4">
+                <button onClick={() => setFabOpen(v => !v)} className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md flex items-center justify-center text-2xl">+</button>
+                {fabOpen && (
+                  <div className="absolute mt-14 bg-white ring-1 ring-gray-200 rounded-xl shadow-lg p-2">
+                    <button onClick={() => alert('Agregar receta (pendiente de implementar)')} className="px-4 py-2 text-sm rounded-lg hover:bg-gray-50">Agregar receta</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {tab === "antecedentes" && (
             <div className="grid grid-cols-1 gap-6">
