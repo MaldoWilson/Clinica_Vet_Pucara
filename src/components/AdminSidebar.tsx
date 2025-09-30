@@ -69,6 +69,7 @@ export default function AdminSidebar() {
       items: [
         { label: "Citas", href: "/admin/citas", emoji: "📅" },
         { label: "Fichas", href: "/admin/fichas", emoji: "📋" },
+        { label: "Pacientes", href: "/admin/pacientes", emoji: "🐾" },
         { label: "Recetas", href: "/admin/recetas", emoji: "💊" },
         { label: "Certificados", href: "/admin/certificados", emoji: "📄" },
       ],
