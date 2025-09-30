@@ -214,4 +214,23 @@ export async function PUT(req: NextRequest) {
   }
 }
 
+// DELETE /api/mascotas { mascotas_id }
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const mascotas_id = body?.mascotas_id ? String(body.mascotas_id) : null;
+    if (!mascotas_id) return NextResponse.json({ ok: false, error: "mascotas_id requerido" }, { status: 400 });
+
+    const supa = supabaseServer();
+    const { error } = await supa
+      .from("mascotas")
+      .delete()
+      .eq("mascotas_id", mascotas_id);
+    if (error) throw error;
+    return NextResponse.json({ ok: true });
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e.message || String(e) }, { status: 500 });
+  }
+}
+
 

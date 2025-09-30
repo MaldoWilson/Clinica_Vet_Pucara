@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { formatRutPretty, isValidRut } from "@/lib/rut";
 import Image from "next/image";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 type Owner = {
   propietario_id: string;
@@ -59,6 +60,9 @@ export default function PacienteDetailPage() {
   const [editAnte, setEditAnte] = useState(false);
   const [savingAnte, setSavingAnte] = useState(false);
   const [ante, setAnte] = useState<Antecedentes>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -162,6 +166,27 @@ export default function PacienteDetailPage() {
     }
   }
 
+  async function deleteMascota() {
+    if (!data?.mascotas_id) return;
+    setDeleting(true); setError(null); setSuccess(null);
+    try {
+      const res = await fetch("/api/mascotas", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mascotas_id: data.mascotas_id }),
+      });
+      const json = await res.json();
+      if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo borrar la mascota");
+      window.location.href = "/admin/pacientes";
+    } catch (e: any) {
+      setError(e?.message || "Error inesperado");
+    } finally {
+      setDeleting(false);
+      setMenuOpen(false);
+      setConfirmDeleteOpen(false);
+    }
+  }
+
   if (loading) {
     return <div className="text-center text-gray-600">Cargando...</div>;
   }
@@ -207,7 +232,45 @@ export default function PacienteDetailPage() {
                 <span className="inline-flex items-center gap-1"><span className="text-gray-500">Ficha Nº:</span> {data.mascotas_id}</span>
               </div>
             </div>
+            {/* Menú acciones */}
+            <div className="ml-auto relative">
+              <button
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen(v => !v)}
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
+                title="Acciones"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 w-44 rounded-xl bg-white ring-1 ring-gray-200 shadow-lg z-20 overflow-hidden">
+                  <button
+                    onClick={() => { setConfirmDeleteOpen(true); setMenuOpen(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Borrar mascota
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
+          {/* Modal de confirmación */}
+          <ConfirmationModal
+            isOpen={confirmDeleteOpen}
+            onClose={() => setConfirmDeleteOpen(false)}
+            onConfirm={deleteMascota}
+            title="Borrar mascota"
+            message="Esta acción eliminará la mascota de forma permanente. ¿Deseas continuar?"
+            confirmText="Borrar"
+            cancelText="Cancelar"
+            isLoading={deleting}
+            danger
+          />
         </div>
       </div>
 
