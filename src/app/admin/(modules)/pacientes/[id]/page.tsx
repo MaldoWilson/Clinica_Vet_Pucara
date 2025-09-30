@@ -121,41 +121,51 @@ export default function PacienteDetailPage() {
   return (
     <div className="max-w-6xl mx-auto">
       {/* Encabezado */}
-      <div className="bg-white border rounded-2xl shadow-sm p-6 mb-6">
-        <div className="flex items-start gap-4">
-          <div className="w-20 h-20 rounded-full bg-indigo-50 overflow-hidden flex items-center justify-center">
-            <Image
-              src={data.especie ? "/gato.webp" : "/perro.webp"}
-              alt={data.especie ? "Gato" : "Perro"}
-              width={160}
-              height={160}
-              className="w-full h-full object-cover object-center"
-              priority
-              quality={100}
-            />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-              {data.nombre}
-            </h1>
-            <div className="text-gray-600 flex flex-wrap gap-4 mt-1 text-sm">
-              <span>{especie}{data.raza ? ` · ${data.raza}` : ""}</span>
-              <span>Sexo: {sexo}</span>
-              <span>Edad: {edadTexto}</span>
-              <span>Ficha Nº: {data.mascotas_id}</span>
+      <div className="relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm mb-6">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />
+        <div className="absolute -inset-1 opacity-0 group-hover:opacity-5 pointer-events-none" />
+        <div className="relative p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-50 to-white ring-1 ring-indigo-100 overflow-hidden flex items-center justify-center shadow-sm">
+              <Image
+                src={data.especie ? "/gato.webp" : "/perro.webp"}
+                alt={data.especie ? "Gato" : "Perro"}
+                width={160}
+                height={160}
+                className="w-full h-full object-cover object-center"
+                priority
+                quality={100}
+              />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">{data.nombre}</h1>
+                {data.esterilizado === true && (
+                  <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Esterilizado/a</span>
+                )}
+                {data.numero_microchip && (
+                  <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200">Chip {data.numero_microchip}</span>
+                )}
+              </div>
+              <div className="text-gray-600 flex flex-wrap gap-x-6 gap-y-2 mt-2 text-sm">
+                <span className="inline-flex items-center gap-1"><span className="text-gray-500">Especie:</span> {especie}{data.raza ? ` · ${data.raza}` : ""}</span>
+                <span className="inline-flex items-center gap-1"><span className="text-gray-500">Sexo:</span> {sexo}</span>
+                <span className="inline-flex items-center gap-1"><span className="text-gray-500">Edad:</span> {edadTexto}</span>
+                <span className="inline-flex items-center gap-1"><span className="text-gray-500">Ficha Nº:</span> {data.mascotas_id}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white border rounded-2xl shadow-sm">
-        <div className="border-b px-4 md:px-6">
-          <div className="flex gap-6">
+      <div className="rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="px-4 md:px-6 pt-4">
+          <div className="flex flex-wrap gap-2">
             {["general","antecedentes","historial"].map((t) => (
               <button
                 key={t}
-                className={`py-4 font-medium ${tab === t ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600 hover:text-gray-800'}`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${tab === t ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50'}`}
                 onClick={() => setTab(t as TabId)}
               >
                 {t === "general" ? "General" : t === "antecedentes" ? "Antecedentes" : "Historial"}
@@ -168,10 +178,13 @@ export default function PacienteDetailPage() {
           {tab === "general" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Mascota */}
-              <div>
+              <div className={`rounded-xl p-4 bg-white/90 ${editPet ? 'ring-2 ring-indigo-300 bg-indigo-50/40' : 'ring-1 ring-gray-200'}`}>
                  <div className="flex items-center justify-between mb-3">
-                   <h3 className="text-sm font-semibold text-gray-900">Paciente</h3>
-                   <button className="text-gray-400 hover:text-gray-600 text-sm" title="Editar paciente" onClick={() => setEditPet((v) => !v)}>✎</button>
+                   <div className="flex items-center gap-2">
+                     <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Paciente</h3>
+                     {editPet && (<span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">Editando</span>)}
+                   </div>
+                   <button aria-pressed={editPet} className={`text-sm ${editPet ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'}`} title={editPet ? "Cerrar edición" : "Editar paciente"} onClick={() => setEditPet((v) => !v)}>{editPet ? '✕' : '✎'}</button>
                  </div>
                 {!editPet ? (
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
@@ -190,10 +203,13 @@ export default function PacienteDetailPage() {
               </div>
 
               {/* Propietario */}
-              <div>
+              <div className={`rounded-xl p-4 bg-white/90 ${editOwner ? 'ring-2 ring-indigo-300 bg-indigo-50/40' : 'ring-1 ring-gray-200'}`}>
                  <div className="flex items-center justify-between mb-3">
-                   <h3 className="text-sm font-semibold text-gray-900">Tutor</h3>
-                   <button className="text-gray-400 hover:text-gray-600 text-sm" title="Editar tutor" onClick={() => setEditOwner((v) => !v)}>✎</button>
+                   <div className="flex items-center gap-2">
+                     <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Tutor</h3>
+                     {editOwner && (<span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">Editando</span>)}
+                   </div>
+                   <button aria-pressed={editOwner} className={`text-sm ${editOwner ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'}`} title={editOwner ? "Cerrar edición" : "Editar tutor"} onClick={() => setEditOwner((v) => !v)}>{editOwner ? '✕' : '✎'}</button>
                  </div>
                 {!editOwner ? (
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
@@ -240,15 +256,33 @@ function OwnerEditForm({ data, onCancel, onSave, saving }: { data: Owner; onCanc
       onSubmit={(e) => { e.preventDefault(); onSave({ nombre, apellido, rut, telefono, direccion, correo_electronico: email }); }}
       className="grid grid-cols-2 gap-3"
     >
-      <div className="col-span-2"><label className="block text-sm">RUT</label><input className="w-full border rounded px-2 py-1" value={rut} onChange={(e) => setRut(e.target.value)} /></div>
-      <div><label className="block text-sm">Nombre</label><input className="w-full border rounded px-2 py-1" value={nombre} onChange={(e) => setNombre(e.target.value)} /></div>
-      <div><label className="block text-sm">Apellido</label><input className="w-full border rounded px-2 py-1" value={apellido} onChange={(e) => setApellido(e.target.value)} /></div>
-      <div><label className="block text-sm">Teléfono</label><input className="w-full border rounded px-2 py-1" value={telefono} onChange={(e) => setTelefono(e.target.value)} /></div>
-      <div><label className="block text-sm">Email</label><input className="w-full border rounded px-2 py-1" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-      <div className="col-span-2"><label className="block text-sm">Dirección</label><input className="w-full border rounded px-2 py-1" value={direccion} onChange={(e) => setDireccion(e.target.value)} /></div>
-      <div className="col-span-2 flex gap-2 mt-1">
-        <button type="submit" className="px-3 py-2 rounded bg-indigo-600 text-white" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
-        <button type="button" className="px-3 py-2 rounded border" onClick={onCancel} disabled={saving}>Cancelar</button>
+      <div className="col-span-2">
+        <label className="block text-xs font-medium text-gray-600 mb-1">RUT</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={rut} onChange={(e) => setRut(e.target.value)} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Nombre</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Apellido</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={apellido} onChange={(e) => setApellido(e.target.value)} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Teléfono</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+      <div className="col-span-2">
+        <label className="block text-xs font-medium text-gray-600 mb-1">Dirección</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+      </div>
+      <div className="col-span-2 flex gap-2 mt-2">
+        <button type="submit" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
+        <button type="button" className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50" onClick={onCancel} disabled={saving}>Cancelar</button>
       </div>
     </form>
   );
@@ -268,33 +302,50 @@ function PetEditForm({ data, onCancel, onSave, saving }: { data: Mascota; onCanc
       onSubmit={(e) => { e.preventDefault(); onSave({ nombre, raza, sexo: sexo === "m", color, fecha_nacimiento: nac, numero_microchip: chip, esterilizado, especie: especie === "gato" }); }}
       className="grid grid-cols-2 gap-3"
     >
-      <div><label className="block text-sm">Nombre</label><input className="w-full border rounded px-2 py-1" value={nombre} onChange={(e) => setNombre(e.target.value)} /></div>
-      <div><label className="block text-sm">Especie</label>
-        <select className="w-full border rounded px-2 py-1 bg-white" value={especie} onChange={(e) => setEspecie(e.target.value as any)}>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Nombre</label>
+        <input className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Especie</label>
+        <select className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={especie} onChange={(e) => setEspecie(e.target.value as any)}>
           <option value="gato">Gato</option>
           <option value="perro">Perro</option>
         </select>
       </div>
-      <div><label className="block text-sm">Raza</label><input className="w-full border rounded px-2 py-1" value={raza} onChange={(e) => setRaza(e.target.value)} /></div>
-      <div><label className="block text-sm">Sexo</label>
-        <select className="w-full border rounded px-2 py-1 bg-white" value={sexo} onChange={(e) => setSexo(e.target.value as any)}>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Raza</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={raza} onChange={(e) => setRaza(e.target.value)} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Sexo</label>
+        <select className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={sexo} onChange={(e) => setSexo(e.target.value as any)}>
           <option value="">Sin especificar</option>
           <option value="m">Macho</option>
           <option value="h">Hembra</option>
         </select>
       </div>
-      <div><label className="block text-sm">Fecha nac.</label><input type="date" className="w-full border rounded px-2 py-1" value={nac} onChange={(e) => setNac(e.target.value)} /></div>
-      <div><label className="block text-sm">Color</label><input className="w-full border rounded px-2 py-1" value={color} onChange={(e) => setColor(e.target.value)} /></div>
-      <div className="col-span-2"><label className="block text-sm">Microchip</label><input className="w-full border rounded px-2 py-1" value={chip} onChange={(e) => setChip(e.target.value)} /></div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Fecha nac.</label>
+        <input type="date" className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={nac} onChange={(e) => setNac(e.target.value)} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Color</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={color} onChange={(e) => setColor(e.target.value)} />
+      </div>
       <div className="col-span-2">
-        <label className="block text-sm mb-1">Esterilizado/a</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Microchip</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={chip} onChange={(e) => setChip(e.target.value)} />
+      </div>
+      <div className="col-span-2">
+        <label className="block text-xs font-medium text-gray-600 mb-1">Esterilizado/a</label>
         <button type="button" aria-pressed={esterilizado} onClick={() => setEsterilizado(!esterilizado)} className={`relative inline-flex items-center h-8 rounded-full w-14 transition-colors ${esterilizado ? 'bg-emerald-600' : 'bg-gray-300'}`}>
           <span className={`inline-block w-7 h-7 transform bg-white rounded-full shadow transition-transform ${esterilizado ? 'translate-x-6' : 'translate-x-1'}`} />
         </button>
       </div>
-      <div className="col-span-2 flex gap-2 mt-1">
-        <button type="submit" className="px-3 py-2 rounded bg-indigo-600 text-white" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
-        <button type="button" className="px-3 py-2 rounded border" onClick={onCancel} disabled={saving}>Cancelar</button>
+      <div className="col-span-2 flex gap-2 mt-2">
+        <button type="submit" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
+        <button type="button" className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50" onClick={onCancel} disabled={saving}>Cancelar</button>
       </div>
     </form>
   );
