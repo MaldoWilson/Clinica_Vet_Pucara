@@ -32,6 +32,18 @@ type Mascota = {
 
 type TabId = "general" | "antecedentes" | "historial";
 
+type Antecedentes = {
+  mascotas_id: string;
+  origen?: string | null;
+  habitat?: string | null;
+  comportamiento?: string | null;
+  enfermedades?: string | null;
+  alergias?: string | null;
+  observaciones?: string | null;
+  alertas?: string[] | null;
+  updated_at?: string | null;
+};
+
 export default function PacienteDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
@@ -43,6 +55,12 @@ export default function PacienteDetailPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const [antecedentes, setAntecedentes] = useState<Antecedentes | null>(null);
+  const [anteLoading, setAnteLoading] = useState(false);
+  const [editAntecedentes, setEditAntecedentes] = useState(false);
+  const [savingAntecedentes, setSavingAntecedentes] = useState(false);
+  const [newAlert, setNewAlert] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -59,6 +77,24 @@ export default function PacienteDetailPage() {
       }
     };
     if (id) load();
+  }, [id]);
+
+  useEffect(() => {
+    const loadAnte = async () => {
+      if (!id) return;
+      setAnteLoading(true);
+      try {
+        const res = await fetch(`/api/mascotas/antecedentes?mascotas_id=${encodeURIComponent(String(id))}`);
+        const json = await res.json();
+        if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo cargar antecedentes");
+        setAntecedentes(json.data as Antecedentes);
+      } catch (e: any) {
+        setError(e?.message || "Error inesperado");
+      } finally {
+        setAnteLoading(false);
+      }
+    };
+    loadAnte();
   }, [id]);
 
   const edadTexto = useMemo(() => {
@@ -88,6 +124,51 @@ export default function PacienteDetailPage() {
     } catch (e: any) {
       setError(e?.message || "Error inesperado");
     } finally { setSaving(false); }
+  }
+
+  function addAlert() {
+    const value = newAlert.trim();
+    if (!value) return;
+    setAntecedentes((prev) => prev ? ({ ...prev, alertas: [ ...(prev.alertas || []), value ] }) : prev);
+    setNewAlert("");
+  }
+
+  function removeAlert(index: number) {
+    setAntecedentes((prev) => {
+      if (!prev) return prev;
+      const list = [ ...(prev.alertas || []) ];
+      list.splice(index, 1);
+      return { ...prev, alertas: list };
+    });
+  }
+
+  async function saveAntecedentes() {
+    if (!data?.mascotas_id || !antecedentes) return;
+    setSavingAntecedentes(true); setError(null); setSuccess(null);
+    try {
+      const payload = {
+        mascotas_id: data.mascotas_id,
+        origen: antecedentes.origen || null,
+        habitat: antecedentes.habitat || null,
+        comportamiento: antecedentes.comportamiento || null,
+        enfermedades: antecedentes.enfermedades || null,
+        alergias: antecedentes.alergias || null,
+        observaciones: antecedentes.observaciones || null,
+        alertas: antecedentes.alertas || [],
+      };
+      const res = await fetch("/api/mascotas/antecedentes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo guardar antecedentes");
+      setAntecedentes(json.data as Antecedentes);
+      setSuccess("Antecedentes guardados");
+      setEditAntecedentes(false);
+    } catch (e: any) {
+      setError(e?.message || "Error inesperado");
+    } finally { setSavingAntecedentes(false); }
   }
 
   async function savePet(updates: Partial<Mascota>) {
@@ -227,7 +308,117 @@ export default function PacienteDetailPage() {
           )}
 
           {tab === "antecedentes" && (
-            <div className="text-gray-600">(Próximamente) Sección de antecedentes médicos.</div>
+            <div className={`rounded-xl p-4 bg-white/90 ${editAntecedentes ? 'ring-2 ring-indigo-300 bg-indigo-50/40' : 'ring-1 ring-gray-200'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Antecedentes de {data.nombre}</h3>
+                  {editAntecedentes && (<span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">Editando</span>)}
+                </div>
+                <button
+                  aria-pressed={editAntecedentes}
+                  className={`text-sm ${editAntecedentes ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'}`}
+                  title={editAntecedentes ? "Cerrar edición" : "Editar antecedentes"}
+                  onClick={() => setEditAntecedentes((v) => !v)}
+                >
+                  {editAntecedentes ? '✕' : '✎'}
+                </button>
+              </div>
+
+              {anteLoading && (
+                <div className="text-gray-600">Cargando antecedentes...</div>
+              )}
+
+              {!anteLoading && !editAntecedentes && (
+                <div className="space-y-4 text-sm">
+                  <div>
+                    <div className="text-gray-500">Origen</div>
+                    <div className="font-medium whitespace-pre-wrap">{antecedentes?.origen || '-'}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Hábitat</div>
+                    <div className="font-medium whitespace-pre-wrap">{antecedentes?.habitat || '-'}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Comportamiento</div>
+                    <div className="font-medium whitespace-pre-wrap">{antecedentes?.comportamiento || '-'}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Enfermedades</div>
+                    <div className="font-medium whitespace-pre-wrap">{antecedentes?.enfermedades || '-'}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Alergias</div>
+                    <div className="font-medium whitespace-pre-wrap">{antecedentes?.alergias || '-'}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Observaciones Generales</div>
+                    <div className="font-medium whitespace-pre-wrap">{antecedentes?.observaciones || '-'}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 mb-1">Alertas</div>
+                    <div className="flex flex-wrap gap-2">
+                      {(antecedentes?.alertas || []).length === 0 && (
+                        <span className="text-gray-500">Sin alertas</span>
+                      )}
+                      {(antecedentes?.alertas || []).map((a, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 ring-1 ring-rose-200">{a}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!anteLoading && editAntecedentes && (
+                <form
+                  onSubmit={(e) => { e.preventDefault(); saveAntecedentes(); }}
+                  className="grid grid-cols-1 gap-3 text-sm"
+                >
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Origen</label>
+                    <textarea className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white min-h-[72px]" value={antecedentes?.origen || ''} onChange={(e) => setAntecedentes((p) => p ? ({ ...p, origen: e.target.value }) : p)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Hábitat</label>
+                    <textarea className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white min-h-[72px]" value={antecedentes?.habitat || ''} onChange={(e) => setAntecedentes((p) => p ? ({ ...p, habitat: e.target.value }) : p)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Comportamiento</label>
+                    <textarea className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white min-h-[72px]" value={antecedentes?.comportamiento || ''} onChange={(e) => setAntecedentes((p) => p ? ({ ...p, comportamiento: e.target.value }) : p)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Enfermedades</label>
+                    <textarea className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white min-h-[72px]" value={antecedentes?.enfermedades || ''} onChange={(e) => setAntecedentes((p) => p ? ({ ...p, enfermedades: e.target.value }) : p)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Alergias</label>
+                    <textarea className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white min-h-[72px]" value={antecedentes?.alergias || ''} onChange={(e) => setAntecedentes((p) => p ? ({ ...p, alergias: e.target.value }) : p)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Observaciones Generales</label>
+                    <textarea className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white min-h-[84px]" value={antecedentes?.observaciones || ''} onChange={(e) => setAntecedentes((p) => p ? ({ ...p, observaciones: e.target.value }) : p)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Alertas</label>
+                    <div className="flex gap-2 mb-2">
+                      <input className="flex-1 rounded-lg border border-rose-300/70 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 px-3 py-2 bg-white" value={newAlert} onChange={(e) => setNewAlert(e.target.value)} placeholder="Ej: Alergia a penicilina" />
+                      <button type="button" className="px-3 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700" onClick={addAlert}>Agregar</button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {(antecedentes?.alertas || []).map((a, i) => (
+                        <span key={`${a}-${i}`} className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 ring-1 ring-rose-200">
+                          {a}
+                          <button type="button" className="ml-1 text-rose-600/70 hover:text-rose-700" onClick={() => removeAlert(i)}>✕</button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    <button type="submit" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm" disabled={savingAntecedentes}>{savingAntecedentes ? 'Guardando...' : 'Guardar'}</button>
+                    <button type="button" className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50" onClick={() => setEditAntecedentes(false)} disabled={savingAntecedentes}>Cancelar</button>
+                  </div>
+                </form>
+              )}
+            </div>
           )}
 
           {tab === "historial" && (
