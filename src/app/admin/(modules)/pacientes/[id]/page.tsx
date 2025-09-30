@@ -30,6 +30,19 @@ type Mascota = {
   propietario: Owner | null;
 };
 
+type Antecedentes = {
+  id?: string;
+  mascota_id: string;
+  origen?: string | null;
+  habitat?: string | null;
+  comportamiento?: string | null;
+  enfermedades?: string | null;
+  alergias?: string | null;
+  observaciones?: string | null;
+  alertas?: string | null;
+  created_at?: string;
+} | null;
+
 type TabId = "general" | "antecedentes" | "historial";
 
 export default function PacienteDetailPage() {
@@ -43,6 +56,9 @@ export default function PacienteDetailPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [editAnte, setEditAnte] = useState(false);
+  const [savingAnte, setSavingAnte] = useState(false);
+  const [ante, setAnte] = useState<Antecedentes>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -59,6 +75,22 @@ export default function PacienteDetailPage() {
       }
     };
     if (id) load();
+  }, [id]);
+
+  // Cargar antecedentes de la mascota
+  useEffect(() => {
+    const loadAnte = async () => {
+      try {
+        const res = await fetch(`/api/antecedentes?mascota_id=${encodeURIComponent(String(id))}`);
+        const json = await res.json();
+        if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo cargar antecedentes");
+        setAnte(json?.data || null);
+      } catch (e: any) {
+        // si no hay registros aún, ante queda null (es válido)
+        setAnte(null);
+      }
+    };
+    if (id) loadAnte();
   }, [id]);
 
   const edadTexto = useMemo(() => {
@@ -107,6 +139,27 @@ export default function PacienteDetailPage() {
     } catch (e: any) {
       setError(e?.message || "Error inesperado");
     } finally { setSaving(false); }
+  }
+
+  async function saveAntecedentes(updates: Omit<NonNullable<Antecedentes>, "id" | "mascota_id" | "created_at">) {
+    if (!data?.mascotas_id) return;
+    setSavingAnte(true); setError(null); setSuccess(null);
+    try {
+      const res = await fetch("/api/antecedentes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mascota_id: data.mascotas_id, ...updates }),
+      });
+      const json = await res.json();
+      if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo guardar antecedentes");
+      setAnte(json.data as Antecedentes);
+      setSuccess("Antecedentes guardados");
+      setEditAnte(false);
+    } catch (e: any) {
+      setError(e?.message || "Error inesperado");
+    } finally {
+      setSavingAnte(false);
+    }
   }
 
   if (loading) {
@@ -227,7 +280,36 @@ export default function PacienteDetailPage() {
           )}
 
           {tab === "antecedentes" && (
-            <div className="text-gray-600">(Próximamente) Sección de antecedentes médicos.</div>
+            <div className="grid grid-cols-1 gap-6">
+              <div className={`rounded-xl p-4 bg-white/90 ${editAnte ? 'ring-2 ring-indigo-300 bg-indigo-50/40' : 'ring-1 ring-gray-200'}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Antecedentes</h3>
+                    {editAnte && (<span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">Editando</span>)}
+                  </div>
+                  <button aria-pressed={editAnte} className={`text-sm ${editAnte ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'}`} title={editAnte ? "Cerrar edición" : "Editar antecedentes"} onClick={() => setEditAnte((v) => !v)}>{editAnte ? '✕' : '✎'}</button>
+                </div>
+
+                {!editAnte ? (
+                  <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                    <div className="md:col-span-1"><dt className="text-gray-500">Origen</dt><dd className="font-medium whitespace-pre-wrap">{ante?.origen || '-'}</dd></div>
+                    <div className="md:col-span-1"><dt className="text-gray-500">Hábitat</dt><dd className="font-medium whitespace-pre-wrap">{ante?.habitat || '-'}</dd></div>
+                    <div className="md:col-span-1"><dt className="text-gray-500">Comportamiento</dt><dd className="font-medium whitespace-pre-wrap">{ante?.comportamiento || '-'}</dd></div>
+                    <div className="md:col-span-1"><dt className="text-gray-500">Enfermedades</dt><dd className="font-medium whitespace-pre-wrap">{ante?.enfermedades || '-'}</dd></div>
+                    <div className="md:col-span-1"><dt className="text-gray-500">Alergias</dt><dd className="font-medium whitespace-pre-wrap">{ante?.alergias || '-'}</dd></div>
+                    <div className="md:col-span-1"><dt className="text-gray-500">Observaciones</dt><dd className="font-medium whitespace-pre-wrap">{ante?.observaciones || '-'}</dd></div>
+                    <div className="md:col-span-2"><dt className="text-gray-500">Alertas</dt><dd className="font-medium whitespace-pre-wrap">{ante?.alertas || '-'}</dd></div>
+                  </dl>
+                ) : (
+                  <AntecedentesForm
+                    data={ante}
+                    onCancel={() => setEditAnte(false)}
+                    onSave={saveAntecedentes}
+                    saving={savingAnte}
+                  />
+                )}
+              </div>
+            </div>
           )}
 
           {tab === "historial" && (
@@ -344,6 +426,52 @@ function PetEditForm({ data, onCancel, onSave, saving }: { data: Mascota; onCanc
         </button>
       </div>
       <div className="col-span-2 flex gap-2 mt-2">
+        <button type="submit" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
+        <button type="button" className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50" onClick={onCancel} disabled={saving}>Cancelar</button>
+      </div>
+    </form>
+  );
+}
+
+function AntecedentesForm({ data, onCancel, onSave, saving }: { data: Antecedentes; onCancel: () => void; onSave: (u: any) => Promise<void>; saving: boolean; }) {
+  const [origen, setOrigen] = useState<string>(data?.origen || "");
+  const [habitat, setHabitat] = useState<string>(data?.habitat || "");
+  const [comportamiento, setComportamiento] = useState<string>(data?.comportamiento || "");
+  const [enfermedades, setEnfermedades] = useState<string>(data?.enfermedades || "");
+  const [alergias, setAlergias] = useState<string>(data?.alergias || "");
+  const [observaciones, setObservaciones] = useState<string>(data?.observaciones || "");
+  const [alertas, setAlertas] = useState<string>(data?.alertas || "");
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSave({ origen, habitat, comportamiento, enfermedades, alergias, observaciones, alertas }); }} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Origen</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={origen} onChange={(e) => setOrigen(e.target.value)} placeholder="Adoptado, comprado, rescatado..." />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Hábitat</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={habitat} onChange={(e) => setHabitat(e.target.value)} placeholder="Interior, exterior, con niños, más mascotas..." />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Comportamiento</label>
+        <input className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={comportamiento} onChange={(e) => setComportamiento(e.target.value)} placeholder="Agresivo, dócil, activo, sedentario..." />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Enfermedades</label>
+        <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={enfermedades} onChange={(e) => setEnfermedades(e.target.value)} placeholder="Antecedentes médicos, edades, tratamientos, resultados..." />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Alergias</label>
+        <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={alergias} onChange={(e) => setAlergias(e.target.value)} placeholder="Vacunas, alimentos, fármacos, atopia..." />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
+        <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={observaciones} onChange={(e) => setObservaciones(e.target.value)} placeholder="Notas generales" />
+      </div>
+      <div className="md:col-span-2">
+        <label className="block text-xs font-medium text-gray-600 mb-1">Alertas</label>
+        <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" value={alertas} onChange={(e) => setAlertas(e.target.value)} placeholder="Advertencias importantes" />
+      </div>
+      <div className="md:col-span-2 flex gap-2 mt-2">
         <button type="submit" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
         <button type="button" className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50" onClick={onCancel} disabled={saving}>Cancelar</button>
       </div>
