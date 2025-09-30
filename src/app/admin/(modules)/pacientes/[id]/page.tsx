@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { formatRutPretty, isValidRut } from "@/lib/rut";
+import Image from "next/image";
 
 type Owner = {
   propietario_id: string;
@@ -122,13 +123,20 @@ export default function PacienteDetailPage() {
       {/* Encabezado */}
       <div className="bg-white border rounded-2xl shadow-sm p-6 mb-6">
         <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-full bg-indigo-50 grid place-items-center text-2xl">
-            {data.especie ? "🐱" : "🐶"}
+          <div className="w-20 h-20 rounded-full bg-indigo-50 overflow-hidden flex items-center justify-center">
+            <Image
+              src={data.especie ? "/gato.webp" : "/perro.webp"}
+              alt={data.especie ? "Gato" : "Perro"}
+              width={160}
+              height={160}
+              className="w-full h-full object-cover object-center"
+              priority
+              quality={100}
+            />
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
               {data.nombre}
-
             </h1>
             <div className="text-gray-600 flex flex-wrap gap-4 mt-1 text-sm">
               <span>{especie}{data.raza ? ` · ${data.raza}` : ""}</span>
