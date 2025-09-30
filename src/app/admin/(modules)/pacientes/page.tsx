@@ -110,13 +110,14 @@ export default function PacientesPage() {
           const sexo = p.sexo === true ? "Macho" : p.sexo === false ? "Hembra" : "-";
           const especie = p.especie === true ? "Gato" : p.especie === false ? "Perro" : "-";
           return (
-            <a href={`/admin/pacientes/${p.mascotas_id}`} key={p.mascotas_id} className="group relative overflow-hidden rounded-2xl border bg-white shadow-sm hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/60 via-white/40 to-white/0 pointer-events-none" />
+            <a href={`/admin/pacientes/${p.mascotas_id}`} key={p.mascotas_id} className="group relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600 opacity-80" />
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-white/30 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               <div className="relative z-10 p-5">
                 <div className="flex gap-4">
                   {/* Propietario (izquierda) */}
-                  <div className="w-1/2 pr-3 border-r">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-1">Propietario</h3>
+                  <div className="w-1/2 pr-3 border-r border-gray-100">
+                    <h3 className="text-xs font-semibold tracking-wide text-indigo-600 mb-2">Propietario</h3>
                     <div className="text-sm text-gray-700">
                       <div className="font-medium">{[o.nombre, o.apellido].filter(Boolean).join(" ") || "-"}</div>
                       <div className="text-gray-500">RUT: {o.rut ? formatRutPretty(o.rut) : "-"}</div>
@@ -127,7 +128,7 @@ export default function PacientesPage() {
 
                   {/* Mascota (derecha) */}
                   <div className="w-1/2 pl-3">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-1">Mascota</h3>
+                    <h3 className="text-xs font-semibold tracking-wide text-indigo-600 mb-2">Mascota</h3>
                     <div className="text-sm text-gray-700">
                       <div className="font-medium">{p.nombre}</div>
                       <div className="text-gray-500">{especie}{p.raza ? ` · ${p.raza}` : ""}</div>
@@ -139,7 +140,7 @@ export default function PacientesPage() {
                         <div className="text-gray-500">Chip: {p.numero_microchip}</div>
                       )}
                       {p.esterilizado === true && (
-                        <span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Esterilizado/a</span>
+                        <span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Esterilizado/a</span>
                       )}
                     </div>
                   </div>
