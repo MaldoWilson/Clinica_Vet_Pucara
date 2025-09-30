@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { formatRutPretty, isValidRut } from "@/lib/rut";
 import Image from "next/image";
@@ -78,6 +78,87 @@ export default function PacienteDetailPage() {
     observaciones: "",
   });
   const [fabOpen, setFabOpen] = useState(false);
+  const [recetaOpen, setRecetaOpen] = useState(false);
+  const [savingReceta, setSavingReceta] = useState(false);
+  const [ultimaReceta, setUltimaReceta] = useState<null | { id: string; fecha?: string; peso?: string; notas?: string; items: Array<{ nombre_medicamento: string; dosis: string; via?: string; frecuencia?: string; duracion?: string; instrucciones?: string; }>; }>(null);
+  const [openHistMenu, setOpenHistMenu] = useState<string | null>(null);
+  const [editConsulta, setEditConsulta] = useState<null | any>(null);
+  const [savingEditConsulta, setSavingEditConsulta] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<null | { id: string }>(null);
+  const consultaCardRef = useRef<HTMLDivElement>(null);
+  const [recetaForm, setRecetaForm] = useState({
+    peso: "",
+    notas: "",
+    items: [
+      { nombre_medicamento: "", dosis: "", via: "", frecuencia: "", duracion: "", instrucciones: "" }
+    ] as Array<{ nombre_medicamento: string; dosis: string; via?: string; frecuencia?: string; duracion?: string; instrucciones?: string; }>,
+  });
+
+  function addRecetaItem() {
+    setRecetaForm((f) => ({ ...f, items: [...f.items, { nombre_medicamento: "", dosis: "", via: "", frecuencia: "", duracion: "", instrucciones: "" }] }));
+  }
+  function removeRecetaItem(idx: number) {
+    setRecetaForm((f) => ({ ...f, items: f.items.filter((_, i) => i !== idx) }));
+  }
+  function updateRecetaItem(idx: number, field: string, value: string) {
+    setRecetaForm((f) => ({ ...f, items: f.items.map((it, i) => i === idx ? { ...it, [field]: value } : it) }));
+  }
+
+  async function crearReceta() {
+    if (!ultimaConsultaId) return;
+    setSavingReceta(true); setError(null); setSuccess(null);
+    try {
+      const payload: any = {
+        consulta_id: ultimaConsultaId,
+        peso: recetaForm.peso ? Number(recetaForm.peso) : null,
+        notas: recetaForm.notas || null,
+        items: recetaForm.items,
+      };
+      const res = await fetch("/api/recetas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo crear la receta");
+      setSuccess("Receta creada.");
+      setRecetaOpen(false);
+      setFabOpen(false);
+      setUltimaReceta({ id: String(json.data.id), fecha: json.data.fecha, peso: recetaForm.peso, notas: recetaForm.notas, items: recetaForm.items });
+    } catch (e: any) {
+      setError(e?.message || "Error inesperado");
+    } finally {
+      setSavingReceta(false);
+    }
+  }
+
+  function imprimirUltimaReceta() {
+    if (!ultimaReceta) return;
+    const w = window.open("", "_blank", "width=800,height=900");
+    if (!w) return;
+    const css = `body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.4;padding:24px;color:#111} h1{font-size:20px;margin:0 0 12px} h2{font-size:16px;margin:16px 0 8px} table{width:100%;border-collapse:collapse;margin-top:8px} th,td{border:1px solid #e5e7eb;padding:8px;text-align:left} .muted{color:#6b7280}`;
+    const itemsRows = ultimaReceta.items.map((it, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${it.nombre_medicamento}</td>
+        <td>${it.dosis}</td>
+        <td>${it.via || ''}</td>
+        <td>${it.frecuencia || ''}</td>
+        <td>${it.duracion || ''}</td>
+        <td>${it.instrucciones || ''}</td>
+      </tr>`).join("");
+    const html = `<!doctype html><html><head><meta charset='utf-8'><title>Receta ${ultimaReceta.id}</title><style>${css}</style></head><body>
+      <h1>Receta #${ultimaReceta.id}</h1>
+      <div class='muted'>Fecha: ${ultimaReceta.fecha || ''}</div>
+      ${ultimaReceta.peso ? `<div class='muted'>Peso: ${ultimaReceta.peso} kg</div>` : ''}
+      ${ultimaReceta.notas ? `<div class='muted'>Notas: ${ultimaReceta.notas}</div>` : ''}
+      <h2>Medicamentos</h2>
+      <table><thead><tr><th>#</th><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Frecuencia</th><th>Duración</th><th>Instrucciones</th></tr></thead><tbody>${itemsRows}</tbody></table>
+      <script>window.onload=() => window.print();</script>
+    </body></html>`;
+    w.document.write(html);
+    w.document.close();
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -102,7 +183,36 @@ export default function PacienteDetailPage() {
       try {
         const res = await fetch(`/api/consultas?mascota_id=${encodeURIComponent(String(id))}`);
         const json = await res.json();
-        if (res.ok && json?.ok) setConsultas(json.data || []);
+        if (res.ok && json?.ok) {
+          // Enriquecer cada consulta con sus recetas
+          const mapped = await Promise.all((json.data || []).map(async (c: any) => {
+            try {
+              const resR = await fetch(`/api/recetas?consulta_id=${c.id}`);
+              const jsonR = await resR.json();
+              const recetas = resR.ok && jsonR?.ok ? jsonR.data : [];
+              return ({
+                id: c.id,
+                fecha: c.created_at || c.fecha,
+                motivo: c.motivo,
+                veterinario: c.veterinario_id || '',
+                tipo: c.tipo_atencion && c.tipo_atencion.toLowerCase().includes('inmun') ? 'inmunizacion' : 'consulta',
+                resumen: c.diagnostico || c.tratamiento || '',
+                recetas,
+              });
+            } catch {
+              return ({
+                id: c.id,
+                fecha: c.created_at || c.fecha,
+                motivo: c.motivo,
+                veterinario: c.veterinario_id || '',
+                tipo: c.tipo_atencion && c.tipo_atencion.toLowerCase().includes('inmun') ? 'inmunizacion' : 'consulta',
+                resumen: c.diagnostico || c.tratamiento || '',
+                recetas: [],
+              });
+            }
+          }));
+          setConsultas(mapped);
+        }
       } catch {}
     };
     if (id) loadConsultas();
@@ -243,6 +353,14 @@ export default function PacienteDetailPage() {
   const o = data.propietario || {};
   const sexo = data.sexo === true ? "Macho" : data.sexo === false ? "Hembra" : "-";
   const especie = data.especie === true ? "Gato" : "Perro";
+
+  function formatFechaHora(iso?: string | null) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const fecha = d.toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: '2-digit' });
+    const hora = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+    return `${fecha} · ${hora}`;
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -390,13 +508,109 @@ export default function PacienteDetailPage() {
             </div>
           )}
 
+          {/* Modal ver/editar consulta */}
+          {editConsulta && (
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/50" onClick={() => setEditConsulta(null)} />
+              <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4">
+                <div className="px-5 py-4 border-b flex items-center justify-between">
+                  <h3 className="text-base font-semibold">Consulta #{editConsulta.id}</h3>
+                  <button onClick={() => setEditConsulta(null)} className="p-2 rounded hover:bg-gray-100">✕</button>
+                </div>
+                <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Fecha</label>
+                    <input type="datetime-local" className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                      value={(editConsulta.fecha || editConsulta.created_at) ? new Date(editConsulta.fecha || editConsulta.created_at).toISOString().slice(0,16) : ''}
+                      onChange={(e) => setEditConsulta({ ...editConsulta, fecha: new Date(e.target.value).toISOString() })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Tipo de atención</label>
+                    <input className="w-full rounded-lg border border-gray-300 px-3 py-2" value={editConsulta.tipo_atencion || ''} onChange={(e) => setEditConsulta({ ...editConsulta, tipo_atencion: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Motivo</label>
+                    <input className="w-full rounded-lg border border-gray-300 px-3 py-2" value={editConsulta.motivo || ''} onChange={(e) => setEditConsulta({ ...editConsulta, motivo: e.target.value })} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Anamnesis</label>
+                    <textarea className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2" value={editConsulta.anamnesis || ''} onChange={(e) => setEditConsulta({ ...editConsulta, anamnesis: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Diagnóstico</label>
+                    <textarea className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2" value={editConsulta.diagnostico || ''} onChange={(e) => setEditConsulta({ ...editConsulta, diagnostico: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Tratamiento</label>
+                    <textarea className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2" value={editConsulta.tratamiento || ''} onChange={(e) => setEditConsulta({ ...editConsulta, tratamiento: e.target.value })} />
+                  </div>
+                </div>
+                <div className="px-5 py-4 bg-gray-50 rounded-b-xl flex justify-end gap-2">
+                  <button onClick={() => setEditConsulta(null)} className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50">Cerrar</button>
+                  <button onClick={async () => {
+                    setSavingEditConsulta(true);
+                    try {
+                      const payload: any = { id: editConsulta.id, motivo: editConsulta.motivo, tipo_atencion: editConsulta.tipo_atencion, anamnesis: editConsulta.anamnesis, diagnostico: editConsulta.diagnostico, tratamiento: editConsulta.tratamiento, fecha: editConsulta.fecha };
+                      const res = await fetch('/api/consultas', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                      const json = await res.json();
+                      if (!res.ok || json?.ok === false) throw new Error(json?.error || 'Error al guardar');
+                      // refrescar lista
+                      setConsultas((prev) => prev.map((x) => x.id === editConsulta.id ? { ...x, fecha: payload.fecha || x.fecha, motivo: payload.motivo || x.motivo, resumen: payload.diagnostico || payload.tratamiento || x.resumen } : x));
+                      setEditConsulta(null);
+                    } catch (e: any) {
+                      alert(e?.message || 'Error');
+                    } finally { setSavingEditConsulta(false); }
+                  }} disabled={savingEditConsulta} className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">{savingEditConsulta ? 'Guardando...' : 'Guardar cambios'}</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Confirmación eliminar consulta */}
+          {confirmDelete && (
+            <ConfirmationModal
+              isOpen={true}
+              onClose={() => setConfirmDelete(null)}
+              onConfirm={async () => {
+                try {
+                  const res = await fetch('/api/consultas', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: confirmDelete.id }) });
+                  const json = await res.json();
+                  if (!res.ok || json?.ok === false) throw new Error(json?.error || 'Error al eliminar');
+                  setConsultas((prev) => prev.filter((x) => String(x.id) !== String(confirmDelete.id)));
+                } catch (e: any) {
+                  alert(e?.message || 'Error');
+                } finally {
+                  setConfirmDelete(null);
+                }
+              }}
+              title="Eliminar consulta"
+              message="Esta acción eliminará la consulta permanentemente. ¿Deseas continuar?"
+              confirmText="Eliminar"
+              cancelText="Cancelar"
+              danger
+            />
+          )}
+          {tab === "general" && (<>
           {/* Carta independiente para Consulta */}
           <div className="mt-6 rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6">
             <div className="w-full flex justify-center">
               {!consultaOpen ? (
                 <button onClick={() => setConsultaOpen(true)} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">Generar consulta</button>
               ) : (
-                <div className="w-full max-w-4xl">
+                <div className="w-full max-w-4xl relative">
+                  {/* Cerrar formulario (flecha hacia arriba) */}
+                  <button
+                    type="button"
+                    aria-label="Ocultar formulario"
+                    title="Ocultar formulario"
+                    onClick={() => setConsultaOpen(false)}
+                    className="absolute -top-4 right-0 p-2 rounded-full bg-white shadow ring-1 ring-gray-200 hover:bg-gray-50"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 14l6-6 6 6" />
+                    </svg>
+                  </button>
                   <h4 className="text-sm font-semibold text-indigo-600 mb-3 text-center">Nueva consulta</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
@@ -444,12 +658,119 @@ export default function PacienteDetailPage() {
                 <button onClick={() => setFabOpen(v => !v)} className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md flex items-center justify-center text-2xl">+</button>
                 {fabOpen && (
                   <div className="absolute mt-14 bg-white ring-1 ring-gray-200 rounded-xl shadow-lg p-2">
-                    <button onClick={() => alert('Agregar receta (pendiente de implementar)')} className="px-4 py-2 text-sm rounded-lg hover:bg-gray-50">Agregar receta</button>
+                    <button onClick={() => { setRecetaOpen(true); setFabOpen(false); }} className="px-4 py-2 text-sm rounded-lg hover:bg-gray-50">Agregar receta</button>
                   </div>
                 )}
               </div>
             )}
           </div>
+
+          {/* Formulario receta */}
+          {recetaOpen && (
+            <div className="mt-4 rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6">
+              <h4 className="text-sm font-semibold text-indigo-600 mb-3 text-center">Nueva receta</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Peso (kg)</label>
+                  <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={recetaForm.peso} onChange={(e) => setRecetaForm({ ...recetaForm, peso: e.target.value })} />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Notas</label>
+                  <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={recetaForm.notas} onChange={(e) => setRecetaForm({ ...recetaForm, notas: e.target.value })} />
+                </div>
+              </div>
+              <div className="mt-3">
+                <h5 className="text-xs font-semibold text-gray-700 mb-2">Medicamentos</h5>
+                {recetaForm.items.map((it, idx) => (
+                  <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-2 mb-2 items-end">
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Nombre</label>
+                      <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white" value={it.nombre_medicamento} onChange={(e) => updateRecetaItem(idx, 'nombre_medicamento', e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Dosis</label>
+                      <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white" value={it.dosis} onChange={(e) => updateRecetaItem(idx, 'dosis', e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Vía</label>
+                      <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white" value={it.via || ''} onChange={(e) => updateRecetaItem(idx, 'via', e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Frecuencia</label>
+                      <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white" value={it.frecuencia || ''} onChange={(e) => updateRecetaItem(idx, 'frecuencia', e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Duración</label>
+                      <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white" value={it.duracion || ''} onChange={(e) => updateRecetaItem(idx, 'duracion', e.target.value)} />
+                    </div>
+                    <div className="md:col-span-6">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Instrucciones</label>
+                      <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white" value={it.instrucciones || ''} onChange={(e) => updateRecetaItem(idx, 'instrucciones', e.target.value)} />
+                    </div>
+                    <div className="md:col-span-6 flex justify-end">
+                      {recetaForm.items.length > 1 && (
+                        <button type="button" onClick={() => removeRecetaItem(idx)} className="text-sm text-red-600 hover:text-red-700">Eliminar medicamento</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <div className="w-full flex justify-center">
+                  <button type="button" onClick={addRecetaItem} className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50">Añadir medicamento</button>
+                </div>
+              </div>
+              <div className="w-full flex justify-center mt-3">
+                <button onClick={crearReceta} disabled={savingReceta} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">{savingReceta ? 'Guardando...' : 'Guardar receta'}</button>
+              </div>
+            </div>
+          )}
+
+          {/* Resumen última receta */}
+          {ultimaReceta && (
+            <div className="mt-4 rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-indigo-600">Receta #{ultimaReceta.id}</h4>
+                <div className="text-sm text-gray-500">{ultimaReceta.fecha ? new Date(ultimaReceta.fecha).toLocaleString('es-CL') : ''}</div>
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                {ultimaReceta.peso && <span className="mr-4">Peso: {ultimaReceta.peso} kg</span>}
+                {ultimaReceta.notas && <span>Notas: {ultimaReceta.notas}</span>}
+              </div>
+              <div className="mt-3 overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-gray-600">
+                      <th className="py-2 pr-4">#</th>
+                      <th className="py-2 pr-4">Medicamento</th>
+                      <th className="py-2 pr-4">Dosis</th>
+                      <th className="py-2 pr-4">Vía</th>
+                      <th className="py-2 pr-4">Frecuencia</th>
+                      <th className="py-2 pr-4">Duración</th>
+                      <th className="py-2 pr-4">Instrucciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ultimaReceta.items.map((it, idx) => (
+                      <tr key={idx} className="border-t">
+                        <td className="py-2 pr-4">{idx + 1}</td>
+                        <td className="py-2 pr-4">{it.nombre_medicamento}</td>
+                        <td className="py-2 pr-4">{it.dosis}</td>
+                        <td className="py-2 pr-4">{it.via}</td>
+                        <td className="py-2 pr-4">{it.frecuencia}</td>
+                        <td className="py-2 pr-4">{it.duracion}</td>
+                        <td className="py-2 pr-4">{it.instrucciones}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="w-full flex justify-center gap-2 mt-4">
+                <button onClick={imprimirUltimaReceta} className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50">Imprimir</button>
+                <button onClick={imprimirUltimaReceta} className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">Descargar PDF</button>
+              </div>
+            </div>
+          )}
+
+          </>)}
 
           {tab === "antecedentes" && (
             <div className="grid grid-cols-1 gap-6">
@@ -485,8 +806,72 @@ export default function PacienteDetailPage() {
           )}
 
           {tab === "historial" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-gray-900">Historial de {data.nombre}</h3>
+                <button onClick={() => { setConsultaOpen(true); consultaCardRef.current?.scrollIntoView({ behavior: 'smooth' }); setTab('general'); }} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-sm hover:bg-indigo-700">
+                  Agregar
+                </button>
+              </div>
+
+              {/* Ítems del historial (consultas) */}
+              {consultas.length === 0 && (
+                <div className="text-sm text-gray-500">Sin registros aún.</div>
+              )}
+
             <div className="space-y-3">
-              <div className="text-gray-600">(Próximamente) Línea de tiempo de atenciones, vacunas, etc.</div>
+                {consultas.map((c) => (
+                  <div key={c.id} className="rounded-xl border border-gray-200 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <div className={`px-4 py-3 flex items-center justify-between border-l-4 ${c.tipo === 'inmunizacion' ? 'border-emerald-500' : 'border-amber-500'}`}>
+                      <div className="flex items-center gap-3">
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${c.tipo === 'inmunizacion' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>{c.tipo === 'inmunizacion' ? '✓' : '!'}</span>
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-900">{c.tipo === 'inmunizacion' ? 'Inmunización' : 'Consulta'}{c.motivo ? ` – ${c.motivo}` : ''}</div>
+                          <div className="text-gray-500">{formatFechaHora(c.fecha)}{c.veterinario ? ` · ${c.veterinario}` : ''}</div>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <button onClick={() => setOpenHistMenu(openHistMenu === String(c.id) ? null : String(c.id))} className="p-2 rounded hover:bg-white/60">⋮</button>
+                        {openHistMenu === String(c.id) && (
+                          <div className="absolute right-0 mt-2 bg-white ring-1 ring-gray-200 rounded-lg shadow-lg text-sm z-10">
+                            <button className="block px-4 py-2 hover:bg-gray-50 w-full text-left" onClick={async () => { try { setOpenHistMenu(null); const res = await fetch(`/api/consultas?id=${c.id}`); const json = await res.json(); if (res.ok && json?.ok) { setEditConsulta(json.data); } else { setEditConsulta(c); } } catch { setEditConsulta(c); } }}>Ver/Editar</button>
+                            <button className="block px-4 py-2 hover:bg-gray-50 w-full text-left text-red-600" onClick={() => { setConfirmDelete({ id: String(c.id) }); setOpenHistMenu(null); }}>Eliminar</button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {c.resumen && (
+                      <div className="px-4 py-3 text-sm bg-gray-50 text-gray-700">
+                        {c.resumen}
+                      </div>
+                    )}
+                    {/* Recetas vinculadas */}
+                    {Array.isArray(c.recetas) && c.recetas.length > 0 && (
+                      <div className="px-4 py-3 bg-white border-t text-sm">
+                        <div className="text-gray-700 font-medium mb-2">Recetas</div>
+                        <div className="space-y-2">
+                          {c.recetas.map((r: any) => (
+                            <div key={r.id} className="rounded-lg ring-1 ring-gray-200 p-3">
+                              <div className="flex items-center justify-between">
+                                <div className="text-gray-800">Receta #{r.id}</div>
+                                <div className="text-gray-500">{formatFechaHora(r.fecha || r.created_at)}</div>
+                              </div>
+                              {Array.isArray(r.items) && r.items.length > 0 && (
+                                <ul className="mt-2 list-disc pl-5 text-gray-700">
+                                  {r.items.slice(0,3).map((it: any, idx: number) => (
+                                    <li key={idx}><span className="font-medium">{it.nombre_medicamento}</span> – {it.dosis}{it.via ? ` (${it.via})` : ''}</li>
+                                  ))}
+                                  {r.items.length > 3 && <li className="text-gray-500">…</li>}
+                                </ul>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

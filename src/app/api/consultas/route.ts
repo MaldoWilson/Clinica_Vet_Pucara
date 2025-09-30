@@ -5,16 +5,28 @@ import { supabaseServer } from "@/lib/supabaseClient";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
     const mascotaId = searchParams.get("mascota_id");
+    const supa = supabaseServer();
+
+    if (id) {
+      const { data, error } = await supa
+        .from("consultas")
+        .select("id, mascota_id, veterinario_id, fecha, motivo, tipo_atencion, anamnesis, diagnostico, tratamiento, proximo_control, observaciones, created_at")
+        .eq("id", id)
+        .single();
+      if (error) return NextResponse.json({ ok: false, error: "No encontrado" }, { status: 404 });
+      return NextResponse.json({ ok: true, data });
+    }
+
     if (!mascotaId) {
       return NextResponse.json({ ok: false, error: "mascota_id requerido" }, { status: 400 });
     }
-    const supa = supabaseServer();
     const { data, error } = await supa
       .from("consultas")
       .select("id, mascota_id, veterinario_id, fecha, motivo, tipo_atencion, anamnesis, diagnostico, tratamiento, proximo_control, observaciones, created_at")
       .eq("mascota_id", mascotaId)
-      .order("fecha", { ascending: false });
+      .order("created_at", { ascending: false });
     if (error) throw error;
     return NextResponse.json({ ok: true, data: data || [] });
   } catch (e: any) {
@@ -76,6 +88,21 @@ export async function PUT(req: NextRequest) {
       .single();
     if (error) throw error;
     return NextResponse.json({ ok: true, data });
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e.message || String(e) }, { status: 500 });
+  }
+}
+
+// DELETE /api/consultas { id }
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const id = body?.id ? String(body.id) : null;
+    if (!id) return NextResponse.json({ ok: false, error: "id requerido" }, { status: 400 });
+    const supa = supabaseServer();
+    const { error } = await supa.from("consultas").delete().eq("id", id);
+    if (error) throw error;
+    return NextResponse.json({ ok: true });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e.message || String(e) }, { status: 500 });
   }
