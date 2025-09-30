@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { cleanRutInput, formatRutPretty, normalizeRutPlain, isValidRut } from "@/lib/rut";
 import { formatIntlPhone, isValidIntlPhone } from "@/lib/phone";
 
@@ -40,6 +41,7 @@ export default function FichaForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const [ownerLookupLoading, setOwnerLookupLoading] = useState(false);
   const [ownerFound, setOwnerFound] = useState(false);
   const [rutValido, setRutValido] = useState<boolean | null>(null);
@@ -64,6 +66,7 @@ export default function FichaForm() {
     setSuccess(null);
     setError(null);
     setOwnerFound(false);
+    setCreatedId(null);
   }
 
   async function handleBuscarRut() {
@@ -187,6 +190,9 @@ export default function FichaForm() {
       if (!res.ok) throw new Error(data?.error || "No se pudo crear la ficha de la mascota");
 
       setSuccess("Ficha de mascota creada correctamente");
+      if (data?.data?.mascotas_id) {
+        setCreatedId(String(data.data.mascotas_id));
+      }
       // Reset mínimos de mascota para permitir crear otra
       setNombre("");
       setEspecie("");
@@ -417,7 +423,19 @@ export default function FichaForm() {
           </div>
 
           {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
-          {success && <p className="text-sm text-green-600 mt-3">{success}</p>}
+          {success && (
+            <div className="mt-3 flex items-center gap-3">
+              <p className="text-sm text-green-600">{success}</p>
+              {createdId && (
+                <Link
+                  href={`/admin/pacientes/${createdId}`}
+                  className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
+                >
+                  Ir a ficha
+                </Link>
+              )}
+            </div>
+          )}
 
           {(() => {
             const rutOk = isValidRut(normalizeRutPlain(rut.trim()));
