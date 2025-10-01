@@ -89,6 +89,12 @@ export default function PacienteDetailPage() {
   const [savingEditConsulta, setSavingEditConsulta] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<null | { id: string }>(null);
   const consultaCardRef = useRef<HTMLDivElement>(null);
+  const [certMenuOpen, setCertMenuOpen] = useState(false);
+  const certBtnRef = useRef<HTMLButtonElement>(null);
+  const certMenuRef = useRef<HTMLDivElement>(null);
+  const [parvoOpen, setParvoOpen] = useState(false);
+  const [parvoTexto, setParvoTexto] = useState("");
+  const [savingParvo, setSavingParvo] = useState(false);
   const [recetaForm, setRecetaForm] = useState({
     peso: "",
     notas: "",
@@ -115,6 +121,47 @@ export default function PacienteDetailPage() {
       return () => { document.body.style.overflow = prev; };
     }
   }, [editConsulta]);
+
+  // Cerrar menú de Certificados al hacer clic fuera o con Escape
+  useEffect(() => {
+    function handleDown(e: MouseEvent) {
+      if (!certMenuOpen) return;
+      const target = e.target as Node;
+      if (certMenuRef.current && !certMenuRef.current.contains(target) && certBtnRef.current && !certBtnRef.current.contains(target)) {
+        setCertMenuOpen(false);
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setCertMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleDown);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleDown);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [certMenuOpen]);
+
+  const certOptions = [
+    "Certificado SAG INGLES.docx",
+    "Certificado DE ALTA MEDICA.docx",
+    "Certificado de defuncion.rtf",
+    "Certificado PARVOVIRUS.docx",
+    "Certificado RETROVIRALES PUCARA - copia.docx",
+    "Certificado SALUD FELINOS SAG.docx",
+    "Certificado SALUD pucara.docx",
+    "Certificado SALUD SAG.docx",
+    "Certificado DE EPICRISIS.docx",
+  ];
+
+  function onSelectCert(name: string) {
+    setCertMenuOpen(false);
+    if (name.toLowerCase().includes("parvovirus")) {
+      setParvoTexto("");
+      setParvoOpen(true);
+      return;
+    }
+  }
 
   async function crearReceta() {
     if (!ultimaConsultaId) {
@@ -480,6 +527,34 @@ export default function PacienteDetailPage() {
     }
   }
 
+  async function guardarExamenParvo() {
+    if (!data?.mascotas_id) return;
+    setSavingParvo(true); setError(null); setSuccess(null);
+    try {
+      const payload: any = {
+        mascota_id: data.mascotas_id,
+        motivo: "Certificado Parvovirus",
+        tipo_atencion: "Examen serológico",
+        diagnostico: parvoTexto || null,
+      };
+      const res = await fetch("/api/consultas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo guardar");
+      setSuccess("Guardado.");
+      setParvoOpen(false);
+      setUltimaConsultaId(String(json.data.id));
+      setConsultas((prev) => [{ id: json.data.id, fecha: json.data.fecha, motivo: payload.motivo, tipo: 'consulta', resumen: parvoTexto }, ...prev]);
+    } catch (e: any) {
+      setError(e?.message || "Error inesperado");
+    } finally {
+      setSavingParvo(false);
+    }
+  }
+
   async function savePet(updates: Partial<Mascota>) {
     if (!data?.mascotas_id) return;
     setSaving(true); setError(null); setSuccess(null);
@@ -546,7 +621,7 @@ export default function PacienteDetailPage() {
   }
   if (!data) return <div className="text-center text-gray-600">Paciente no encontrado</div>;
 
-  const o = data.propietario || {};
+  const o = (data.propietario || {}) as Owner;
   const sexo = data.sexo === true ? "Macho" : data.sexo === false ? "Hembra" : "-";
   const especie = data.especie === true ? "Gato" : "Perro";
 
@@ -908,7 +983,33 @@ export default function PacienteDetailPage() {
               {!consultaOpen ? (
                 <div className="flex items-center gap-3">
                   <button onClick={() => setConsultaOpen(true)} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">Generar consulta</button>
-                  <button onClick={() => {/* TODO: Implementar crear certificados */}} className="px-5 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 shadow-sm">Crear certificados</button>
+                  <div className="relative">
+                    <button
+                      ref={certBtnRef}
+                      aria-haspopup="menu"
+                      aria-expanded={certMenuOpen}
+                      onClick={() => setCertMenuOpen((v) => !v)}
+                      className="px-5 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 shadow-sm"
+                    >
+                      Crear Certificados
+                    </button>
+                    {certMenuOpen && (
+                      <div ref={certMenuRef} className="absolute left-0 mt-2 w-72 rounded-xl bg-white ring-1 ring-gray-200 shadow-lg z-20 overflow-hidden">
+                        <ul className="py-2">
+                          {certOptions.map((opt) => (
+                            <li key={opt}>
+                              <button
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                onClick={() => onSelectCert(opt)}
+                              >
+                                {opt}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="w-full max-w-4xl relative mt-16">
@@ -980,6 +1081,38 @@ export default function PacienteDetailPage() {
             </div>
 
           </div>
+
+          {/* Panel rápido: Certificado Parvovirus */}
+          {parvoOpen && (
+            <div className="fixed left-1/2 -translate-x-1/2 bottom-8 z-50 w-[90vw] max-w-3xl">
+              <div className="rounded-2xl shadow-2xl ring-1 ring-gray-200 bg-white overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
+                  <div className="text-sm font-semibold text-gray-700">Certificado PARVOVIRUS · EXAMEN SEROLÓGICO</div>
+                  <button onClick={() => setParvoOpen(false)} className="p-2 rounded hover:bg-gray-100" title="Cerrar">✕</button>
+                </div>
+                <div className="p-4 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-start">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">EXAMEN SEROLÓGICO</label>
+                    <textarea
+                      className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2"
+                      placeholder="Resultado, método, notas..."
+                      value={parvoTexto}
+                      onChange={(e) => setParvoTexto(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex md:flex-col gap-2 md:gap-3 justify-end md:justify-start">
+                    <button
+                      onClick={guardarExamenParvo}
+                      disabled={savingParvo}
+                      className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      {savingParvo ? 'Guardando...' : 'Guardar'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Formulario receta */}
           {recetaOpen && (
