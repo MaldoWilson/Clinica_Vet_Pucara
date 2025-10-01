@@ -951,7 +951,7 @@ export default function PacienteDetailPage() {
                       <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.tratamiento} onChange={(e) => setConsultaForm({ ...consultaForm, tratamiento: e.target.value })} />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Próximo control</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Próximo control <span className="text-gray-400">(Opcional)</span></label>
                       <input type="date" className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.proximo_control} onChange={(e) => setConsultaForm({ ...consultaForm, proximo_control: e.target.value })} />
                     </div>
                     <div>
@@ -961,7 +961,18 @@ export default function PacienteDetailPage() {
                   </div>
                   <div className="w-full flex justify-center mt-3 ">
                     <button onClick={crearConsulta} disabled={savingConsulta} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">{savingConsulta ? 'Guardando...' : 'Guardar consulta'}</button>
-                    <button onClick={() => { setRecetaOpen(true); setFabOpen(false); }} className="px-5 ml-5 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">Crear receta</button>
+                    <button 
+                      onClick={() => { setRecetaOpen(true); setFabOpen(false); }} 
+                      disabled={!ultimaConsultaId}
+                      className={`px-5 ml-5 py-2 rounded-lg text-white shadow-sm ${
+                        ultimaConsultaId 
+                          ? 'bg-emerald-600 hover:bg-emerald-700' 
+                          : 'bg-gray-400 cursor-not-allowed'
+                      }`}
+                      title={!ultimaConsultaId ? 'Debes crear una consulta primero' : 'Crear receta'}
+                    >
+                      Crear receta
+                    </button>
 
                   </div>
                 </div>
