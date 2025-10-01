@@ -614,7 +614,6 @@ export default function PacienteDetailPage() {
               {!consultaOpen ? (
                 <div className="flex items-center gap-3">
                   <button onClick={() => setConsultaOpen(true)} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">Generar consulta</button>
-                  <button onClick={() => { setRecetaOpen(true); setFabOpen(false); }} className="px-5 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">Crear receta</button>
                   <button onClick={() => {/* TODO: Implementar crear certificados */}} className="px-5 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 shadow-sm">Crear certificados</button>
                 </div>
               ) : (
@@ -666,8 +665,10 @@ export default function PacienteDetailPage() {
                       <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.observaciones} onChange={(e) => setConsultaForm({ ...consultaForm, observaciones: e.target.value })} />
                     </div>
                   </div>
-                  <div className="w-full flex justify-center mt-3">
+                  <div className="w-full flex justify-center mt-3 ">
                     <button onClick={crearConsulta} disabled={savingConsulta} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">{savingConsulta ? 'Guardando...' : 'Guardar consulta'}</button>
+                    <button onClick={() => { setRecetaOpen(true); setFabOpen(false); }} className="px-5 ml-5 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">Crear receta</button>
+
                   </div>
                 </div>
               )}
