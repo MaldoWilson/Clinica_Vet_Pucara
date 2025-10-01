@@ -372,51 +372,6 @@ export default function AdminHome() {
         </div>
       </section>
 
-      {/* Accesos rápidos */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="h-1 w-12 rounded-full bg-gradient-to-r from-pink-500 to-rose-500"></div>
-          <h2 className="text-2xl font-bold text-gray-900">Accesos Rápidos</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link href="/admin/citas" className="group p-4 rounded-xl bg-white border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-indigo-50 group-hover:bg-indigo-100 transition-colors">
-                <span className="text-xl">➕</span>
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-600">Nueva Cita</span>
-            </div>
-          </Link>
-          
-          <Link href="/admin/fichas" className="group p-4 rounded-xl bg-white border border-gray-100 hover:border-emerald-200 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-50 group-hover:bg-emerald-100 transition-colors">
-                <span className="text-xl">📝</span>
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-emerald-600">Nueva Ficha</span>
-            </div>
-          </Link>
-          
-          <Link href="/admin/productos" className="group p-4 rounded-xl bg-white border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
-                <span className="text-xl">🏷️</span>
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">Nuevo Producto</span>
-            </div>
-          </Link>
-          
-          <Link href="/admin/blogs" className="group p-4 rounded-xl bg-white border border-gray-100 hover:border-purple-200 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-50 group-hover:bg-purple-100 transition-colors">
-                <span className="text-xl">✍️</span>
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-purple-600">Nuevo Blog</span>
-            </div>
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }
