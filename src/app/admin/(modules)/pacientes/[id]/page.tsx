@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useParams } from "next/navigation";
 import { formatRutPretty, isValidRut } from "@/lib/rut";
 import Image from "next/image";
@@ -103,6 +104,15 @@ export default function PacienteDetailPage() {
   function updateRecetaItem(idx: number, field: string, value: string) {
     setRecetaForm((f) => ({ ...f, items: f.items.map((it, i) => i === idx ? { ...it, [field]: value } : it) }));
   }
+
+  // Bloquear scroll del body cuando el modal de consulta está abierto
+  useEffect(() => {
+    if (editConsulta) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [editConsulta]);
 
   async function crearReceta() {
     if (!ultimaConsultaId) return;
@@ -363,7 +373,7 @@ export default function PacienteDetailPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       {/* Encabezado */}
       <div className="relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm mb-6">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />
@@ -509,11 +519,13 @@ export default function PacienteDetailPage() {
           )}
 
           {/* Modal ver/editar consulta */}
-          {editConsulta && (
-            <div className="fixed inset-0 z-[1000] flex items-center justify-center">
+          {editConsulta && createPortal(
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-2 sm:p-4">
+              {/* Backdrop a pantalla completa */}
               <div className="absolute inset-0 bg-black/50" onClick={() => setEditConsulta(null)} />
-              <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4">
-                <div className="px-5 py-4 border-b flex items-center justify-between">
+              {/* Contenedor del modal con altura máxima y scroll interno */}
+              <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-auto max-h-[92vh] overflow-y-auto">
+                <div className="px-5 py-4 border-b flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/75">
                   <h3 className="text-base font-semibold">Consulta #{editConsulta.id}</h3>
                   <button onClick={() => setEditConsulta(null)} className="p-2 rounded hover:bg-gray-100">✕</button>
                 </div>
@@ -546,7 +558,7 @@ export default function PacienteDetailPage() {
                     <textarea className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2" value={editConsulta.tratamiento || ''} onChange={(e) => setEditConsulta({ ...editConsulta, tratamiento: e.target.value })} />
                   </div>
                 </div>
-                <div className="px-5 py-4 bg-gray-50 rounded-b-xl flex justify-end gap-2">
+                <div className="px-5 py-4 bg-gray-50 rounded-b-xl flex justify-end gap-2 sticky bottom-0">
                   <button onClick={() => setEditConsulta(null)} className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50">Cerrar</button>
                   <button onClick={async () => {
                     setSavingEditConsulta(true);
@@ -564,7 +576,8 @@ export default function PacienteDetailPage() {
                   }} disabled={savingEditConsulta} className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">{savingEditConsulta ? 'Guardando...' : 'Guardar cambios'}</button>
                 </div>
               </div>
-            </div>
+            </div>,
+            document.body
           )}
 
           {/* Confirmación eliminar consulta */}
@@ -807,71 +820,176 @@ export default function PacienteDetailPage() {
 
           {tab === "historial" && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-gray-900">Historial de {data.nombre}</h3>
-                <button onClick={() => { setConsultaOpen(true); consultaCardRef.current?.scrollIntoView({ behavior: 'smooth' }); setTab('general'); }} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-sm hover:bg-indigo-700">
-                  Agregar
-                </button>
-              </div>
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold text-gray-900">Historial de {data.nombre}</h3>
+          </div>
 
               {/* Ítems del historial (consultas) */}
               {consultas.length === 0 && (
                 <div className="text-sm text-gray-500">Sin registros aún.</div>
               )}
 
-            <div className="space-y-3">
-                {consultas.map((c) => (
-                  <div key={c.id} className="rounded-xl border border-gray-200 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-                    <div className={`px-4 py-3 flex items-center justify-between border-l-4 ${c.tipo === 'inmunizacion' ? 'border-emerald-500' : 'border-amber-500'}`}>
-                      <div className="flex items-center gap-3">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${c.tipo === 'inmunizacion' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>{c.tipo === 'inmunizacion' ? '✓' : '!'}</span>
-                        <div className="text-sm">
-                          <div className="font-medium text-gray-900">{c.tipo === 'inmunizacion' ? 'Inmunización' : 'Consulta'}{c.motivo ? ` – ${c.motivo}` : ''}</div>
-                          <div className="text-gray-500">{formatFechaHora(c.fecha)}{c.veterinario ? ` · ${c.veterinario}` : ''}</div>
-                        </div>
-                      </div>
-                      <div className="relative">
-                        <button onClick={() => setOpenHistMenu(openHistMenu === String(c.id) ? null : String(c.id))} className="p-2 rounded hover:bg-white/60">⋮</button>
-                        {openHistMenu === String(c.id) && (
-                          <div className="absolute right-0 mt-2 bg-white ring-1 ring-gray-200 rounded-lg shadow-lg text-sm z-10">
-                            <button className="block px-4 py-2 hover:bg-gray-50 w-full text-left" onClick={async () => { try { setOpenHistMenu(null); const res = await fetch(`/api/consultas?id=${c.id}`); const json = await res.json(); if (res.ok && json?.ok) { setEditConsulta(json.data); } else { setEditConsulta(c); } } catch { setEditConsulta(c); } }}>Ver/Editar</button>
-                            <button className="block px-4 py-2 hover:bg-gray-50 w-full text-left text-red-600" onClick={() => { setConfirmDelete({ id: String(c.id) }); setOpenHistMenu(null); }}>Eliminar</button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    {c.resumen && (
-                      <div className="px-4 py-3 text-sm bg-gray-50 text-gray-700">
-                        {c.resumen}
-                      </div>
-                    )}
-                    {/* Recetas vinculadas */}
-                    {Array.isArray(c.recetas) && c.recetas.length > 0 && (
-                      <div className="px-4 py-3 bg-white border-t text-sm">
-                        <div className="text-gray-700 font-medium mb-2">Recetas</div>
-                        <div className="space-y-2">
-                          {c.recetas.map((r: any) => (
-                            <div key={r.id} className="rounded-lg ring-1 ring-gray-200 p-3">
-                              <div className="flex items-center justify-between">
-                                <div className="text-gray-800">Receta #{r.id}</div>
-                                <div className="text-gray-500">{formatFechaHora(r.fecha || r.created_at)}</div>
-                              </div>
-                              {Array.isArray(r.items) && r.items.length > 0 && (
-                                <ul className="mt-2 list-disc pl-5 text-gray-700">
-                                  {r.items.slice(0,3).map((it: any, idx: number) => (
-                                    <li key={idx}><span className="font-medium">{it.nombre_medicamento}</span> – {it.dosis}{it.via ? ` (${it.via})` : ''}</li>
-                                  ))}
-                                  {r.items.length > 3 && <li className="text-gray-500">…</li>}
-                                </ul>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+             <div className="space-y-4">
+                 {consultas.map((c) => (
+                   <div key={c.id} className="group relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-gray-200">
+                     {/* Header con gradiente sutil */}
+                     <div className={`relative px-6 py-5 ${c.tipo === 'inmunizacion' ? 'bg-gradient-to-r from-emerald-50 to-emerald-100/50' : 'bg-gradient-to-r from-amber-50 to-amber-100/50'}`}>
+                       <div className="flex items-start justify-between">
+                         <div className="flex items-center gap-4">
+                           {/* Icono de estado mejorado */}
+                           <div className={`relative flex items-center justify-center w-10 h-10 rounded-full shadow-sm ${c.tipo === 'inmunizacion' ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+                             <span className="text-white font-semibold text-sm">
+                               {c.tipo === 'inmunizacion' ? '✓' : '!'}
+                             </span>
+                             {/* Efecto de brillo */}
+                             <div className={`absolute inset-0 rounded-full opacity-20 ${c.tipo === 'inmunizacion' ? 'bg-emerald-300' : 'bg-amber-300'} animate-pulse`}></div>
+                           </div>
+                           
+                           <div className="space-y-1">
+                             <div className="flex items-center gap-2">
+                               <h4 className="font-semibold text-gray-900 text-base">
+                                 {c.tipo === 'inmunizacion' ? 'Inmunización' : 'Consulta'}
+                               </h4>
+                               {c.motivo && (
+                                 <span className="text-gray-600 text-sm">– {c.motivo}</span>
+                               )}
+                             </div>
+                             <div className="flex items-center gap-3 text-sm text-gray-500">
+                               <span className="flex items-center gap-1">
+                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                 </svg>
+                                 {formatFechaHora(c.fecha)}
+                               </span>
+                               {c.veterinario && (
+                                 <span className="flex items-center gap-1">
+                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                   </svg>
+                                   {c.veterinario}
+                                 </span>
+                               )}
+                             </div>
+                           </div>
+                         </div>
+                         
+                         {/* Menú de acciones mejorado */}
+                         <div className="relative">
+                           <button 
+                             onClick={() => setOpenHistMenu(openHistMenu === String(c.id) ? null : String(c.id))} 
+                             className="p-2 rounded-lg hover:bg-white/80 transition-colors group-hover:bg-white/60"
+                           >
+                             <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                             </svg>
+                           </button>
+                           {openHistMenu === String(c.id) && (
+                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-20">
+                               <button 
+                                 className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors" 
+                                 onClick={async () => { 
+                                   try { 
+                                     setOpenHistMenu(null); 
+                                     const res = await fetch(`/api/consultas?id=${c.id}`); 
+                                     const json = await res.json(); 
+                                     if (res.ok && json?.ok) { 
+                                       setEditConsulta(json.data); 
+                                     } else { 
+                                       setEditConsulta(c); 
+                                     } 
+                                   } catch { 
+                                     setEditConsulta(c); 
+                                   } 
+                                 }}
+                               >
+                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                 </svg>
+                                 Ver/Editar
+                               </button>
+                               <button 
+                                 className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors" 
+                                 onClick={() => { setConfirmDelete({ id: String(c.id) }); setOpenHistMenu(null); }}
+                               >
+                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                 </svg>
+                                 Eliminar
+                               </button>
+                             </div>
+                           )}
+                         </div>
+                       </div>
+                     </div>
+                     
+                     {/* Contenido principal */}
+                     <div className="px-6 py-4">
+                       {c.resumen && (
+                         <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                           <div className="flex items-start gap-2">
+                             <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                             </svg>
+                             <div className="text-sm text-gray-700 leading-relaxed">
+                               {c.resumen}
+                             </div>
+                           </div>
+                         </div>
+                       )}
+                       
+                       {/* Recetas vinculadas con mejor diseño */}
+                       {Array.isArray(c.recetas) && c.recetas.length > 0 && (
+                         <div className="space-y-3">
+                           <div className="flex items-center gap-2 mb-3">
+                             <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                             </svg>
+                             <h5 className="font-semibold text-gray-800">Recetas</h5>
+                           </div>
+                           <div className="space-y-3">
+                             {c.recetas.map((r: any) => (
+                               <div key={r.id} className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-4 border border-indigo-100 hover:border-indigo-200 transition-colors">
+                                 <div className="flex items-center justify-between mb-3">
+                                   <div className="flex items-center gap-2">
+                                     <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                                     <span className="font-medium text-indigo-800">Receta #{r.id}</span>
+                                   </div>
+                                   <span className="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">
+                                     {formatFechaHora(r.fecha || r.created_at)}
+                                   </span>
+                                 </div>
+                                 {Array.isArray(r.items) && r.items.length > 0 && (
+                                   <div className="space-y-2">
+                                     {r.items.slice(0,3).map((it: any, idx: number) => (
+                                       <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
+                                         <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full flex-shrink-0"></span>
+                                         <span className="font-medium text-gray-800">{it.nombre_medicamento}</span>
+                                         <span className="text-gray-500">–</span>
+                                         <span>{it.dosis}</span>
+                                         {it.via && (
+                                           <>
+                                             <span className="text-gray-400">•</span>
+                                             <span className="text-gray-500 text-xs bg-gray-100 px-2 py-0.5 rounded-full">{it.via}</span>
+                                           </>
+                                         )}
+                                       </div>
+                                     ))}
+                                     {r.items.length > 3 && (
+                                       <div className="text-xs text-gray-500 italic">
+                                         +{r.items.length - 3} medicamentos más...
+                                       </div>
+                                     )}
+                                   </div>
+                                 )}
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                 ))}
+               </div>
             </div>
           )}
 
