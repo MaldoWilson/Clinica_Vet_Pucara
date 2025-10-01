@@ -173,80 +173,109 @@ export default function BlogsForm() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">{editing ? "Editar Blog" : "Crear un Blog"}</h2>
-        <form onSubmit={editing ? (e) => { e.preventDefault(); handleUpdate(); } : handleSubmit}>
-          <div className="mb-2">
-            <label className="block font-medium">Título</label>
-            <input
-              type="text"
-              className="w-full border rounded px-2 py-1"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              placeholder="Ej: Consejos para el cuidado de tu mascota"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block font-medium">Contenido</label>
-            <textarea
-              className="w-full border rounded px-2 py-1 min-h-[120px]"
-              value={contenido}
-              onChange={(e) => setContenido(e.target.value)}
-              placeholder="Escribe el contenido del blog..."
-            />
-          </div>
-          <div className="mb-3">
-            <label className="block font-medium">Imagen</label>
-            <div className="flex items-center gap-3 flex-wrap">
-              <input aria-label="..." className="block w-full sm:w-auto"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setImageFile(file);
-                  setImagePreview(file ? URL.createObjectURL(file) : null);
-                }}
-              />
-              {imagePreview && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />
+    <div className="space-y-8 max-w-[90rem] mx-auto">
+      <div className="relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-4">{editing ? "Editar Blog" : "Crear un Blog"}</h2>
+          <form onSubmit={editing ? (e) => { e.preventDefault(); handleUpdate(); } : handleSubmit}>
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Información del Blog</h3>
+              </div>
+              <div className="grid grid-cols-1 gap-4 mt-3">
+                <div>
+                  <label className="block font-medium">Título *</label>
+                  <input
+                    type="text"
+                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
+                    value={titulo}
+                    onChange={(e) => setTitulo(e.target.value)}
+                    placeholder="Ej: Consejos para el cuidado de tu mascota"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium">Contenido *</label>
+                  <textarea
+                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white min-h-[120px]"
+                    value={contenido}
+                    onChange={(e) => setContenido(e.target.value)}
+                    placeholder="Escribe el contenido del blog..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Imagen y Configuración</h3>
+              </div>
+              <div className="grid grid-cols-1 gap-4 mt-3">
+                <div>
+                  <label className="block font-medium">Imagen</label>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <input 
+                      aria-label="Subir imagen del blog" 
+                      className="block w-full sm:w-auto rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setImageFile(file);
+                        setImagePreview(file ? URL.createObjectURL(file) : null);
+                      }}
+                    />
+                    {imagePreview && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="publico"
+                    type="checkbox"
+                    checked={publico}
+                    onChange={(e) => setPublico(e.target.checked)}
+                    className="rounded border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <label htmlFor="publico" className="font-medium">Público</label>
+                </div>
+              </div>
+            </div>
+
+            {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+            {success && <p className="text-sm text-green-600 mt-3">{success}</p>}
+
+            <div className="flex items-center gap-2 mt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${loading ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700'}`}
+              >
+                {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar" : "Crear Blog")}
+              </button>
+              
+              {editing && (
+                <button 
+                  type="button" 
+                  className="px-3 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50" 
+                  onClick={() => {
+                    setEditing(null);
+                    setTitulo("");
+                    setContenido("");
+                    setPublico(false);
+                    setImageFile(null);
+                    setImagePreview(null);
+                  }}
+                >
+                  Cancelar
+                </button>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
-          </div>
-          <div className="mb-3 flex items-center gap-2">
-            <input
-              id="publico"
-              type="checkbox"
-              checked={publico}
-              onChange={(e) => setPublico(e.target.checked)}
-            />
-            <label htmlFor="publico" className="font-medium">Público</label>
-          </div>
-          {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-          {success && <p className="text-green-600 text-sm mb-2">{success}</p>}
-          <div className="flex items-center gap-2 mt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
-            >
-              {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar" : "Crear Blog")}
-            </button>
-            
-            {editing && (
-              <button type="button" className="px-3 py-2 rounded border" onClick={() => {
-                setEditing(null);
-                setTitulo("");
-                setContenido("");
-                setPublico(false);
-                setImageFile(null);
-                setImagePreview(null);
-              }}>Cancelar</button>
-            )}
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
 
       <div>

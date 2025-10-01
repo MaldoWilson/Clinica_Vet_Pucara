@@ -308,163 +308,191 @@ export default function ProductosForm() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">{editing ? "Editar Producto" : "Crear un Producto"}</h2>
-        <form onSubmit={editing ? (e) => { e.preventDefault(); handleUpdate(); } : handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block font-medium">Nombre *</label>
-              <input
-                type="text"
-                className="w-full border rounded px-2 py-1"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                placeholder="Ej: Alimento Premium para Perros"
-              />
+    <div className="space-y-8 max-w-[90rem] mx-auto">
+      <div className="relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-4">{editing ? "Editar Producto" : "Crear un Producto"}</h2>
+          <form onSubmit={editing ? (e) => { e.preventDefault(); handleUpdate(); } : handleSubmit}>
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Información Básica</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                <div>
+                  <label className="block font-medium">Nombre *</label>
+                  <input
+                    type="text"
+                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    placeholder="Ej: Alimento Premium para Perros"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium">SKU *</label>
+                  <input
+                    type="text"
+                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
+                    value={sku}
+                    onChange={(e) => setSku(e.target.value)}
+                    placeholder="Ej: ALI-PER-001"
+                  />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block font-medium">Descripción *</label>
+                <textarea
+                  className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white min-h-[120px]"
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                  placeholder="Describe el producto..."
+                />
+              </div>
             </div>
-            <div>
-              <label className="block font-medium">SKU *</label>
-              <input
-                type="text"
-                className="w-full border rounded px-2 py-1"
-                value={sku}
-                onChange={(e) => setSku(e.target.value)}
-                placeholder="Ej: ALI-PER-001"
-              />
+
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Precio y Stock</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                <div>
+                  <label className="block font-medium">Precio (CLP) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
+                    value={precio}
+                    onChange={(e) => setPrecio(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium">Stock *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
+                    value={stock}
+                    onChange={(e) => setStock(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium">Categoría</label>
+                  <select
+                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
+                    value={categoria}
+                    onChange={(e) => setCategoria(e.target.value)}
+                  >
+                    <option value="">Selecciona categoría</option>
+                    <option value="Alimentos">Alimentos</option>
+                    <option value="Medicamentos">Medicamentos</option>
+                    <option value="Accesorios">Accesorios</option>
+                  </select>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block font-medium">Descripción *</label>
-            <textarea
-              className="w-full border rounded px-2 py-1 min-h-[120px]"
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-              placeholder="Describe el producto..."
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="block font-medium">Precio (CLP) *</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                className="w-full border rounded px-2 py-1"
-                value={precio}
-                onChange={(e) => setPrecio(e.target.value)}
-                placeholder="0"
-              />
+
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Imágenes del Producto</h3>
+              </div>
+              <div className="grid grid-cols-1 gap-4 mt-3">
+                <div>
+                  <label className="block font-medium">Imagen Principal</label>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <input 
+                      aria-label="Subir imagen principal del producto" 
+                      className="block w-full sm:w-auto rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setImageFile(file);
+                        setImagePreview(file ? URL.createObjectURL(file) : null);
+                      }}
+                    />
+                    {imagePreview && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
+                </div>
+
+                <div>
+                  <label className="block font-medium">Imágenes adicionales (hasta 3)</label>
+                  <div className="grid grid-cols-1 gap-3 mt-1">
+                    {[0,1,2].map((idx) => (
+                      <div key={idx} className="flex items-center gap-3 flex-wrap">
+                        <input 
+                          className="block w-full sm:w-auto rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null;
+                            setExtraFiles((prev) => {
+                              const next = [...prev];
+                              next[idx] = file;
+                              return next;
+                            });
+                            setExtraPreviews((prev) => {
+                              const next = [...prev];
+                              next[idx] = file ? URL.createObjectURL(file) : prev[idx];
+                              return next;
+                            });
+                          }}
+                        />
+                        {(extraPreviews[idx]) && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={extraPreviews[idx] as string} alt={`extra-${idx+1}`} className="w-16 h-16 object-cover rounded border shrink-0" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Opcional. Se reemplazarán si subes nuevas al editar.</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block font-medium">Stock *</label>
-              <input
-                type="number"
-                min="0"
-                className="w-full border rounded px-2 py-1"
-                value={stock}
-                onChange={(e) => setStock(e.target.value)}
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Categoría</label>
-              <select
-                className="w-full border rounded px-2 py-1 bg-white"
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
+            
+            {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+            {success && <p className="text-sm text-green-600 mt-3">{success}</p>}
+
+            <div className="flex items-center gap-2 mt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${loading ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700'}`}
               >
-                <option value="">Selecciona categoría</option>
-                <option value="Alimentos">Alimentos</option>
-                <option value="Medicamentos">Medicamentos</option>
-                <option value="Accesorios">Accesorios</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="mb-3">
-            <label className="block font-medium">Imagen Principal</label>
-            <div className="flex items-center gap-3 flex-wrap">
-              <input aria-label="..." className="block w-full sm:w-auto"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setImageFile(file);
-                  setImagePreview(file ? URL.createObjectURL(file) : null);
-                }}
-              />
-              {imagePreview && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />
+                {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar" : "Crear Producto")}
+              </button>
+              
+              {editing && (
+                <button 
+                  type="button" 
+                  className="px-3 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50" 
+                  onClick={() => {
+                    setEditing(null);
+                    setNombre("");
+                    setDescripcion("");
+                    setPrecio("");
+                    setSku("");
+                    setCategoria("");
+                    setStock("");
+                    setImageFile(null);
+                    setImagePreview(null);
+                    setExtraFiles([null, null, null]);
+                    setExtraPreviews([null, null, null]);
+                  }}
+                >
+                  Cancelar
+                </button>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
-          </div>
-
-          {/* Imágenes adicionales */}
-          <div className="mb-3">
-            <label className="block font-medium">Imágenes adicionales (hasta 3)</label>
-            <div className="grid grid-cols-1 gap-3 mt-1">
-              {[0,1,2].map((idx) => (
-                <div key={idx} className="flex items-center gap-3 flex-wrap">
-                  <input className="block w-full sm:w-auto"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0] || null;
-                      setExtraFiles((prev) => {
-                        const next = [...prev];
-                        next[idx] = file;
-                        return next;
-                      });
-                      setExtraPreviews((prev) => {
-                        const next = [...prev];
-                        next[idx] = file ? URL.createObjectURL(file) : prev[idx];
-                        return next;
-                      });
-                    }}
-                  />
-                  {(extraPreviews[idx]) && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={extraPreviews[idx] as string} alt={`extra-${idx+1}`} className="w-16 h-16 object-cover rounded border shrink-0" />
-                  )}
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-gray-500 mt-1">Opcional. Se reemplazarán si subes nuevas al editar.</p>
-          </div>
-          
-          {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-          {success && <p className="text-green-600 text-sm mb-2">{success}</p>}
-          <div className="flex items-center gap-2 mt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
-            >
-              {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar" : "Crear Producto")}
-            </button>
-            
-            {editing && (
-              <button type="button" className="px-3 py-2 rounded border" onClick={() => {
-                setEditing(null);
-                setNombre("");
-                setDescripcion("");
-                setPrecio("");
-                setSku("");
-                setCategoria("");
-                setStock("");
-                setImageFile(null);
-                setImagePreview(null);
-                setExtraFiles([null, null, null]);
-                setExtraPreviews([null, null, null]);
-              }}>Cancelar</button>
-            )}
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
 
       <div>

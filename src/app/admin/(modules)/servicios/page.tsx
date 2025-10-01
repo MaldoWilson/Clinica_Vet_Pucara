@@ -125,40 +125,110 @@ export default function AdminServiciosPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-[90rem] mx-auto">
       {error && (<div className="p-3 rounded border border-red-200 bg-red-50 text-red-700 text-sm">{error}</div>)}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-semibold mb-4">{isEdit ? "Editar servicio" : "Nuevo servicio"}</h3>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Nombre</label>
-            <input className="w-full rounded border px-3 py-2" value={form.nombre} onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))} required placeholder="Nombre del servicio" aria-label="Nombre del servicio" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Precio</label>
-            <input type="number" step="0.01" className="w-full rounded border px-3 py-2" value={form.precio_clp} onChange={(e) => setForm((f) => ({ ...f, precio_clp: e.target.value }))} placeholder="Precio en CLP" aria-label="Precio en CLP" />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">Descripción</label>
-            <textarea className="w-full rounded border px-3 py-2" rows={3} value={form.descripcion} onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))} placeholder="Descripción del servicio" aria-label="Descripción del servicio" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Duración (minutos)</label>
-            <input type="number" className="w-full rounded border px-3 py-2" value={form.duracion_min} onChange={(e) => setForm((f) => ({ ...f, duracion_min: e.target.value }))} placeholder="Duración en minutos" aria-label="Duración en minutos" />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">Imagen</label>
-            <div className="flex items-center gap-3 flex-wrap">
-              <input className="block w-full sm:w-auto" type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0] || null; setImageFile(file); setImagePreview(file ? URL.createObjectURL(file) : null); }} aria-label="Subir imagen del servicio" />
-              {imagePreview && (<img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />)}
+      <div className="relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />
+        <div className="p-6">
+          <h3 className="text-xl font-semibold mb-4">{isEdit ? "Editar servicio" : "Nuevo servicio"}</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Información del Servicio</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                <div>
+                  <label className="block font-medium">Nombre *</label>
+                  <input 
+                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" 
+                    value={form.nombre} 
+                    onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))} 
+                    required 
+                    placeholder="Nombre del servicio" 
+                    aria-label="Nombre del servicio" 
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium">Precio (CLP)</label>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" 
+                    value={form.precio_clp} 
+                    onChange={(e) => setForm((f) => ({ ...f, precio_clp: e.target.value }))} 
+                    placeholder="Precio en CLP" 
+                    aria-label="Precio en CLP" 
+                  />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block font-medium">Descripción</label>
+                <textarea 
+                  className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" 
+                  rows={3} 
+                  value={form.descripcion} 
+                  onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))} 
+                  placeholder="Descripción del servicio" 
+                  aria-label="Descripción del servicio" 
+                />
+              </div>
+              <div className="mt-4">
+                <label className="block font-medium">Duración (minutos)</label>
+                <input 
+                  type="number" 
+                  className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" 
+                  value={form.duracion_min} 
+                  onChange={(e) => setForm((f) => ({ ...f, duracion_min: e.target.value }))} 
+                  placeholder="Duración en minutos" 
+                  aria-label="Duración en minutos" 
+                />
+              </div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
-          </div>
-          <div className="flex items-end gap-2">
-            <button type="submit" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300" disabled={saving}>{saving ? "Guardando..." : isEdit ? "Actualizar" : "Crear Servicio"}</button>
-            {isEdit && (<button type="button" onClick={resetForm} className="inline-flex items-center px-3 py-2 rounded border">Cancelar</button>)}
-          </div>
-        </form>
+
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Imagen del Servicio</h3>
+              </div>
+              <div className="mt-3">
+                <label className="block font-medium">Imagen</label>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <input 
+                    className="block w-full sm:w-auto rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white" 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => { 
+                      const file = e.target.files?.[0] || null; 
+                      setImageFile(file); 
+                      setImagePreview(file ? URL.createObjectURL(file) : null); 
+                    }} 
+                    aria-label="Subir imagen del servicio" 
+                  />
+                  {imagePreview && (<img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />)}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
+              </div>
+            </div>
+
+            <div className="flex items-end gap-2">
+              <button 
+                type="submit" 
+                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${saving ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700'}`} 
+                disabled={saving}
+              >
+                {saving ? "Guardando..." : isEdit ? "Actualizar" : "Crear Servicio"}
+              </button>
+              {isEdit && (
+                <button 
+                  type="button" 
+                  onClick={resetForm} 
+                  className="px-3 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
       </div>
       <AdminEditableTable
         items={servicios}
