@@ -7,15 +7,28 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "20", 10), 1), 100);
     const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
+    const mes = url.searchParams.get("mes"); // Formato: YYYY-MM
     
     const supa = supabaseServer();
     
     // Obtener registros con paginación
-    const query = supa
+    let query = supa
       .from("flujo_caja")
       .select("*", { count: "exact" })
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+      .order("created_at", { ascending: false });
+    
+    // Filtrar por mes si se especifica
+    if (mes) {
+      const [year, month] = mes.split('-');
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59, 999);
+      
+      query = query
+        .gte("created_at", startDate.toISOString())
+        .lte("created_at", endDate.toISOString());
+    }
+    
+    query = query.range(offset, offset + limit - 1);
     
     const { data, error, count } = await query;
     
@@ -25,7 +38,7 @@ export async function GET(req: Request) {
       {
         ok: true,
         data,
-        meta: { limit, offset, count: count || 0 }
+        meta: { limit, offset, count: count || 0, mes }
       },
       { headers: { "Cache-Control": "no-store" } }
     );
@@ -46,13 +59,6 @@ export async function POST(req: Request) {
     if (body.dia === undefined || body.dia === null || body.dia === "") {
       return NextResponse.json(
         { ok: false, error: "El campo 'día' es obligatorio" },
-        { status: 400 }
-      );
-    }
-    
-    if (!body.tipo || body.tipo.trim() === "") {
-      return NextResponse.json(
-        { ok: false, error: "El campo 'tipo' es obligatorio" },
         { status: 400 }
       );
     }
@@ -109,13 +115,6 @@ export async function PUT(req: Request) {
     if (body.dia === undefined || body.dia === null || body.dia === "") {
       return NextResponse.json(
         { ok: false, error: "El campo 'día' es obligatorio" },
-        { status: 400 }
-      );
-    }
-    
-    if (!body.tipo || body.tipo.trim() === "") {
-      return NextResponse.json(
-        { ok: false, error: "El campo 'tipo' es obligatorio" },
         { status: 400 }
       );
     }

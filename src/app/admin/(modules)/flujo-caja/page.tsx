@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import IngresosEgresosChart from "@/components/IngresosEgresosChart";
+import EgresosDistribucionChart from "@/components/EgresosDistribucionChart";
+import ProfesionalesRendimientoChart from "@/components/ProfesionalesRendimientoChart";
+import * as XLSX from "xlsx";
 
 type Veterinario = {
   id: string;
@@ -60,6 +64,13 @@ export default function FlujoCajaPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // Filtro de mes/año - Por defecto el mes actual
+  const getCurrentMonthString = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  };
+  const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentMonthString());
+  
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -94,7 +105,7 @@ export default function FlujoCajaPage() {
     setError(null);
     try {
       const offset = (currentPage - 1) * itemsPerPage;
-      const res = await fetch(`/api/flujo-caja?limit=${itemsPerPage}&offset=${offset}`);
+      const res = await fetch(`/api/flujo-caja?limit=${itemsPerPage}&offset=${offset}&mes=${selectedMonth}`);
       const json = await res.json();
       
       if (!res.ok || !json.ok) {
@@ -117,12 +128,19 @@ export default function FlujoCajaPage() {
   }, []);
 
   useEffect(() => {
+    setCurrentPage(1); // Resetear página al cambiar mes
+    cargarRegistros();
+  }, [selectedMonth]);
+
+  useEffect(() => {
     cargarRegistros();
   }, [currentPage]);
 
   // Abrir modal para crear
   const handleNuevo = () => {
-    setFormData(initialFormState);
+    // Autocompletar el día actual
+    const diaActual = new Date().getDate();
+    setFormData({ ...initialFormState, dia: diaActual });
     setIsEditing(false);
     setShowModal(true);
   };
@@ -230,13 +248,335 @@ export default function FlujoCajaPage() {
     }).format(num);
   };
 
+  // Obtener nombre del mes en español
+  const getMonthName = (monthString: string) => {
+    const [year, month] = monthString.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+  };
+
+  // Exportar a Excel
+  const exportarExcel = () => {
+    if (registros.length === 0) {
+      alert("No hay registros para exportar");
+      return;
+    }
+
+    const monthName = getMonthName(selectedMonth);
+
+    // Crear datos con encabezado de título
+    const titulo = [[`FLUJO DE CAJA - ${monthName.toUpperCase()}`]];
+    const subtitulo = [[`Clínica Veterinaria Pucará`]];
+    const espacioBlanco = [[]];
+    
+    // Encabezados de columnas (en mayúsculas)
+    const headers = [["DÍA", "TIPO", "CATEGORÍA", "NOMBRE", "EFECTIVO", "DÉBITO", "CRÉDITO", "TRANSFERENCIA", "DEUDA", "EGRESO", "DR", "FECHA CREACIÓN"]];
+    
+    // Preparar datos - valores nulos o 0 se muestran como vacíos
+    const datosBody = registros.map(reg => [
+      reg.dia,
+      reg.tipo || "",
+      reg.categoria || "",
+      reg.nombre || "",
+      reg.efectivo ? reg.efectivo : "",
+      reg.debito ? reg.debito : "",
+      reg.credito ? reg.credito : "",
+      reg.transferencia ? reg.transferencia : "",
+      reg.deuda ? reg.deuda : "",
+      reg.egreso ? reg.egreso : "",
+      reg.dr || "",
+      new Date(reg.created_at).toLocaleDateString('es-CL')
+    ]);
+
+    // Combinar todo
+    const datosCompletos = [...titulo, ...subtitulo, ...espacioBlanco, ...headers, ...datosBody];
+
+    // Crear hoja
+    const worksheet = XLSX.utils.aoa_to_sheet(datosCompletos);
+    const workbook = XLSX.utils.book_new();
+
+    // Ajustar ancho de columnas
+    worksheet['!cols'] = [
+      { wch: 8 },  // Día
+      { wch: 15 }, // Tipo
+      { wch: 12 }, // Categoría
+      { wch: 25 }, // Nombre
+      { wch: 13 }, // Efectivo
+      { wch: 13 }, // Débito
+      { wch: 13 }, // Crédito
+      { wch: 15 }, // Transferencia
+      { wch: 13 }, // Deuda
+      { wch: 13 }, // Egreso
+      { wch: 20 }, // DR
+      { wch: 16 }  // Fecha Creación
+    ];
+
+    // Aplicar estilos
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+    
+    // Estilo del título (fila 1)
+    if (worksheet['A1']) {
+      worksheet['A1'].s = {
+        font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "4F46E5" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+    }
+    
+    // Estilo del subtítulo (fila 2)
+    if (worksheet['A2']) {
+      worksheet['A2'].s = {
+        font: { bold: true, sz: 12, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "6366F1" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+    }
+
+    // Combinar celdas para título y subtítulo
+    worksheet['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }, // Título
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 11 } }  // Subtítulo
+    ];
+
+    // Estilo de encabezados (fila 4)
+    for (let col = 0; col <= 11; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 3, c: col });
+      if (worksheet[cellAddress]) {
+        worksheet[cellAddress].s = {
+          font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "059669" } },
+          alignment: { horizontal: "center", vertical: "center" },
+          border: {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } }
+          }
+        };
+      }
+    }
+
+    // Estilo de datos (filas 5 en adelante) - alternar colores
+    for (let row = 4; row <= range.e.r; row++) {
+      const isEvenRow = (row - 4) % 2 === 0;
+      for (let col = 0; col <= 11; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+        if (worksheet[cellAddress]) {
+          // Formato de números con separador de miles para columnas monetarias (4-9)
+          if (col >= 4 && col <= 9 && worksheet[cellAddress].v !== "") {
+            const value = worksheet[cellAddress].v;
+            if (typeof value === 'number') {
+              worksheet[cellAddress].z = '#,##0';
+            }
+          }
+
+          // Color por columna - solo si tiene valor
+          let fontColor = { rgb: "000000" }; // Negro por defecto
+          let fontBold = false;
+          
+          if (worksheet[cellAddress].v !== "") {
+            switch(col) {
+              case 5: // DÉBITO - Verde
+                fontColor = { rgb: "16A34A" };
+                fontBold = true;
+                break;
+              case 6: // CRÉDITO - Morado
+                fontColor = { rgb: "9333EA" };
+                fontBold = true;
+                break;
+              case 7: // TRANSFERENCIA - Celeste
+                fontColor = { rgb: "0891B2" };
+                fontBold = true;
+                break;
+              case 8: // DEUDA - Rojo
+                fontColor = { rgb: "DC2626" };
+                fontBold = true;
+                break;
+              case 9: // EGRESO - Rojo
+                fontColor = { rgb: "DC2626" };
+                fontBold = true;
+                break;
+              case 4: // EFECTIVO - Negro pero negrita
+                fontBold = true;
+                break;
+            }
+          }
+
+          worksheet[cellAddress].s = {
+            fill: { fgColor: { rgb: isEvenRow ? "FFFFFF" : "F3F4F6" } },
+            alignment: { 
+              horizontal: col >= 4 && col <= 9 ? "right" : "left",
+              vertical: "center" 
+            },
+            border: {
+              top: { style: "thin", color: { rgb: "E5E7EB" } },
+              bottom: { style: "thin", color: { rgb: "E5E7EB" } },
+              left: { style: "thin", color: { rgb: "E5E7EB" } },
+              right: { style: "thin", color: { rgb: "E5E7EB" } }
+            },
+            font: { color: fontColor, bold: fontBold }
+          };
+        }
+      }
+    }
+
+    // Agregar filtro automático a los encabezados
+    worksheet['!autofilter'] = { ref: `A4:L${range.e.r + 1}` };
+
+    // Agregar hoja al libro
+    XLSX.utils.book_append_sheet(workbook, worksheet, monthName.substring(0, 31));
+    
+    // Descargar archivo
+    const fileName = `flujo_caja_${monthName.replace(/ /g, '_')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+
+  // Imprimir mes
+  const imprimirMes = () => {
+    if (registros.length === 0) {
+      alert("No hay registros para imprimir");
+      return;
+    }
+
+    const monthName = getMonthName(selectedMonth);
+    const contenidoImpresion = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Flujo de Caja - ${monthName}</title>
+        <style>
+          @page {
+            size: landscape;
+            margin: 1cm;
+          }
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #000;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+          }
+          .header h1 {
+            font-size: 18px;
+            margin-bottom: 5px;
+          }
+          .header h2 {
+            font-size: 14px;
+            color: #666;
+            text-transform: capitalize;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+          }
+          th, td {
+            border: 1px solid #333;
+            padding: 6px 4px;
+            text-align: left;
+          }
+          th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            font-size: 10px;
+            text-transform: uppercase;
+          }
+          td {
+            font-size: 10px;
+          }
+          .text-right {
+            text-align: right;
+          }
+          .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 9px;
+            color: #666;
+          }
+          @media print {
+            body {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Clínica Veterinaria Pucará</h1>
+          <h2>Flujo de Caja - ${monthName}</h2>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 5%;">Día</th>
+              <th style="width: 10%;">Tipo</th>
+              <th style="width: 8%;">Categoría</th>
+              <th style="width: 15%;">Nombre</th>
+              <th style="width: 8%;" class="text-right">Efectivo</th>
+              <th style="width: 8%;" class="text-right">Débito</th>
+              <th style="width: 8%;" class="text-right">Crédito</th>
+              <th style="width: 9%;" class="text-right">Transfer.</th>
+              <th style="width: 8%;" class="text-right">Deuda</th>
+              <th style="width: 8%;" class="text-right">Egreso</th>
+              <th style="width: 13%;">DR</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${registros.map(reg => `
+              <tr>
+                <td>${reg.dia}</td>
+                <td>${reg.tipo || ""}</td>
+                <td>${reg.categoria || ""}</td>
+                <td>${reg.nombre || ""}</td>
+                <td class="text-right">${reg.efectivo ? formatNumber(reg.efectivo) : ""}</td>
+                <td class="text-right">${reg.debito ? formatNumber(reg.debito) : ""}</td>
+                <td class="text-right">${reg.credito ? formatNumber(reg.credito) : ""}</td>
+                <td class="text-right">${reg.transferencia ? formatNumber(reg.transferencia) : ""}</td>
+                <td class="text-right">${reg.deuda ? formatNumber(reg.deuda) : ""}</td>
+                <td class="text-right">${reg.egreso ? formatNumber(reg.egreso) : ""}</td>
+                <td>${reg.dr || ""}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <div class="footer">
+          <p>Impreso el ${new Date().toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })} - Total de registros: ${registros.length}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const ventanaImpresion = window.open('', '_blank');
+    if (ventanaImpresion) {
+      ventanaImpresion.document.write(contenidoImpresion);
+      ventanaImpresion.document.close();
+      ventanaImpresion.focus();
+      
+      // Esperar a que cargue antes de imprimir
+      setTimeout(() => {
+        ventanaImpresion.print();
+      }, 250);
+    }
+  };
+
   return (
     <div className="space-y-6 px-4 py-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Gestión de Flujo de Caja</h1>
-          <p className="text-gray-600 mt-1">Administra ingresos y egresos</p>
+          <p className="text-gray-600 mt-1">Administra ingresos y egresos - <span className="font-semibold capitalize">{getMonthName(selectedMonth)}</span></p>
         </div>
         <button
           onClick={handleNuevo}
@@ -244,6 +584,49 @@ export default function FlujoCajaPage() {
         >
           + Agregar Nuevo Registro
         </button>
+      </div>
+
+      {/* Filtros y Acciones */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-1">
+            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Filtrar por mes:</label>
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              onClick={() => setSelectedMonth(getCurrentMonthString())}
+              className="px-4 py-2 text-sm rounded border border-gray-300 hover:bg-gray-50 transition-colors whitespace-nowrap"
+            >
+              Mes Actual
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={exportarExcel}
+              disabled={loading || registros.length === 0}
+              className="px-4 py-2 rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Exportar Excel
+            </button>
+            <button
+              onClick={imprimirMes}
+              disabled={loading || registros.length === 0}
+              className="px-4 py-2 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              Imprimir Mes
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Error global */}
@@ -381,13 +764,10 @@ export default function FlujoCajaPage() {
 
                   {/* Tipo */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Tipo <span className="text-red-500">*</span>
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                     <select
                       value={formData.tipo}
                       onChange={(e) => handleInputChange("tipo", e.target.value)}
-                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="">Seleccionar...</option>
@@ -425,7 +805,7 @@ export default function FlujoCajaPage() {
                       type="text"
                       value={formData.nombre || ""}
                       onChange={(e) => handleInputChange("nombre", e.target.value)}
-                      placeholder="Descripción del movimiento"
+                      placeholder="Nombre del cliente"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
@@ -553,6 +933,15 @@ export default function FlujoCajaPage() {
           </div>
         </div>
       )}
+
+      {/* Gráfico de Ingresos vs Egresos */}
+      <IngresosEgresosChart data={registros} />
+
+      {/* Gráfico de Distribución de Egresos */}
+      <EgresosDistribucionChart data={registros} />
+
+      {/* Gráfico de Rendimiento por Profesional */}
+      <ProfesionalesRendimientoChart data={registros} />
 
       {/* Modal de Confirmación de Eliminación */}
       <ConfirmationModal

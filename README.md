@@ -19,6 +19,11 @@ npm -v
 npm install
 ```
 
+```bash
+npm install xlsx
+npm install recharts
+```
+
 2. Variables de entorno:
 - Crea el archivo `.env` y completa los valores.
 
