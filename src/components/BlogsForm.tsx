@@ -233,14 +233,20 @@ export default function BlogsForm() {
                   <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    id="publico"
-                    type="checkbox"
-                    checked={publico}
-                    onChange={(e) => setPublico(e.target.checked)}
-                    className="rounded border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                  <label htmlFor="publico" className="font-medium">Público</label>
+                  <div>
+                    <label className="block font-medium mb-1">Público</label>
+                    <button
+                      type="button"
+                      aria-pressed={publico}
+                      onClick={() => setPublico(!publico)}
+                      className={`relative inline-flex items-center h-8 rounded-full w-14 transition-colors ${publico ? 'bg-emerald-600' : 'bg-gray-300'}`}
+                      title="Marcar si el blog es público"
+                    >
+                      <span
+                        className={`inline-block w-7 h-7 transform bg-white rounded-full shadow transition-transform ${publico ? 'translate-x-6' : 'translate-x-1'}`}
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

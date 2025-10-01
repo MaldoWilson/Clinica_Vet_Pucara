@@ -10,6 +10,7 @@ export default function ProductosForm() {
   const [sku, setSku] = useState("");
   const [categoria, setCategoria] = useState("");
   const [stock, setStock] = useState("");
+  const [publico, setPublico] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [extraFiles, setExtraFiles] = useState<Array<File | null>>([null, null, null]);
@@ -26,6 +27,7 @@ export default function ProductosForm() {
     sku: string; 
     categoria: string; 
     stock: number; 
+    publico?: boolean;
     imagen_principal?: string | null;
     imagenes?: string[];
     updated_at?: string;
@@ -43,6 +45,7 @@ export default function ProductosForm() {
     sku: string; 
     categoria: string; 
     stock: number; 
+    publico?: boolean;
     imagen_principal?: string | null;
     imagenes?: string[];
     updated_at?: string;
@@ -152,6 +155,7 @@ export default function ProductosForm() {
           sku, 
           categoria, 
           stock: stockNum, 
+          publico,
           imagen_principal, 
           imagenes
         }),
@@ -165,6 +169,7 @@ export default function ProductosForm() {
       setSku("");
       setCategoria("");
       setStock("");
+      setPublico(false);
       setImageFile(null);
       setImagePreview(null);
       setExtraFiles([null, null, null]);
@@ -186,6 +191,7 @@ export default function ProductosForm() {
     sku: string; 
     categoria: string; 
     stock: number; 
+    publico?: boolean;
     imagen_principal?: string | null;
     imagenes?: string[];
     updated_at?: string;
@@ -197,6 +203,7 @@ export default function ProductosForm() {
     setSku(producto.sku);
     setCategoria(producto.categoria || "");
     setStock(producto.stock.toString());
+    setPublico(producto.publico || false);
     setImageFile(null);
     setImagePreview(producto.imagen_principal || null);
     const prevs = [null, null, null] as Array<string | null>;
@@ -258,6 +265,7 @@ export default function ProductosForm() {
           sku, 
           categoria, 
           stock: stockNum, 
+          publico,
           imagen_principal, 
           ...(typeof imagenesUpdate !== 'undefined' ? { imagenes: imagenesUpdate } : {})
         }),
@@ -272,6 +280,7 @@ export default function ProductosForm() {
       setSku("");
       setCategoria("");
       setStock("");
+      setPublico(false);
       setImageFile(null);
       setImagePreview(null);
       setExtraFiles([null, null, null]);
@@ -399,7 +408,7 @@ export default function ProductosForm() {
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Imágenes del Producto</h3>
               </div>
-              <div className="grid grid-cols-1 gap-4 mt-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-3">
                 <div>
                   <label className="block font-medium">Imagen Principal</label>
                   <div className="flex items-center gap-3 flex-wrap">
@@ -420,6 +429,25 @@ export default function ProductosForm() {
                     )}
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
+
+                  <div className="mt-8">
+                <div className="flex items-center gap-2">
+                  <div>
+                    <label className="block font-medium mb-1">Público</label>
+                    <button
+                      type="button"
+                      aria-pressed={publico}
+                      onClick={() => setPublico(!publico)}
+                      className={`relative inline-flex items-center h-8 rounded-full w-14 transition-colors ${publico ? 'bg-emerald-600' : 'bg-gray-300'}`}
+                      title="Marcar si el producto es público"
+                    >
+                      <span
+                        className={`inline-block w-7 h-7 transform bg-white rounded-full shadow transition-transform ${publico ? 'translate-x-6' : 'translate-x-1'}`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
                 </div>
 
                 <div>
@@ -481,6 +509,7 @@ export default function ProductosForm() {
                     setSku("");
                     setCategoria("");
                     setStock("");
+                    setPublico(false);
                     setImageFile(null);
                     setImagePreview(null);
                     setExtraFiles([null, null, null]);
