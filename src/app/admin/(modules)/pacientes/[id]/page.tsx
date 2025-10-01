@@ -115,7 +115,10 @@ export default function PacienteDetailPage() {
   }, [editConsulta]);
 
   async function crearReceta() {
-    if (!ultimaConsultaId) return;
+    if (!ultimaConsultaId) {
+      setError("Debes crear una consulta primero antes de crear una receta.");
+      return;
+    }
     setSavingReceta(true); setError(null); setSuccess(null);
     try {
       const payload: any = {
