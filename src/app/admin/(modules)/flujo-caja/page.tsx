@@ -935,13 +935,19 @@ export default function FlujoCajaPage() {
       )}
 
       {/* Gráfico de Ingresos vs Egresos */}
-      <IngresosEgresosChart data={registros} />
+      <div id="grafico-ingresos-egresos">
+        <IngresosEgresosChart data={registros} />
+      </div>
 
       {/* Gráfico de Distribución de Egresos */}
-      <EgresosDistribucionChart data={registros} />
+      <div id="grafico-distribucion-egresos">
+        <EgresosDistribucionChart data={registros} />
+      </div>
 
       {/* Gráfico de Rendimiento por Profesional */}
-      <ProfesionalesRendimientoChart data={registros} />
+      <div id="grafico-rendimiento-profesionales">
+        <ProfesionalesRendimientoChart data={registros} />
+      </div>
 
       {/* Modal de Confirmación de Eliminación */}
       <ConfirmationModal

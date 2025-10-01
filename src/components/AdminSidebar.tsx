@@ -10,6 +10,8 @@ type Section = {
   id: string;
   label: string;
   items: NavItem[];
+  color: string;
+  gradient: string;
 };
 
 export default function AdminSidebar() {
@@ -54,18 +56,10 @@ export default function AdminSidebar() {
 
   const sections: Section[] = useMemo(() => [
     {
-      id: "contenido",
-      label: "Contenido",
-      items: [
-        { label: "Blogs", href: "/admin/blogs", emoji: "📝" },
-        { label: "Productos", href: "/admin/productos", emoji: "🛍️" },
-        { label: "Servicios", href: "/admin/servicios", emoji: "💼" },
-        { label: "Equipo", href: "/admin/equipo", emoji: "👥" },
-      ],
-    },
-    {
       id: "mascotas",
       label: "Mascotas",
+      color: "emerald",
+      gradient: "from-emerald-500 to-teal-500",
       items: [
         { label: "Citas", href: "/admin/citas", emoji: "📅" },
         { label: "Fichas", href: "/admin/fichas", emoji: "📋" },
@@ -76,10 +70,24 @@ export default function AdminSidebar() {
     {
       id: "gestion",
       label: "Gestión",
+      color: "orange",
+      gradient: "from-orange-500 to-amber-500",
       items: [
         { label: "Horarios", href: "/admin/horarios", emoji: "⏰" },
-        { label: "Ingresos/Egresos", href: "/admin/flujo-caja", emoji: "💰" },
+        { label: "Flujo de Caja", href: "/admin/flujo-caja", emoji: "💰" },
         { label: "Stock", href: "#", emoji: "📦", disabled: true },
+      ],
+    },
+    {
+      id: "contenido",
+      label: "Contenido",
+      color: "purple",
+      gradient: "from-purple-500 to-pink-500",
+      items: [
+        { label: "Blogs", href: "/admin/blogs", emoji: "📝" },
+        { label: "Productos", href: "/admin/productos", emoji: "🛍️" },
+        { label: "Servicios", href: "/admin/servicios", emoji: "💼" },
+        { label: "Equipo", href: "/admin/equipo", emoji: "👥" },
       ],
     },
   ], []);
@@ -96,61 +104,165 @@ export default function AdminSidebar() {
 
   const isCollapsed = isDesktop && collapsed;
 
+  // Helper para obtener clases de color según la sección
+  const getSectionColors = (color: string, active: boolean = false) => {
+    const colors: Record<string, any> = {
+      emerald: {
+        bg: 'bg-emerald-50',
+        text: 'text-emerald-600',
+        border: 'border-emerald-500',
+        hover: 'hover:bg-emerald-50',
+        gradient: 'bg-gradient-to-r from-emerald-500 to-teal-500'
+      },
+      orange: {
+        bg: 'bg-orange-50',
+        text: 'text-orange-600',
+        border: 'border-orange-500',
+        hover: 'hover:bg-orange-50',
+        gradient: 'bg-gradient-to-r from-orange-500 to-amber-500'
+      },
+      purple: {
+        bg: 'bg-purple-50',
+        text: 'text-purple-600',
+        border: 'border-purple-500',
+        hover: 'hover:bg-purple-50',
+        gradient: 'bg-gradient-to-r from-purple-500 to-pink-500'
+      }
+    };
+    return colors[color] || colors.emerald;
+  };
+
   return (
-    <aside className={`bg-white border-r transition-all duration-300 shrink-0 h-full w-64 ${isCollapsed ? "md:w-16" : "md:w-64"}`}> 
-      <div className="h-16 flex items-center justify-between px-3 border-b">
-        <Link href="/admin" className="flex items-center gap-2">
-          <span className="text-lg">📊</span>
-          {!isCollapsed && (<span className="font-semibold text-gray-900">Dashboard</span>)}
+    <aside className={`bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 transition-all duration-300 shrink-0 h-full ${isCollapsed ? "md:w-20" : "w-64"}`}> 
+      {/* Header mejorado */}
+      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 bg-white">
+        <Link href="/admin" className="flex items-center gap-3 group">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg group-hover:shadow-xl transition-shadow">
+            <span className="text-xl">📊</span>
+          </div>
+          {!isCollapsed && (
+            <div className="flex flex-col">
+              <span className="font-bold text-gray-900 text-sm">Admin Panel</span>
+              <span className="text-xs text-gray-500">Clínica Veterinaria</span>
+            </div>
+          )}
         </Link>
         <button
           aria-label="Contraer/expandir sidebar"
-          className="p-2 rounded hover:bg-gray-100 hidden md:inline-flex"
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors hidden md:inline-flex"
           onClick={() => setCollapsed(v => !v)}
           title={collapsed ? "Expandir" : "Contraer"}
         >
-          <span className="text-base">{collapsed ? "»" : "«"}</span>
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {collapsed ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            )}
+          </svg>
         </button>
       </div>
 
-      <nav className="py-3">
-        {sections.map(section => (
-          <div key={section.id}>
-            <button
-              className={`w-full flex items-center ${isCollapsed ? "justify-center" : "justify-between"} px-3 py-2 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50`}
-              onClick={() => setOpen(o => ({ ...o, [section.id]: !o[section.id] }))}
-            >
-              {!isCollapsed && <span>{section.label}</span>}
-              {isCollapsed ? (
-                <span className="sr-only">{section.label}</span>
-              ) : (
-                <span className={`text-xs transition-transform ${open[section.id] ? "rotate-180 inline-block" : ""}`}>▼</span>
-              )}
-            </button>
-            <div className={`${open[section.id] ? "max-h-[800px]" : "max-h-0"} overflow-hidden transition-all`}>
-              {section.items.map(item => {
-                const active = item.href !== "#" && pathname?.startsWith(item.href);
-                const isDisabled = item.disabled;
-                const className = `flex items-center gap-3 ${isCollapsed ? "justify-center" : "px-5"} py-2 text-sm ${active ? "text-indigo-500 font-medium" : "text-gray-700"} ${isDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"}`;
-                if (isDisabled) {
-                  return (
-                    <div key={item.label} className={className} title="Próximamente">
-                      <span className="text-base">{item.emoji}</span>
-                      {!isCollapsed && <span>{item.label}</span>}
+      {/* Navegación mejorada */}
+      <nav className="py-4 px-2 space-y-2">
+        {sections.map((section, sectionIndex) => {
+          const sectionColors = getSectionColors(section.color);
+          
+          return (
+            <div key={section.id} className={sectionIndex > 0 ? "mt-6" : ""}>
+              {/* Header de sección */}
+              <button
+                className={`w-full flex items-center ${isCollapsed ? "justify-center px-2" : "justify-between px-3"} py-2.5 text-left rounded-lg transition-all duration-200 group ${
+                  open[section.id] 
+                    ? `${sectionColors.bg} ${sectionColors.text}` 
+                    : `hover:bg-gray-100 text-gray-700`
+                }`}
+                onClick={() => setOpen(o => ({ ...o, [section.id]: !o[section.id] }))}
+              >
+                {!isCollapsed ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <div className={`h-1.5 w-1.5 rounded-full ${sectionColors.gradient}`}></div>
+                      <span className="font-semibold text-sm">{section.label}</span>
                     </div>
-                  );
-                }
-                return (
-                  <Link key={item.href} href={item.href} className={className}>
-                    <span className={`text-base ${active ? "" : "text-gray-500"}`}>{item.emoji}</span>
-                    {!isCollapsed && <span>{item.label}</span>}
-                  </Link>
-                );
-              })}
+                    <svg 
+                      className={`w-4 h-4 transition-transform duration-200 ${open[section.id] ? "rotate-180" : ""}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </>
+                ) : (
+                  <div className={`h-2 w-2 rounded-full ${sectionColors.gradient}`}></div>
+                )}
+              </button>
+
+              {/* Items de la sección */}
+              <div className={`${open[section.id] ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"} overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed ? "" : "mt-1"}`}>
+                <div className={`space-y-1 ${isCollapsed ? "" : "ml-2"}`}>
+                  {section.items.map(item => {
+                    const active = item.href !== "#" && pathname?.startsWith(item.href);
+                    const isDisabled = item.disabled;
+                    const itemColors = getSectionColors(section.color);
+                    
+                    const baseClassName = `relative flex items-center gap-3 ${isCollapsed ? "justify-center px-2" : "px-3"} py-2.5 text-sm rounded-lg transition-all duration-200 group`;
+                    
+                    const activeClassName = active 
+                      ? `${itemColors.bg} ${itemColors.text} font-medium shadow-sm` 
+                      : `text-gray-600 ${itemColors.hover}`;
+                    
+                    const disabledClassName = isDisabled 
+                      ? "opacity-50 cursor-not-allowed" 
+                      : "hover:translate-x-1";
+
+                    const className = `${baseClassName} ${activeClassName} ${disabledClassName}`;
+
+                    if (isDisabled) {
+                      return (
+                        <div key={item.label} className={className} title="Próximamente">
+                          {active && !isCollapsed && (
+                            <div className={`absolute left-0 w-1 h-8 rounded-r-full ${sectionColors.gradient}`}></div>
+                          )}
+                          <span className="text-xl">{item.emoji}</span>
+                          {!isCollapsed && (
+                            <div className="flex items-center justify-between flex-1">
+                              <span>{item.label}</span>
+                              <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Pronto</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <Link key={item.href} href={item.href} className={className}>
+                        {active && !isCollapsed && (
+                          <div className={`absolute left-0 w-1 h-8 rounded-r-full ${sectionColors.gradient}`}></div>
+                        )}
+                        <span className="text-xl">{item.emoji}</span>
+                        {!isCollapsed && <span className="flex-1">{item.label}</span>}
+                        {!isCollapsed && (
+                          <svg 
+                            className={`w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity ${active ? 'opacity-100' : ''}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </nav>
+
     </aside>
   );
 }

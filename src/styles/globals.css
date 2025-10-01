@@ -4,6 +4,13 @@
 @tailwind utilities;
 
 :root { color-scheme: light; }
+
+/* Scroll suave para toda la página */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem; /* Espacio desde el top al hacer scroll a secciones */
+}
+
 body { @apply text-neutral-900; }
 a { @apply underline-offset-2; }
 
