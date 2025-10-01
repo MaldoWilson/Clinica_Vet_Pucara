@@ -167,3 +167,18 @@ CREATE TABLE public.veterinarios (
   descripcion text,
   CONSTRAINT veterinarios_pkey PRIMARY KEY (id)
 );
+CREATE TABLE flujo_caja (
+    id SERIAL PRIMARY KEY,
+    dia INT,
+    tipo TEXT,
+    categoria TEXT, 
+    nombre TEXT,
+    efectivo NUMERIC,
+    debito NUMERIC,
+    credito NUMERIC,
+    transferencia NUMERIC,
+    deuda NUMERIC,
+    egreso NUMERIC,
+    dr TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);

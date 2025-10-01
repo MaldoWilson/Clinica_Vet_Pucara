@@ -78,7 +78,7 @@ export default function AdminSidebar() {
       label: "Gestión",
       items: [
         { label: "Horarios", href: "/admin/horarios", emoji: "⏰" },
-        { label: "Ingresos/Egresos", href: "#", emoji: "📈", disabled: true },
+        { label: "Ingresos/Egresos", href: "/admin/flujo-caja", emoji: "💰" },
         { label: "Stock", href: "#", emoji: "📦", disabled: true },
       ],
     },
