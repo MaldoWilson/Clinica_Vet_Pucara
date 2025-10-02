@@ -530,67 +530,117 @@ body > * {
 }
 
 /* --- Marca de agua con logo --- */
-body::before {
-  content: "";
+.watermark {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: url('/logo.webp') no-repeat center center;
-  background-size: 350px;  /* ajusta tamaño del sello */
-  opacity: 0.08;           /* más bajo = más tenue */
   width: 400px;
   height: 400px;
   z-index: -1;
   pointer-events: none;
 }
 
+/* Fallback para impresión */
+@media print {
+  .watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    z-index: -1;
+  }
+}
 
-/* ENCABEZADO */
+
+/* ENCABEZADO PROFESIONAL - OPTIMIZADO */
 .header {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
+  padding: 15px 0;
+  border-top: 2px solid #1e40af;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .clinic-title {
   font-size: 18px;
-  font-weight: bold;
-  color: #003366;
-  margin-bottom: 4px;
+  font-weight: 800;
+  color: #1e40af;
+  margin-bottom: 6px;
   text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .vet-info {
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.4;
-  color: #003366;
+  color: #374151;
+  font-weight: 500;
 }
 
-/* CAMPOS DE FORMULARIO */
+.vet-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 2px;
+}
+
+.contact-info {
+  font-size: 11px;
+  color: #6b7280;
+  margin: 2px 0;
+}
+
+/* CAMPOS DE FORMULARIO PROFESIONALES - OPTIMIZADO */
 .form-fields {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin: 20px 0;
+  padding: 12px 15px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .field-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .peso-label {
-  font-weight: bold;
-  color: #003366;
+  font-weight: 700;
+  color: #1e40af;
+  font-size: 13px;
 }
 
 .field-box {
-  border: 1px solid #003366;
-  padding: 2px 12px;
-  min-width: 70px;
+  border: 2px solid #1e40af;
+  padding: 4px 12px;
+  min-width: 80px;
   text-align: center;
-  border-radius: 3px;
+  border-radius: 4px;
   font-size: 13px;
+  font-weight: bold;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.date-labels {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #1e40af;
+  font-size: 12px;
 }
 
 .date-labels span {
@@ -600,18 +650,25 @@ body::before {
   font-weight: bold;
 }
 
-/* RP */
+/* NÚMERO DE RECETA PROFESIONAL - OPTIMIZADO */
 .recipe-number {
-  font-weight: bold;
-  font-size: 14px;
-  margin: 15px 0;
-  color: #003366;
+  position: absolute;
+  top: 100px;
+  right: 20px;
+  font-weight: 700;
+  font-size: 12px;
+  color: #1e40af;
+  background: #f0f9ff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #bae6fd;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 /* LOGO Y MARCA DE AGUA */
 .logo-section {
   position: relative;
-  margin: 50px 0;
+  margin: 60px 0;
   text-align: center;
 }
 
@@ -631,58 +688,131 @@ body::before {
   color: #003366;
 }
 
-/* INFO DEL PACIENTE */
+/* INFO DEL PACIENTE - OPTIMIZADO */
 .patient-info {
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  background: #f9f9f9;
-  font-size: 13px;
+  border: 1px solid #e2e8f0;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* TABLA DE MEDICAMENTOS */
+/* TABLA DE MEDICAMENTOS PROFESIONAL - OPTIMIZADO */
 .medications-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin: 15px 0;
+  font-size: 11px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 .medications-table th {
-  background: #003366;
-  color: #fff;
-  padding: 6px;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+  padding: 8px 6px;
   text-align: center;
-  font-size: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .medications-table td {
-  border: 1px solid #ddd;
-  padding: 6px;
-  font-size: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 8px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #374151;
 }
 
-/* OBSERVACIONES */
+.medications-table tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.medications-table tr:hover {
+  background: #f0f9ff;
+}
+
+/* OBSERVACIONES PROFESIONALES - OPTIMIZADO */
 .observations {
   margin-top: 20px;
-  padding: 10px;
-  border-left: 4px solid #003366;
-  background: #f1f5ff;
-  font-size: 13px;
+  padding: 12px 15px;
+  border-left: 3px solid #1e40af;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  font-size: 12px;
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* PRÓXIMO CONTROL */
+.observations strong {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+/* PRÓXIMO CONTROL PROFESIONAL - REPOSICIONADO */
 .next-control {
-  margin-top: 40px;
-  font-size: 13px;
-  font-weight: bold;
-  color: #003366;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e40af;
+  background: #f0f9ff;
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: 1px solid #bae6fd;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .control-line {
-  border-bottom: 1px solid #003366;
-  margin-top: 6px;
+  border-bottom: 2px solid #1e40af;
+  width: 200px;
+  height: 25px;
+  margin-top: 8px;
+  border-radius: 2px;
 }
+/* SECCIÓN DE FIRMA PROFESIONAL - OPTIMIZADO */
+.signature-section {
+  margin-top: 25px;
+  padding: 15px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.signature-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.signature-label {
+  font-weight: 700;
+  color: #1e40af;
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+.signature-space {
+  flex: 1;
+  border-bottom: 2px solid #1e40af;
+  height: 25px;
+  margin-left: 8px;
+}
+
+.vet-signature {
+  text-align: right;
+  font-size: 11px;
+  color: #374151;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
 /* Para que el contenido quede por encima */
 body * {
   position: relative;
@@ -718,6 +848,10 @@ body * {
           <style>${css}</style>
         </head>
         <body>
+          <div class="watermark">
+            <img src="/logo.webp" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; opacity: 0.15;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+            <div style="display: none; width: 100%; height: 100%; background: #e3f2fd; border: 2px dashed #1976d2; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; color: #1976d2; opacity: 0.15;"></div>
+          </div>
           <div class="header">
             <div class="clinic-title">VETERINARIA PUCARA</div>
             <div class="vet-info">
@@ -752,11 +886,6 @@ body * {
             RP: ${receta.id}
           </div>
 
-          <div class="logo-section">
-            <div class="logo-watermark"></div>
-            <div class="logo-text">PUCARÁ</div>
-          </div>
-
           <div class="content-area">
             ${data ? `
               <div class="patient-info">
@@ -789,6 +918,18 @@ body * {
                 ${receta.notas}
               </div>
             ` : ''}
+          </div>
+
+          <div class="signature-section">
+            <div class="signature-line">
+              <div class="signature-label">Firma del Médico Veterinario:</div>
+              <div class="signature-space"></div>
+            </div>
+            <div class="vet-signature">
+              Dra. Pilar Zoccola Segovia<br>
+              R.U.T: 10.301.357-7<br>
+              Médico Veterinario
+            </div>
           </div>
 
           <div class="next-control">
