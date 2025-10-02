@@ -135,7 +135,7 @@ export default function AdminSidebar() {
   return (
     <aside className={`bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 transition-all duration-300 shrink-0 h-full ${isCollapsed ? "md:w-20" : "w-64"}`}> 
       {/* Header mejorado */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 bg-white">
+      <div className="h-16 flex items-center justify-between px-2 border-b border-gray-200 bg-white">
         <Link href="/admin" className="flex items-center gap-3 group">
           <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg group-hover:shadow-xl transition-shadow">
             <span className="text-xl">📊</span>

@@ -246,64 +246,257 @@ export default function PacienteDetailPage() {
     if (!w) return;
     
     const css = `
-      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; line-height: 1.4; padding: 24px; color: #111; }
-      h1 { font-size: 20px; margin: 0 0 12px; }
-      h2 { font-size: 16px; margin: 16px 0 8px; }
-      .section { margin: 16px 0; }
-      .label { font-weight: 600; color: #374151; }
-      .value { margin-bottom: 8px; }
-      .muted { color: #6b7280; }
+      @page { margin: 20mm; }
+      body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        line-height: 1.5; 
+        margin: 0; 
+        padding: 0; 
+        color: #2c3e50; 
+        background: #fff;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        border-bottom: 3px solid #2c5aa0;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+      }
+      .logo {
+        width: 80px;
+        height: 80px;
+        margin-right: 20px;
+        border-radius: 10px;
+      }
+      .clinic-info {
+        flex: 1;
+      }
+      .clinic-name {
+        font-size: 28px;
+        font-weight: bold;
+        color: #2c5aa0;
+        margin: 0;
+        line-height: 1.2;
+      }
+      .clinic-subtitle {
+        font-size: 16px;
+        color: #7f8c8d;
+        margin: 5px 0 0 0;
+      }
+      .clinic-contact {
+        font-size: 12px;
+        color: #95a5a6;
+        margin: 8px 0 0 0;
+      }
+      .document-title {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c5aa0;
+        margin: 30px 0 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+      }
+      .consultation-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border-left: 4px solid #2c5aa0;
+      }
+      .info-row {
+        display: flex;
+        margin-bottom: 8px;
+      }
+      .info-label {
+        font-weight: bold;
+        color: #2c5aa0;
+        min-width: 120px;
+      }
+      .info-value {
+        color: #2c3e50;
+      }
+      .patient-info {
+        background: #e8f4f8;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border-left: 4px solid #17a2b8;
+      }
+      .section {
+        background: white;
+        margin: 20px 0;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      .section-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #2c5aa0;
+        margin: 0 0 12px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .section-content {
+        color: #2c3e50;
+        line-height: 1.6;
+        min-height: 20px;
+      }
+      .empty-value {
+        color: #95a5a6;
+        font-style: italic;
+      }
+      .footer {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 2px solid #e9ecef;
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 12px;
+      }
+      .signature-section {
+        margin-top: 50px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .signature-box {
+        text-align: center;
+        width: 200px;
+      }
+      .signature-line {
+        border-top: 1px solid #2c3e50;
+        margin-top: 40px;
+        padding-top: 5px;
+        font-size: 12px;
+        color: #7f8c8d;
+      }
+      @media print {
+        body { print-color-adjust: exact; }
+        .header { page-break-inside: avoid; }
+        .section { page-break-inside: avoid; }
+      }
     `;
+    
+    const fechaFormateada = consulta.fecha ? new Date(consulta.fecha).toLocaleDateString('es-CL', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }) : '';
+    
+    const proximoControlFormateado = consulta.proximo_control ? new Date(consulta.proximo_control).toLocaleDateString('es-CL', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }) : '';
     
     const html = `<!doctype html>
       <html>
         <head>
           <meta charset='utf-8'>
-          <title>Consulta #${consulta.id}</title>
+          <title>Consulta Médica Veterinaria - ${consulta.id}</title>
           <style>${css}</style>
         </head>
         <body>
-          <h1>Consulta #${consulta.id}</h1>
-          <div class='muted'>Fecha: ${consulta.fecha ? new Date(consulta.fecha).toLocaleString('es-CL') : ''}</div>
-          
-          <div class='section'>
-            <div class='label'>Motivo:</div>
-            <div class='value'>${consulta.motivo || 'No especificado'}</div>
+          <div class="header">
+            <img src="/logo.webp" alt="Logo Clínica Veterinaria Pucará" class="logo" onerror="this.style.display='none'">
+            <div class="clinic-info">
+              <h1 class="clinic-name">Clínica Veterinaria Pucará</h1>
+              <p class="clinic-subtitle">Atención Médica Veterinaria Integral</p>
+              <p class="clinic-contact">📍 Dirección de la clínica • 📞 Teléfono • 📧 correo@clinicapucara.cl</p>
+            </div>
           </div>
-          
-          <div class='section'>
-            <div class='label'>Tipo de Atención:</div>
-            <div class='value'>${consulta.tipo_atencion || 'No especificado'}</div>
+
+          <div class="document-title">
+            🩺 CONSULTA MÉDICA VETERINARIA
           </div>
-          
-          <div class='section'>
-            <div class='label'>Anamnesis:</div>
-            <div class='value'>${consulta.anamnesis || 'No especificado'}</div>
+
+          <div class="consultation-info">
+            <div class="info-row">
+              <span class="info-label">N° Consulta:</span>
+              <span class="info-value">#${consulta.id}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Fecha:</span>
+              <span class="info-value">${fechaFormateada}</span>
+            </div>
           </div>
-          
-          <div class='section'>
-            <div class='label'>Diagnóstico:</div>
-            <div class='value'>${consulta.diagnostico || 'No especificado'}</div>
+
+          ${data ? `
+          <div class="patient-info">
+            <div class="info-row">
+              <span class="info-label">Paciente:</span>
+              <span class="info-value">${data.nombre || ''}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Especie:</span>
+              <span class="info-value">${data.especie || ''}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Propietario:</span>
+              <span class="info-value">${data.propietario?.nombre || ''} ${data.propietario?.apellido || ''}</span>
+            </div>
           </div>
-          
-          <div class='section'>
-            <div class='label'>Tratamiento:</div>
-            <div class='value'>${consulta.tratamiento || 'No especificado'}</div>
+          ` : ''}
+
+          <div class="section">
+            <div class="section-title">📋 Motivo de Consulta</div>
+            <div class="section-content">${consulta.motivo || '<span class="empty-value">No especificado</span>'}</div>
           </div>
-          
+
+          <div class="section">
+            <div class="section-title">🏥 Tipo de Atención</div>
+            <div class="section-content">${consulta.tipo_atencion || '<span class="empty-value">No especificado</span>'}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">📝 Anamnesis</div>
+            <div class="section-content">${consulta.anamnesis || '<span class="empty-value">No especificado</span>'}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">🔍 Diagnóstico</div>
+            <div class="section-content">${consulta.diagnostico || '<span class="empty-value">No especificado</span>'}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">💊 Tratamiento</div>
+            <div class="section-content">${consulta.tratamiento || '<span class="empty-value">No especificado</span>'}</div>
+          </div>
+
           ${consulta.proximo_control ? `
-          <div class='section'>
-            <div class='label'>Próximo Control:</div>
-            <div class='value'>${new Date(consulta.proximo_control).toLocaleDateString('es-CL')}</div>
+          <div class="section">
+            <div class="section-title">📅 Próximo Control</div>
+            <div class="section-content">${proximoControlFormateado}</div>
           </div>
           ` : ''}
-          
+
           ${consulta.observaciones ? `
-          <div class='section'>
-            <div class='label'>Observaciones:</div>
-            <div class='value'>${consulta.observaciones}</div>
+          <div class="section">
+            <div class="section-title">💭 Observaciones</div>
+            <div class="section-content">${consulta.observaciones}</div>
           </div>
           ` : ''}
+
+          <div class="signature-section">
+            <div class="signature-box">
+              <div class="signature-line">Médico Veterinario</div>
+            </div>
+            <div class="signature-box">
+              <div class="signature-line">Fecha y Sello</div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p><strong>Clínica Veterinaria Pucará</strong> - Cuidando la salud de tus mascotas</p>
+            <p>Consulta registrada en el historial médico del paciente</p>
+          </div>
         </body>
       </html>`;
     
@@ -318,54 +511,290 @@ export default function PacienteDetailPage() {
     if (!w) return;
     
     const css = `
-      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; line-height: 1.4; padding: 24px; color: #111; }
-      h1 { font-size: 20px; margin: 0 0 12px; }
-      h2 { font-size: 16px; margin: 16px 0 8px; }
-      table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-      th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
-      .muted { color: #6b7280; }
+@page { margin: 15mm; size: A4; }
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 13px;
+  color: #111;
+  background: #fff;
+  margin: 0;
+  padding: 20px 40px;
+  position: relative;
+}
+
+/* Asegurar que el contenido esté por encima del sello de agua */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Marca de agua con logo --- */
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: url('/logo.webp') no-repeat center center;
+  background-size: 350px;  /* ajusta tamaño del sello */
+  opacity: 0.08;           /* más bajo = más tenue */
+  width: 400px;
+  height: 400px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+
+/* ENCABEZADO */
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.clinic-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #003366;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.vet-info {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #003366;
+}
+
+/* CAMPOS DE FORMULARIO */
+.form-fields {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.field-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.peso-label {
+  font-weight: bold;
+  color: #003366;
+}
+
+.field-box {
+  border: 1px solid #003366;
+  padding: 2px 12px;
+  min-width: 70px;
+  text-align: center;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.date-labels span {
+  font-size: 11px;
+  margin: 0 4px;
+  color: #003366;
+  font-weight: bold;
+}
+
+/* RP */
+.recipe-number {
+  font-weight: bold;
+  font-size: 14px;
+  margin: 15px 0;
+  color: #003366;
+}
+
+/* LOGO Y MARCA DE AGUA */
+.logo-section {
+  position: relative;
+  margin: 50px 0;
+  text-align: center;
+}
+
+.logo-watermark {
+  font-size: 180px;
+  font-weight: bold;
+  color: #003366;
+  opacity: 0.05;
+  user-select: none;
+  line-height: 1;
+}
+
+.logo-text {
+  margin-top: -40px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #003366;
+}
+
+/* INFO DEL PACIENTE */
+.patient-info {
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  background: #f9f9f9;
+  font-size: 13px;
+}
+
+/* TABLA DE MEDICAMENTOS */
+.medications-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.medications-table th {
+  background: #003366;
+  color: #fff;
+  padding: 6px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.medications-table td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  font-size: 12px;
+}
+
+/* OBSERVACIONES */
+.observations {
+  margin-top: 20px;
+  padding: 10px;
+  border-left: 4px solid #003366;
+  background: #f1f5ff;
+  font-size: 13px;
+}
+
+/* PRÓXIMO CONTROL */
+.next-control {
+  margin-top: 40px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #003366;
+}
+
+.control-line {
+  border-bottom: 1px solid #003366;
+  margin-top: 6px;
+}
+/* Para que el contenido quede por encima */
+body * {
+  position: relative;
+  z-index: 1;
+}
+
+
+
     `;
     
     const itemsRows = receta.items?.map((it: any, i: number) => `
       <tr>
-        <td>${it.nombre_medicamento || ''}</td>
+        <td style="font-weight: 500;">${it.nombre_medicamento || ''}</td>
         <td>${it.dosis || ''}</td>
         <td>${it.via || ''}</td>
         <td>${it.frecuencia || ''}</td>
         <td>${it.duracion || ''}</td>
-        <td>${it.instrucciones || ''}</td>
+        <td style="font-size: 11px;">${it.instrucciones || ''}</td>
       </tr>
     `).join('') || '';
+    
+    // Extraer día, mes y año de la fecha
+    const fecha = receta.fecha ? new Date(receta.fecha) : new Date();
+    const dia = fecha.getDate().toString().padStart(2, '0');
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+    const año = fecha.getFullYear().toString();
     
     const html = `<!doctype html>
       <html>
         <head>
           <meta charset='utf-8'>
-          <title>Receta ${receta.id}</title>
+          <title>Receta Médica - ${receta.id}</title>
           <style>${css}</style>
         </head>
         <body>
-          <h1>Receta #${receta.id}</h1>
-          <div class='muted'>Fecha: ${receta.fecha ? new Date(receta.fecha).toLocaleString('es-CL') : ''}</div>
-          ${receta.peso ? `<div class='muted'>Peso: ${receta.peso} kg</div>` : ''}
-          ${receta.notas ? `<div class='muted'>Notas: ${receta.notas}</div>` : ''}
-          
-          <h2>Medicamentos</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Medicamento</th>
-                <th>Dosis</th>
-                <th>Vía</th>
-                <th>Frecuencia</th>
-                <th>Duración</th>
-                <th>Instrucciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsRows}
-            </tbody>
-          </table>
+          <div class="header">
+            <div class="clinic-title">VETERINARIA PUCARA</div>
+            <div class="vet-info">
+              <div class="vet-name">Dra. Pilar Zoccola Segovia</div>
+              <div>Médico Veterinario</div>
+              <div>R:U:T: 10.301.357-7</div>
+              <div>Esmeralda N° 97</div>
+              <div class="contact-info">Fono: 22859 2840/ Whatsapp: 9 39246250</div>
+              <div class="contact-info">San Bernardo</div>
+            </div>
+          </div>
+
+          <div class="form-fields">
+            <div class="field-group">
+              <span class="peso-label">PESO:</span>
+              <div class="field-box">${receta.peso || ''}</div>
+            </div>
+            
+            <div class="field-group">
+              <div class="date-labels">
+                <span>Día</span>
+                <div class="field-box">${dia}</div>
+                <span>Mes</span>
+                <div class="field-box">${mes}</div>
+                <span>Año</span>
+                <div class="field-box">${año}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="recipe-number">
+            RP: ${receta.id}
+          </div>
+
+          <div class="logo-section">
+            <div class="logo-watermark"></div>
+            <div class="logo-text">PUCARÁ</div>
+          </div>
+
+          <div class="content-area">
+            ${data ? `
+              <div class="patient-info">
+                <strong>Paciente:</strong> ${data.nombre || ''} (${data.especie ? 'Canino' : 'Felino'})<br>
+                <strong>Propietario:</strong> ${data.propietario?.nombre || ''} ${data.propietario?.apellido || ''}
+              </div>
+            ` : ''}
+            
+            ${receta.items && receta.items.length > 0 ? `
+              <table class="medications-table">
+                <thead>
+                  <tr>
+                    <th>Medicamento</th>
+                    <th>Dosis</th>
+                    <th>Vía</th>
+                    <th>Frecuencia</th>
+                    <th>Duración</th>
+                    <th>Instrucciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsRows}
+                </tbody>
+              </table>
+            ` : ''}
+            
+            ${receta.notas ? `
+              <div class="observations">
+                <strong>Observaciones:</strong><br>
+                ${receta.notas}
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="next-control">
+            PRÓXIMO CONTROL:
+            <div class="control-line"></div>
+          </div>
         </body>
       </html>`;
     

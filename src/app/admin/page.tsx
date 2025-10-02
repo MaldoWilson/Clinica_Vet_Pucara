@@ -183,8 +183,8 @@ export default function AdminHome() {
               <span className="text-3xl">📊</span>
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Dashboard</h1>
-              <p className="text-white/90 text-sm mt-1">Panel de Administración</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-white">Panel de Administración</h1>
+              
             </div>
           </div>
           <p className="text-white/80 max-w-2xl">
