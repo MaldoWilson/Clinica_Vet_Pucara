@@ -17,6 +17,8 @@ npm -v
 1. Instala dependencias en la raíz del proyecto:
 ```bash
 npm install
+npm install xlsx
+npm install recharts
 ```
 
 2. Variables de entorno:
