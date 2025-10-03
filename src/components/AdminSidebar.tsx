@@ -64,7 +64,7 @@ export default function AdminSidebar() {
         { label: "Citas", href: "/admin/citas" },
         { label: "Fichas", href: "/admin/fichas" },
         { label: "Pacientes", href: "/admin/pacientes" },
-
+        { label: "Calendario", href: "/admin/calendario" },
       ],
     },
     {

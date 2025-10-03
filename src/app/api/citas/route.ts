@@ -1,6 +1,29 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseClient";
 
+export async function GET() {
+  try {
+    const supa = supabaseServer();
+
+    const { data, error } = await supa
+      .from("citas")
+      .select(`
+        id, estado, creado_en,
+        tutor_nombre, tutor_telefono, tutor_email, mascota_nombre, notas,
+        servicio_id, horario_id,
+        servicios:servicios(nombre, duracion_min),
+        horarios:horarios(inicio, fin)
+      `)
+      .order("creado_en", { ascending: false });
+
+    if (error) throw error;
+
+    return NextResponse.json({ ok: true, citas: data });
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e.message ?? String(e) }, { status: 400 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json() as {
