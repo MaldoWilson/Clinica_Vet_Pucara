@@ -31,22 +31,23 @@ export default function CalendarView({}: CalendarViewProps) {
   const [selectedCita, setSelectedCita] = useState<Cita | null>(null);
   const [showCitaModal, setShowCitaModal] = useState(false);
 
-  // Obtener citas confirmadas
-  useEffect(() => {
-    const fetchCitas = async () => {
+  // Función para obtener citas
+  const fetchCitas = async () => {
       try {
         setLoading(true);
         const response = await fetch("/api/citas");
         const data = await response.json();
         
         if (data.ok) {
-          console.log("Todas las citas:", data.citas);
           // Filtrar citas confirmadas y atendidas para mostrar en el calendario
-          const citasVisibles = data.citas.filter((cita: any) => 
+          const citasVisibles = data.citas?.filter((cita: any) => 
             cita.estado === "CONFIRMADA" || cita.estado === "ATENDIDA"
-          );
-          console.log("Citas visibles en calendario:", citasVisibles);
+          ) || [];
+          
+          console.log(`Cargadas ${citasVisibles.length} citas confirmadas/atendidas`);
           setCitas(citasVisibles);
+        } else {
+          console.error("Error en la respuesta de la API:", data);
         }
       } catch (error) {
         console.error("Error fetching citas:", error);
@@ -55,6 +56,8 @@ export default function CalendarView({}: CalendarViewProps) {
       }
     };
 
+  // Obtener citas al cargar el componente
+  useEffect(() => {
     fetchCitas();
   }, []);
 
@@ -133,22 +136,50 @@ export default function CalendarView({}: CalendarViewProps) {
   // Obtener citas para una fecha específica
   const getCitasForDate = (date: Date) => {
     const dateStr = date.toISOString().split("T")[0];
-    return citas.filter(cita => {
-      const citaDate = new Date(cita.horarios.inicio).toISOString().split("T")[0];
-      return citaDate === dateStr;
+    const citasDelDia = citas.filter(cita => {
+      if (!cita.horarios?.inicio) {
+        console.warn("Cita sin horario:", cita);
+        return false;
+      }
+      
+      const citaDate = new Date(cita.horarios.inicio);
+      const citaDateStr = citaDate.toISOString().split("T")[0];
+      
+      // Debug para ver las fechas
+      if (citaDateStr === dateStr) {
+        console.log(`Cita encontrada para ${dateStr}:`, cita.mascota_nombre);
+      }
+      
+      return citaDateStr === dateStr;
     });
+    
+    if (citasDelDia.length > 0) {
+      console.log(`Citas para ${dateStr}:`, citasDelDia);
+    }
+    
+    return citasDelDia;
   };
 
   // Obtener citas para un slot de tiempo específico
   const getCitasForTimeSlot = (date: Date, timeSlot: Date) => {
     const citasDelDia = getCitasForDate(date);
     return citasDelDia.filter(cita => {
+      if (!cita.horarios?.inicio) {
+        return false;
+      }
+      
       const citaStart = new Date(cita.horarios.inicio);
-      const citaEnd = new Date(cita.horarios.fin);
       const slotStart = new Date(timeSlot);
       const slotEnd = new Date(timeSlot.getTime() + 30 * 60000); // 30 minutos
       
-      return (citaStart < slotEnd && citaEnd > slotStart);
+      // Verificar si la cita comienza en este slot de 30 minutos
+      const citaHour = citaStart.getHours();
+      const citaMinute = citaStart.getMinutes();
+      const slotHour = slotStart.getHours();
+      const slotMinute = slotStart.getMinutes();
+      
+      // La cita debe comenzar en este slot de 30 minutos
+      return citaHour === slotHour && citaMinute >= slotMinute && citaMinute < slotMinute + 30;
     });
   };
 
@@ -234,7 +265,10 @@ export default function CalendarView({}: CalendarViewProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando citas...</p>
+        </div>
       </div>
     );
   }
@@ -246,7 +280,7 @@ export default function CalendarView({}: CalendarViewProps) {
         <div className="flex items-center space-x-4">
           <button
             onClick={goToToday}
-            className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-500 rounded-md hover:bg-indigo-600 transition-colors"
+            className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white rounded-md hover:bg-gray-100 transition-colors"
           >
             Hoy
           </button>
@@ -254,7 +288,7 @@ export default function CalendarView({}: CalendarViewProps) {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => navigate("prev")}
-              className="p-1.5 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md transition-colors"
+              className="p-1.5 text-white hover:bg-indigo-500 rounded-md transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -263,7 +297,7 @@ export default function CalendarView({}: CalendarViewProps) {
             
             <button
               onClick={() => setShowMiniCalendar(!showMiniCalendar)}
-              className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-500 border border-white rounded-md hover:bg-indigo-600 transition-colors"
+              className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white border border-white rounded-md hover:bg-gray-100 transition-colors"
             >
               {viewMode === "semana" 
                 ? `${formatDate(weekDates[0])} - ${formatDate(weekDates[6])} ${currentDate.getFullYear()}`
@@ -275,7 +309,7 @@ export default function CalendarView({}: CalendarViewProps) {
             
             <button
               onClick={() => navigate("next")}
-              className="p-1.5 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md transition-colors"
+              className="p-1.5 text-white hover:bg-indigo-500 rounded-md transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -285,7 +319,7 @@ export default function CalendarView({}: CalendarViewProps) {
         </div>
 
         <div className="flex items-center space-x-2">
-           <button className="flex items-center space-x-2 px-3 py-1.5 text-sm text-white bg-indigo-500 border border-white rounded-md hover:bg-indigo-600 transition-colors">
+          <button className="flex items-center space-x-2 px-3 py-1.5 text-sm text-indigo-400 bg-white border border-white rounded-md hover:bg-gray-100 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
@@ -296,13 +330,13 @@ export default function CalendarView({}: CalendarViewProps) {
             <select
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value as "semana" | "dia" | "mes")}
-              className="px-3 py-1.5 text-sm text-white bg-indigo-500 border border-white rounded-md hover:bg-indigo-600 transition-colors appearance-none pr-8"
+              className="px-3 py-1.5 text-sm text-indigo-400 bg-white border border-white rounded-md hover:bg-gray-100 transition-colors appearance-none pr-8"
             >
               <option value="semana">SEMANA</option>
               <option value="mes">MES</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
