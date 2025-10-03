@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-type NavItem = { label: string; href: string; emoji: string; disabled?: boolean };
+type NavItem = { label: string; href: string; disabled?: boolean };
 
 type Section = {
   id: string;
@@ -61,10 +61,10 @@ export default function AdminSidebar() {
       color: "emerald",
       gradient: "from-emerald-500 to-teal-500",
       items: [
-        { label: "Citas", href: "/admin/citas", emoji: "📅" },
-        { label: "Fichas", href: "/admin/fichas", emoji: "📋" },
-        { label: "Pacientes", href: "/admin/pacientes", emoji: "🐾" },
-        
+        { label: "Citas", href: "/admin/citas" },
+        { label: "Fichas", href: "/admin/fichas" },
+        { label: "Pacientes", href: "/admin/pacientes" },
+
       ],
     },
     {
@@ -73,9 +73,9 @@ export default function AdminSidebar() {
       color: "orange",
       gradient: "from-orange-500 to-amber-500",
       items: [
-        { label: "Horarios", href: "/admin/horarios", emoji: "⏰" },
-        { label: "Flujo de Caja", href: "/admin/flujo-caja", emoji: "💰" },
-        { label: "Stock", href: "#", emoji: "📦", disabled: true },
+        { label: "Horarios", href: "/admin/horarios" },
+        { label: "Flujo de Caja", href: "/admin/flujo-caja" },
+        { label: "Stock", href: "#", disabled: true },
       ],
     },
     {
@@ -84,10 +84,10 @@ export default function AdminSidebar() {
       color: "purple",
       gradient: "from-purple-500 to-pink-500",
       items: [
-        { label: "Blogs", href: "/admin/blogs", emoji: "📝" },
-        { label: "Productos", href: "/admin/productos", emoji: "🛍️" },
-        { label: "Servicios", href: "/admin/servicios", emoji: "💼" },
-        { label: "Equipo", href: "/admin/equipo", emoji: "👥" },
+        { label: "Blogs", href: "/admin/blogs" },
+        { label: "Productos", href: "/admin/productos" },
+        { label: "Servicios", href: "/admin/servicios" },
+        { label: "Equipo", href: "/admin/equipo" },
       ],
     },
   ], []);
@@ -138,7 +138,6 @@ export default function AdminSidebar() {
       <div className="h-16 flex items-center justify-between px-2 border-b border-gray-200 bg-white">
         <Link href="/admin" className="flex items-center gap-3 group">
           <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg group-hover:shadow-xl transition-shadow">
-            <span className="text-xl">📊</span>
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
@@ -225,7 +224,6 @@ export default function AdminSidebar() {
                           {active && !isCollapsed && (
                             <div className={`absolute left-0 w-1 h-8 rounded-r-full ${sectionColors.gradient}`}></div>
                           )}
-                          <span className="text-xl">{item.emoji}</span>
                           {!isCollapsed && (
                             <div className="flex items-center justify-between flex-1">
                               <span>{item.label}</span>
@@ -241,7 +239,6 @@ export default function AdminSidebar() {
                         {active && !isCollapsed && (
                           <div className={`absolute left-0 w-1 h-8 rounded-r-full ${sectionColors.gradient}`}></div>
                         )}
-                        <span className="text-xl">{item.emoji}</span>
                         {!isCollapsed && <span className="flex-1">{item.label}</span>}
                         {!isCollapsed && (
                           <svg 

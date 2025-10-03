@@ -24,27 +24,24 @@ const cards = [
     section: "Mascotas",
     gradient: "from-green-500 to-teal-500",
     items: [
-      { 
-        title: "Citas", 
-        description: "Revisa y administra citas.", 
-        href: "/admin/citas", 
-        emoji: "📅",
+      {
+        title: "Citas",
+        description: "Revisa y administra citas.",
+        href: "/admin/citas",
         color: "from-green-50 to-emerald-50",
         iconBg: "bg-gradient-to-br from-green-500 to-emerald-500"
       },
-      { 
-        title: "Fichas clínicas", 
-        description: "Crea y edita fichas.", 
-        href: "/admin/fichas", 
-        emoji: "📋",
+      {
+        title: "Fichas clínicas",
+        description: "Crea y edita fichas.",
+        href: "/admin/fichas",
         color: "from-lime-50 to-green-50",
         iconBg: "bg-gradient-to-br from-lime-500 to-green-500"
       },
-      { 
-        title: "Pacientes", 
-        description: "Administra mascotas registradas.", 
-        href: "/admin/pacientes", 
-        emoji: "🐾",
+      {
+        title: "Pacientes",
+        description: "Administra mascotas registradas.",
+        href: "/admin/pacientes",
         color: "from-pink-50 to-rose-50",
         iconBg: "bg-gradient-to-br from-pink-500 to-rose-500"
       },
@@ -54,19 +51,17 @@ const cards = [
     section: "Gestión",
     gradient: "from-orange-500 to-red-500",
     items: [
-      { 
-        title: "Horarios", 
-        description: "Genera y gestiona horarios.", 
-        href: "/admin/horarios", 
-        emoji: "⏰",
+      {
+        title: "Horarios",
+        description: "Genera y gestiona horarios.",
+        href: "/admin/horarios",
         color: "from-orange-50 to-amber-50",
         iconBg: "bg-gradient-to-br from-orange-500 to-amber-500"
       },
-      { 
-        title: "Flujo de Caja", 
-        description: "Gestiona ingresos y egresos.", 
-        href: "/admin/flujo-caja", 
-        emoji: "💰",
+      {
+        title: "Flujo de Caja",
+        description: "Gestiona ingresos y egresos.",
+        href: "/admin/flujo-caja",
         color: "from-yellow-50 to-orange-50",
         iconBg: "bg-gradient-to-br from-yellow-500 to-orange-500"
       },
@@ -76,35 +71,31 @@ const cards = [
     section: "Contenido",
     gradient: "from-purple-500 to-pink-500",
     items: [
-      { 
-        title: "Blogs", 
-        description: "Publica y gestiona artículos.", 
-        href: "/admin/blogs", 
-        emoji: "📝",
+      {
+        title: "Blogs",
+        description: "Publica y gestiona artículos.",
+        href: "/admin/blogs",
         color: "from-purple-50 to-pink-50",
         iconBg: "bg-gradient-to-br from-purple-500 to-pink-500"
       },
-      { 
-        title: "Productos", 
-        description: "Catálogo para la tienda.", 
-        href: "/admin/productos", 
-        emoji: "🛍️",
+      {
+        title: "Productos",
+        description: "Catálogo para la tienda.",
+        href: "/admin/productos",
         color: "from-blue-50 to-cyan-50",
         iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500"
       },
-      { 
-        title: "Servicios", 
-        description: "Configura servicios y precios.", 
-        href: "/admin/servicios", 
-        emoji: "💼",
+      {
+        title: "Servicios",
+        description: "Configura servicios y precios.",
+        href: "/admin/servicios",
         color: "from-indigo-50 to-purple-50",
         iconBg: "bg-gradient-to-br from-indigo-500 to-purple-500"
       },
-      { 
-        title: "Equipo", 
-        description: "Gestiona el equipo médico.", 
-        href: "/admin/equipo", 
-        emoji: "👥",
+      {
+        title: "Equipo",
+        description: "Gestiona el equipo médico.",
+        href: "/admin/equipo",
         color: "from-teal-50 to-emerald-50",
         iconBg: "bg-gradient-to-br from-teal-500 to-emerald-500"
       },
@@ -175,20 +166,17 @@ export default function AdminHome() {
   return (
     <div className="space-y-12 pb-8">
       {/* Header mejorado */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-green-800 p-8 shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-              <span className="text-3xl">📊</span>
-            </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-white">Panel de Administración</h1>
-              
+
             </div>
           </div>
           <p className="text-white/80 max-w-2xl">
-            Bienvenido al panel de administración de la Clínica Veterinaria Pucara. Selecciona un módulo para comenzar.
+            Centro de control administrativo para la gestión completa de la Clínica Veterinaria Pucara. Accede a todas las herramientas y módulos disponibles.
           </p>
         </div>
         {/* Decoración */}
@@ -215,7 +203,6 @@ export default function AdminHome() {
                     {/* Icono */}
                     <div className="flex items-start justify-between">
                       <div className={`p-4 rounded-2xl ${item.iconBg} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                        <span className="text-3xl">{item.emoji}</span>
                       </div>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,9 +257,6 @@ export default function AdminHome() {
               <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl group-hover:scale-110 transition-transform">
-                    <span className="text-3xl">💵</span>
-                  </div>
                   <div className="text-white/60 text-xs font-medium">MES ACTUAL</div>
                 </div>
                 <p className="text-white/90 text-sm font-medium mb-2">Total Ingresos</p>
@@ -304,9 +288,6 @@ export default function AdminHome() {
               <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl group-hover:scale-110 transition-transform">
-                    <span className="text-3xl">💸</span>
-                  </div>
                   <div className="text-white/60 text-xs font-medium">MES ACTUAL</div>
                 </div>
                 <p className="text-white/90 text-sm font-medium mb-2">Total Egresos</p>
@@ -342,9 +323,6 @@ export default function AdminHome() {
               <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl group-hover:scale-110 transition-transform">
-                    <span className="text-3xl">{estadisticas.balance >= 0 ? '💰' : '⚠️'}</span>
-                  </div>
                   <div className="text-white/60 text-xs font-medium">MES ACTUAL</div>
                 </div>
                 <p className="text-white/90 text-sm font-medium mb-2">Balance</p>
