@@ -81,10 +81,8 @@ export default function AdminSidebar() {
       color: "emerald",
       gradient: "from-emerald-500 to-teal-500",
       items: [
-        { label: "Citas", href: "/admin/citas" },
-        { label: "Fichas", href: "/admin/fichas" },
+        { label: "Crear Fichas", href: "/admin/fichas" },
         { label: "Pacientes", href: "/admin/pacientes" },
-        { label: "Calendario", href: "/admin/calendario" },
       ],
     },
     {
@@ -94,6 +92,8 @@ export default function AdminSidebar() {
       gradient: "from-orange-500 to-amber-500",
       items: [
         { label: "Horarios", href: "/admin/horarios" },
+        { label: "Citas", href: "/admin/citas" },
+        { label: "Calendario", href: "/admin/calendario" },
         { label: "Flujo de Caja", href: "/admin/flujo-caja" },
         { label: "Stock", href: "#", disabled: true },
       ],

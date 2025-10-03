@@ -5,6 +5,8 @@ import { useState, useEffect, useMemo } from "react";
 interface Cita {
   id: string;
   tutor_nombre: string;
+  tutor_telefono?: string;
+  tutor_email?: string;
   mascota_nombre: string;
   estado: string;
   notas?: string;
@@ -240,11 +242,11 @@ export default function CalendarView({}: CalendarViewProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Header del calendario */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-indigo-400 text-white">
         <div className="flex items-center space-x-4">
           <button
             onClick={goToToday}
-            className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+            className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-500 rounded-md hover:bg-indigo-600 transition-colors"
           >
             Hoy
           </button>
@@ -252,7 +254,7 @@ export default function CalendarView({}: CalendarViewProps) {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => navigate("prev")}
-              className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              className="p-1.5 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -261,7 +263,7 @@ export default function CalendarView({}: CalendarViewProps) {
             
             <button
               onClick={() => setShowMiniCalendar(!showMiniCalendar)}
-              className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-500 border border-white rounded-md hover:bg-indigo-600 transition-colors"
             >
               {viewMode === "semana" 
                 ? `${formatDate(weekDates[0])} - ${formatDate(weekDates[6])} ${currentDate.getFullYear()}`
@@ -273,7 +275,7 @@ export default function CalendarView({}: CalendarViewProps) {
             
             <button
               onClick={() => navigate("next")}
-              className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              className="p-1.5 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -283,7 +285,7 @@ export default function CalendarView({}: CalendarViewProps) {
         </div>
 
         <div className="flex items-center space-x-2">
-          <button className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+           <button className="flex items-center space-x-2 px-3 py-1.5 text-sm text-white bg-indigo-500 border border-white rounded-md hover:bg-indigo-600 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
@@ -294,14 +296,13 @@ export default function CalendarView({}: CalendarViewProps) {
             <select
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value as "semana" | "dia" | "mes")}
-              className="px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors appearance-none pr-8"
+              className="px-3 py-1.5 text-sm text-white bg-indigo-500 border border-white rounded-md hover:bg-indigo-600 transition-colors appearance-none pr-8"
             >
               <option value="semana">SEMANA</option>
-              <option value="dia">DÍA</option>
               <option value="mes">MES</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
@@ -421,12 +422,12 @@ export default function CalendarView({}: CalendarViewProps) {
                         <div
                           key={citaIndex}
                           onClick={() => handleCitaClick(cita)}
-                          className="bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-300 rounded p-1 text-xs cursor-pointer hover:from-blue-200 hover:to-blue-300 hover:shadow-sm transition-all duration-200"
+                          className="bg-amber-300 border border-amber-400 rounded p-1 text-xs cursor-pointer hover:bg-amber-400 hover:shadow-sm transition-all duration-200"
                         >
-                          <div className="font-medium text-blue-900 truncate">
+                          <div className="font-medium text-amber-900 truncate">
                             {cita.mascota_nombre}
                           </div>
-                          <div className="text-blue-700 truncate">
+                          <div className="text-amber-800 truncate">
                             {cita.servicios.nombre}
                           </div>
                         </div>
@@ -490,16 +491,16 @@ export default function CalendarView({}: CalendarViewProps) {
                           <div
                             key={citaIndex}
                             onClick={() => handleCitaClick(cita)}
-                            className="absolute inset-1 bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-300 rounded-lg p-2 text-sm overflow-hidden cursor-pointer hover:from-blue-200 hover:to-blue-300 hover:shadow-md transition-all duration-200"
+                            className="absolute inset-1 bg-amber-300 border border-amber-400 rounded-lg p-2 text-sm overflow-hidden cursor-pointer hover:bg-amber-400 hover:shadow-md transition-all duration-200"
                             title={`${cita.tutor_nombre} - ${cita.mascota_nombre} - ${cita.servicios.nombre}`}
                           >
-                            <div className="font-bold text-blue-900 truncate text-base">
+                            <div className="font-bold text-amber-900 truncate text-base">
                               {cita.mascota_nombre}
                             </div>
-                            <div className="text-blue-700 truncate font-medium">
+                            <div className="text-amber-800 truncate font-medium">
                               {cita.servicios.nombre}
                             </div>
-                            <div className="text-blue-600 truncate text-xs">
+                            <div className="text-amber-700 truncate text-xs">
                               {formatTime(new Date(cita.horarios.inicio))}
                             </div>
                           </div>
@@ -546,19 +547,19 @@ export default function CalendarView({}: CalendarViewProps) {
                       <div
                         key={citaIndex}
                         onClick={() => handleCitaClick(cita)}
-                        className="absolute inset-1 bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-300 rounded-lg p-3 text-sm overflow-hidden cursor-pointer hover:from-blue-200 hover:to-blue-300 hover:shadow-md transition-all duration-200"
+                        className="absolute inset-1 bg-amber-300 border border-amber-400 rounded-lg p-3 text-sm overflow-hidden cursor-pointer hover:bg-amber-400 hover:shadow-md transition-all duration-200"
                         title={`${cita.tutor_nombre} - ${cita.mascota_nombre} - ${cita.servicios.nombre}`}
                       >
-                        <div className="font-bold text-blue-900 text-lg">
+                        <div className="font-bold text-amber-900 text-lg">
                           {cita.mascota_nombre}
                         </div>
-                        <div className="text-blue-700 font-medium">
+                        <div className="text-amber-800 font-medium">
                           {cita.servicios.nombre}
                         </div>
-                        <div className="text-blue-600 text-sm">
+                        <div className="text-amber-700 text-sm">
                           {cita.tutor_nombre}
                         </div>
-                        <div className="text-blue-500 text-xs">
+                        <div className="text-amber-600 text-xs">
                           {formatTime(new Date(cita.horarios.inicio))} - {formatTime(new Date(cita.horarios.fin))}
                         </div>
                       </div>
