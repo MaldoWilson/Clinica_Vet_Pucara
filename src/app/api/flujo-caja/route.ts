@@ -54,19 +54,12 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    
-    // Validación básica
-    if (body.dia === undefined || body.dia === null || body.dia === "") {
-      return NextResponse.json(
-        { ok: false, error: "El campo 'día' es obligatorio" },
-        { status: 400 }
-      );
-    }
-    
+
+    // El día se calcula automáticamente desde created_at, no se recibe del formulario
+
     const supa = supabaseServer();
-    
+
     const nuevoRegistro = {
-      dia: parseInt(body.dia) || 0,
       tipo: body.tipo,
       categoria: body.categoria || null,
       nombre: body.nombre || null,
@@ -111,18 +104,11 @@ export async function PUT(req: Request) {
       );
     }
     
-    // Validación básica
-    if (body.dia === undefined || body.dia === null || body.dia === "") {
-      return NextResponse.json(
-        { ok: false, error: "El campo 'día' es obligatorio" },
-        { status: 400 }
-      );
-    }
-    
+    // El día se calcula automáticamente desde created_at, no se recibe del formulario
+
     const supa = supabaseServer();
-    
+
     const registroActualizado = {
-      dia: parseInt(body.dia) || 0,
       tipo: body.tipo,
       categoria: body.categoria || null,
       nombre: body.nombre || null,

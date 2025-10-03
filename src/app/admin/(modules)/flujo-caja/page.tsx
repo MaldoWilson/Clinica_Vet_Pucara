@@ -15,7 +15,7 @@ type Veterinario = {
 
 type FlujoCaja = {
   id: string;
-  dia: number;
+  dia: number; // Calculado automáticamente desde created_at
   tipo: string;
   categoria: string | null;
   nombre: string | null;
@@ -29,10 +29,9 @@ type FlujoCaja = {
   created_at: string;
 };
 
-type FormData = Omit<FlujoCaja, "id" | "created_at"> & { id?: string };
+type FormData = Omit<FlujoCaja, "id" | "created_at" | "dia"> & { id?: string };
 
 const initialFormState: FormData = {
-  dia: 1,
   tipo: "",
   categoria: "",
   nombre: "",
@@ -138,9 +137,7 @@ export default function FlujoCajaPage() {
 
   // Abrir modal para crear
   const handleNuevo = () => {
-    // Autocompletar el día actual
-    const diaActual = new Date().getDate();
-    setFormData({ ...initialFormState, dia: diaActual });
+    setFormData(initialFormState);
     setIsEditing(false);
     setShowModal(true);
   };
@@ -149,7 +146,6 @@ export default function FlujoCajaPage() {
   const handleEditar = (registro: FlujoCaja) => {
     setFormData({
       id: registro.id,
-      dia: registro.dia,
       tipo: registro.tipo,
       categoria: registro.categoria || "",
       nombre: registro.nombre || "",
@@ -173,10 +169,12 @@ export default function FlujoCajaPage() {
 
     try {
       const method = isEditing ? "PUT" : "POST";
+      // Remover el campo dia del formulario ya que se calcula automáticamente desde created_at
+      const { dia, ...dataToSend } = formData;
       const res = await fetch("/api/flujo-caja", {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       const json = await res.json();
@@ -274,7 +272,7 @@ export default function FlujoCajaPage() {
     
     // Preparar datos - valores nulos o 0 se muestran como vacíos
     const datosBody = registros.map(reg => [
-      reg.dia,
+      new Date(reg.created_at).getDate(), // Día extraído de created_at
       reg.tipo || "",
       reg.categoria || "",
       reg.nombre || "",
@@ -535,7 +533,7 @@ export default function FlujoCajaPage() {
           <tbody>
             ${registros.map(reg => `
               <tr>
-                <td>${reg.dia}</td>
+                <td>${new Date(reg.created_at).getDate()}</td>
                 <td>${reg.tipo || ""}</td>
                 <td>${reg.categoria || ""}</td>
                 <td>${reg.nombre || ""}</td>
@@ -672,7 +670,7 @@ export default function FlujoCajaPage() {
               ) : (
                 registros.map((reg) => (
                   <tr key={reg.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{reg.dia}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{new Date(reg.created_at).getDate()}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{reg.tipo}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{reg.categoria || "-"}</td>
                     <td className="px-4 py-4 text-sm text-gray-600">{reg.nombre || "-"}</td>
@@ -746,20 +744,22 @@ export default function FlujoCajaPage() {
 
               <form onSubmit={handleGuardar} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Día */}
+                  {/* Día (calculado automáticamente desde created_at) */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Día <span className="text-red-500">*</span>
+                      Día <span className="text-gray-500">(automático)</span>
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       value={formData.dia}
-                      onChange={(e) => handleInputChange("dia", parseInt(e.target.value) || 0)}
-                      min={1}
-                      max={31}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-md"
+                      placeholder="Se calcula automáticamente"
+                      title="El día se calcula automáticamente desde la fecha de creación"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Se calcula automáticamente desde la fecha de creación
+                    </p>
                   </div>
 
                   {/* Tipo */}

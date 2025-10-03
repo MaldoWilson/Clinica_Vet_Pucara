@@ -3,6 +3,41 @@
 import { useEffect, useMemo, useState } from "react";
 import { normalizeRutPlain, formatRutPretty } from "@/lib/rut";
 
+// Componente skeleton para tarjetas de pacientes
+function PacienteSkeletonCard() {
+  return (
+    <div className="group relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm animate-pulse">
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-gray-300 to-gray-400" />
+      <div className="relative z-10 p-5">
+        <div className="flex gap-4">
+          {/* Propietario skeleton */}
+          <div className="w-1/2 pr-3 border-r border-gray-100">
+            <div className="h-3 bg-gray-200 rounded mb-2"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-3 bg-gray-200 rounded w-4/5"></div>
+            </div>
+          </div>
+
+          {/* Mascota skeleton */}
+          <div className="w-1/2 pl-3">
+            <div className="h-3 bg-gray-200 rounded mb-2"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type Paciente = {
   mascotas_id: string;
   nombre: string; // nombre mascota
@@ -28,7 +63,7 @@ type Paciente = {
 
 export default function PacientesPage() {
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Iniciar en true para mostrar skeletons
   const [items, setItems] = useState<Paciente[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -70,6 +105,9 @@ export default function PacientesPage() {
 
   const total = items.length;
 
+  // Mostrar skeletons cuando esté cargando (tanto en carga inicial como en búsquedas)
+  const showSkeletons = loading;
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
@@ -99,56 +137,64 @@ export default function PacientesPage() {
             </div>
           </div>
           <div className="text-sm text-gray-600">
-            {loading ? "Cargando..." : `${total} resultado(s)`}
+            {loading && items.length === 0 ? "Cargando pacientes..." : `${total} resultado(s)`}
           </div>
         </div>
       </div>
 
       <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-        {items.map((p) => {
-          const o = (p.propietario || {}) as NonNullable<Paciente['propietario']>;
-          const sexo = p.sexo === true ? "Macho" : p.sexo === false ? "Hembra" : "-";
-          const especie = p.especie === true ? "Gato" : p.especie === false ? "Perro" : "-";
-          return (
-            <a href={`/admin/pacientes/${p.mascotas_id}`} key={p.mascotas_id} className="group relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600 opacity-80" />
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-white/30 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              <div className="relative z-10 p-5">
-                <div className="flex gap-4">
-                  {/* Propietario (izquierda) */}
-                  <div className="w-1/2 pr-3 border-r border-gray-100">
-                    <h3 className="text-xs font-semibold tracking-wide text-indigo-600 mb-2">Propietario</h3>
-                    <div className="text-sm text-gray-700">
-                      <div className="font-medium">{[o.nombre, o.apellido].filter(Boolean).join(" ") || "-"}</div>
-                      <div className="text-gray-500">RUT: {o.rut ? formatRutPretty(o.rut) : "-"}</div>
-                      <div className="text-gray-500">Tel: {o.telefono || "-"}</div>
-                      <div className="text-gray-500 line-clamp-1" title={o.direccion || undefined}>Dir: {o.direccion || "-"}</div>
+        {showSkeletons ? (
+          // Mostrar 9 tarjetas skeleton mientras carga
+          Array.from({ length: 9 }).map((_, index) => (
+            <PacienteSkeletonCard key={`skeleton-${index}`} />
+          ))
+        ) : (
+          // Mostrar datos reales cuando ya no esté cargando
+          items.map((p) => {
+            const o = (p.propietario || {}) as NonNullable<Paciente['propietario']>;
+            const sexo = p.sexo === true ? "Macho" : p.sexo === false ? "Hembra" : "-";
+            const especie = p.especie === true ? "Gato" : p.especie === false ? "Perro" : "-";
+            return (
+              <a href={`/admin/pacientes/${p.mascotas_id}`} key={p.mascotas_id} className="group relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600 opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-white/30 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <div className="relative z-10 p-5">
+                  <div className="flex gap-4">
+                    {/* Propietario (izquierda) */}
+                    <div className="w-1/2 pr-3 border-r border-gray-100">
+                      <h3 className="text-xs font-semibold tracking-wide text-indigo-600 mb-2">Propietario</h3>
+                      <div className="text-sm text-gray-700">
+                        <div className="font-medium">{[o.nombre, o.apellido].filter(Boolean).join(" ") || "-"}</div>
+                        <div className="text-gray-500">RUT: {o.rut ? formatRutPretty(o.rut) : "-"}</div>
+                        <div className="text-gray-500">Tel: {o.telefono || "-"}</div>
+                        <div className="text-gray-500 line-clamp-1" title={o.direccion || undefined}>Dir: {o.direccion || "-"}</div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Mascota (derecha) */}
-                  <div className="w-1/2 pl-3">
-                    <h3 className="text-xs font-semibold tracking-wide text-indigo-600 mb-2">Mascota</h3>
-                    <div className="text-sm text-gray-700">
-                      <div className="font-medium">{p.nombre}</div>
-                      <div className="text-gray-500">{especie}{p.raza ? ` · ${p.raza}` : ""}</div>
-                      <div className="text-gray-500">Sexo: {sexo}</div>
-                      {p.fecha_nacimiento && (
-                        <div className="text-gray-500">Nac.: {new Date(p.fecha_nacimiento).toLocaleDateString("es-CL")}</div>
-                      )}
-                      {p.numero_microchip && (
-                        <div className="text-gray-500">Chip: {p.numero_microchip}</div>
-                      )}
-                      {p.esterilizado === true && (
-                        <span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Esterilizado/a</span>
-                      )}
+                    {/* Mascota (derecha) */}
+                    <div className="w-1/2 pl-3">
+                      <h3 className="text-xs font-semibold tracking-wide text-indigo-600 mb-2">Mascota</h3>
+                      <div className="text-sm text-gray-700">
+                        <div className="font-medium">{p.nombre}</div>
+                        <div className="text-gray-500">{especie}{p.raza ? ` · ${p.raza}` : ""}</div>
+                        <div className="text-gray-500">Sexo: {sexo}</div>
+                        {p.fecha_nacimiento && (
+                          <div className="text-gray-500">Nac.: {new Date(p.fecha_nacimiento).toLocaleDateString("es-CL")}</div>
+                        )}
+                        {p.numero_microchip && (
+                          <div className="text-gray-500">Chip: {p.numero_microchip}</div>
+                        )}
+                        {p.esterilizado === true && (
+                          <span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Esterilizado/a</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </a>
-          );
-        })}
+              </a>
+            );
+          })
+        )}
       </div>
 
       {/* Paginación */}

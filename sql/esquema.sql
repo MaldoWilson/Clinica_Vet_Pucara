@@ -167,11 +167,12 @@ CREATE TABLE public.veterinarios (
   descripcion text,
   CONSTRAINT veterinarios_pkey PRIMARY KEY (id)
 );
+-- Crear tabla flujo_caja con dia calculado automáticamente desde created_at
 CREATE TABLE flujo_caja (
     id SERIAL PRIMARY KEY,
-    dia INT,
+    dia INT GENERATED ALWAYS AS (EXTRACT(DAY FROM created_at)) STORED,
     tipo TEXT,
-    categoria TEXT, 
+    categoria TEXT,
     nombre TEXT,
     efectivo NUMERIC,
     debito NUMERIC,
@@ -182,3 +183,6 @@ CREATE TABLE flujo_caja (
     dr TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Actualizar registros existentes para que dia coincida con created_at
+UPDATE flujo_caja SET dia = EXTRACT(DAY FROM created_at) WHERE dia != EXTRACT(DAY FROM created_at);

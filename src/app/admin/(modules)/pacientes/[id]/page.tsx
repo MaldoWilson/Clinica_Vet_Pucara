@@ -47,6 +47,86 @@ type Antecedentes = {
 
 type TabId = "general" | "antecedentes" | "historial";
 
+// Componente skeleton para la página detallada de paciente
+function PacienteDetailSkeleton() {
+  return (
+    <div className="max-w-7xl mx-auto">
+      {/* Encabezado skeleton */}
+      <div className="relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm mb-6 animate-pulse">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-gray-300 to-gray-400" />
+        <div className="relative p-6">
+          <div className="flex items-start gap-4">
+            {/* Imagen skeleton */}
+            <div className="w-20 h-20 rounded-2xl bg-gray-200 ring-1 ring-gray-200"></div>
+
+            {/* Información skeleton */}
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="h-8 bg-gray-200 rounded w-48"></div>
+                <div className="h-5 bg-gray-200 rounded w-24"></div>
+                <div className="h-5 bg-gray-200 rounded w-20"></div>
+              </div>
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                <div className="h-4 bg-gray-200 rounded w-32"></div>
+                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                <div className="h-4 bg-gray-200 rounded w-28"></div>
+                <div className="h-4 bg-gray-200 rounded w-20"></div>
+              </div>
+            </div>
+
+            {/* Menú acciones skeleton */}
+            <div className="ml-auto">
+              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs skeleton */}
+      <div className="rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm animate-pulse">
+        <div className="px-4 md:px-6 pt-4">
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-8 bg-gray-200 rounded-full w-20"></div>
+            ))}
+          </div>
+        </div>
+
+        {/* Contenido skeleton */}
+        <div className="p-4 md:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Columna izquierda */}
+            <div className="space-y-4">
+              <div className="h-5 bg-gray-200 rounded w-32"></div>
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex justify-between">
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Columna derecha */}
+            <div className="space-y-4">
+              <div className="h-5 bg-gray-200 rounded w-36"></div>
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex justify-between">
+                    <div className="h-4 bg-gray-200 rounded w-28"></div>
+                    <div className="h-4 bg-gray-200 rounded w-36"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PacienteDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
@@ -1201,6 +1281,11 @@ body * {
     const fecha = d.toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: '2-digit' });
     const hora = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
     return `${fecha} · ${hora}`;
+  }
+
+  // Mostrar skeleton mientras carga
+  if (loading || !data) {
+    return <PacienteDetailSkeleton />;
   }
 
   return (
