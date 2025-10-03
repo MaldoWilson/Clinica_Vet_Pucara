@@ -148,7 +148,16 @@ export default function PacienteDetailPage() {
   const [consultas, setConsultas] = useState<any[]>([]);
   const [ultimaConsultaId, setUltimaConsultaId] = useState<string | null>(null);
   const [savingConsulta, setSavingConsulta] = useState(false);
-  const [consultaForm, setConsultaForm] = useState({
+  const [consultaForm, setConsultaForm] = useState<{
+    fecha: string;
+    motivo: string;
+    tipo_atencion: string;
+    anamnesis: string;
+    diagnostico: string;
+    tratamiento: string;
+    proximo_control: string | null;
+    observaciones: string;
+  }>({
     fecha: new Date().toISOString().slice(0, 10),
     motivo: "",
     tipo_atencion: "",
@@ -175,9 +184,11 @@ export default function PacienteDetailPage() {
   const [parvoOpen, setParvoOpen] = useState(false);
   const [parvoTexto, setParvoTexto] = useState("");
   const [savingParvo, setSavingParvo] = useState(false);
+  const [veterinarios, setVeterinarios] = useState<Array<{id: string; nombre: string; especialidad?: string;}>>([]);
   const [recetaForm, setRecetaForm] = useState({
     peso: "",
     notas: "",
+    emitida_por: "",
     items: [
       { nombre_medicamento: "", dosis: "", via: "", frecuencia: "", duracion: "", instrucciones: "" }
     ] as Array<{ nombre_medicamento: string; dosis: string; via?: string; frecuencia?: string; duracion?: string; instrucciones?: string; }>,
@@ -248,12 +259,17 @@ export default function PacienteDetailPage() {
       setError("Debes crear una consulta primero antes de crear una receta.");
       return;
     }
+    if (!recetaForm.emitida_por) {
+      setError("Debes seleccionar el veterinario que emite la receta.");
+      return;
+    }
     setSavingReceta(true); setError(null); setSuccess(null);
     try {
       const payload: any = {
         consulta_id: ultimaConsultaId,
         peso: recetaForm.peso ? Number(recetaForm.peso) : null,
         notas: recetaForm.notas || null,
+        emitida_por: recetaForm.emitida_por,
         items: recetaForm.items,
       };
       const res = await fetch("/api/recetas", {
@@ -279,12 +295,17 @@ export default function PacienteDetailPage() {
 
   async function actualizarReceta() {
     if (!editReceta) return;
+    if (!editReceta.emitida_por) {
+      setError("Debes seleccionar el veterinario que emite la receta.");
+      return;
+    }
     setSavingEditReceta(true); setError(null); setSuccess(null);
     try {
       const payload: any = {
         id: editReceta.id,
         peso: editReceta.peso ? Number(editReceta.peso) : null,
         notas: editReceta.notas || null,
+        emitida_por: editReceta.emitida_por,
         items: editReceta.items,
       };
       const res = await fetch("/api/recetas", {
@@ -1054,6 +1075,19 @@ body * {
     if (id) load();
   }, [id]);
 
+  // Función para cargar veterinarios
+  const loadVeterinarios = async () => {
+    try {
+      const res = await fetch("/api/Veterinarios");
+      const json = await res.json();
+      if (json?.ok && Array.isArray(json.data)) {
+        setVeterinarios(json.data);
+      }
+    } catch (e) {
+      console.error("Error cargando veterinarios:", e);
+    }
+  };
+
   // Función para cargar consultas y enriquecerlas con recetas
   const loadConsultas = async () => {
     try {
@@ -1094,9 +1128,12 @@ body * {
     }
   };
 
-  // Cargar consultas existentes
+  // Cargar consultas existentes y veterinarios
   useEffect(() => {
-    if (id) loadConsultas();
+    if (id) {
+      loadConsultas();
+      loadVeterinarios();
+    }
   }, [id]);
 
   // Cargar antecedentes de la mascota
@@ -1512,17 +1549,33 @@ body * {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
-                      <input 
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2" 
-                        value={editReceta.peso || ''} 
+                      <input
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        value={editReceta.peso || ''}
                         onChange={(e) => setEditReceta({ ...editReceta, peso: e.target.value })}
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Veterinario que emite la receta</label>
+                      <select
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        value={editReceta.emitida_por || ''}
+                        onChange={(e) => setEditReceta({ ...editReceta, emitida_por: e.target.value })}
+                        required
+                      >
+                        <option value="">Seleccionar veterinario...</option>
+                        {veterinarios.map((vet) => (
+                          <option key={vet.id} value={vet.id}>
+                            {vet.nombre} {vet.especialidad ? `(${vet.especialidad})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Notas</label>
-                      <textarea 
-                        className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2" 
-                        value={editReceta.notas || ''} 
+                      <textarea
+                        className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2"
+                        value={editReceta.notas || ''}
                         onChange={(e) => setEditReceta({ ...editReceta, notas: e.target.value })}
                       />
                     </div>
@@ -1711,7 +1764,7 @@ body * {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Próximo control <span className="text-gray-400">(Opcional)</span></label>
-                      <input type="date" className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.proximo_control || ""} onChange={(e) => setConsultaForm({ ...consultaForm, proximo_control: e.target.value || null })} />
+                      <input type="date" className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.proximo_control || ""} onChange={(e) => setConsultaForm({ ...consultaForm, proximo_control: e.target.value ? e.target.value : null })} />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
@@ -1792,6 +1845,22 @@ body * {
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">Peso (kg)</label>
                   <input className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={recetaForm.peso} onChange={(e) => setRecetaForm({ ...recetaForm, peso: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Veterinario que emite la receta</label>
+                  <select
+                    className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    value={recetaForm.emitida_por}
+                    onChange={(e) => setRecetaForm({ ...recetaForm, emitida_por: e.target.value })}
+                    required
+                  >
+                    <option value="">Seleccionar veterinario...</option>
+                    {veterinarios.map((vet) => (
+                      <option key={vet.id} value={vet.id}>
+                        {vet.nombre} {vet.especialidad ? `(${vet.especialidad})` : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-gray-600 mb-1">Notas</label>

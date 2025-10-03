@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const supa = supabaseServer();
     const { data: recetas, error } = await supa
       .from("recetas")
-      .select("id, consulta_id, fecha, peso, notas, created_at")
+      .select("id, consulta_id, fecha, peso, notas, emitida_por, created_at")
       .eq("consulta_id", consultaId)
       .order("created_at", { ascending: false });
     if (error) throw error;
@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
       consulta_id,
       peso: body?.peso ?? null,
       notas: body?.notas ?? null,
+      emitida_por: body?.emitida_por ?? null,
     };
 
     const { data: receta, error } = await supa
@@ -74,6 +75,37 @@ export async function POST(req: NextRequest) {
         if (itemsErr) throw itemsErr;
       }
     }
+
+    return NextResponse.json({ ok: true, data: receta });
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e.message || String(e) }, { status: 500 });
+  }
+}
+
+// PUT /api/recetas  { id, peso?, notas?, items?: [...], emitida_por? }
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const id = body?.id ? String(body.id) : null;
+    if (!id) return NextResponse.json({ ok: false, error: "id requerido" }, { status: 400 });
+    const supa = supabaseServer();
+
+    const update: any = {};
+    if (body?.peso !== undefined) update.peso = body?.peso ?? null;
+    if (body?.notas !== undefined) update.notas = body?.notas ?? null;
+    if (body?.emitida_por !== undefined) update.emitida_por = body?.emitida_por ?? null;
+
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json({ ok: false, error: "No hay campos para actualizar" }, { status: 400 });
+    }
+
+    const { data: receta, error } = await supa
+      .from("recetas")
+      .update(update)
+      .eq("id", id)
+      .select("id, consulta_id, fecha, peso, notas, emitida_por, created_at")
+      .single();
+    if (error) throw error;
 
     return NextResponse.json({ ok: true, data: receta });
   } catch (e: any) {
