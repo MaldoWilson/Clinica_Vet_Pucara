@@ -155,7 +155,7 @@ export default function PacienteDetailPage() {
     anamnesis: "",
     diagnostico: "",
     tratamiento: "",
-    proximo_control: "",
+    proximo_control: null,
     observaciones: "",
   });
   const [fabOpen, setFabOpen] = useState(false);
@@ -267,6 +267,9 @@ export default function PacienteDetailPage() {
       setRecetaOpen(false);
       setFabOpen(false);
       setUltimaReceta({ id: String(json.data.id), fecha: json.data.fecha, peso: recetaForm.peso, notas: recetaForm.notas, items: recetaForm.items });
+
+      // Recargar consultas para actualizar el historial con la nueva receta
+      await loadConsultas();
     } catch (e: any) {
       setError(e?.message || "Error inesperado");
     } finally {
@@ -294,26 +297,7 @@ export default function PacienteDetailPage() {
       setSuccess("Receta actualizada.");
       setEditReceta(null);
       // Recargar consultas para actualizar el historial
-      const resConsultas = await fetch(`/api/consultas?mascota_id=${encodeURIComponent(String(id))}`);
-      if (resConsultas.ok) {
-        const jsonConsultas = await resConsultas.json();
-        if (jsonConsultas?.ok) {
-          const mapped = await Promise.all(jsonConsultas.data.map(async (c: any) => {
-            const resR = await fetch(`/api/recetas?consulta_id=${c.id}`);
-            const jsonR = await resR.json();
-            const recetas = resR.ok && jsonR?.ok ? jsonR.data : [];
-            return {
-              id: c.id,
-              fecha: c.fecha || c.created_at,
-              motivo: c.motivo || '',
-              resumen: c.diagnostico || c.tratamiento || '',
-              tipo: c.tipo_atencion && c.tipo_atencion.toLowerCase().includes('inmun') ? 'inmunizacion' : 'consulta',
-              recetas,
-            };
-          }));
-          setConsultas(mapped);
-        }
-      }
+      await loadConsultas();
     } catch (e: any) {
       setError(e?.message || "Error inesperado");
     } finally {
@@ -1070,44 +1054,48 @@ body * {
     if (id) load();
   }, [id]);
 
+  // Función para cargar consultas y enriquecerlas con recetas
+  const loadConsultas = async () => {
+    try {
+      const res = await fetch(`/api/consultas?mascota_id=${encodeURIComponent(String(id))}`);
+      const json = await res.json();
+      if (res.ok && json?.ok) {
+        // Enriquecer cada consulta con sus recetas
+        const mapped = await Promise.all((json.data || []).map(async (c: any) => {
+          try {
+            const resR = await fetch(`/api/recetas?consulta_id=${c.id}`);
+            const jsonR = await resR.json();
+            const recetas = resR.ok && jsonR?.ok ? jsonR.data : [];
+            return ({
+              id: c.id,
+              fecha: c.created_at || c.fecha,
+              motivo: c.motivo,
+              veterinario: c.veterinario_id || '',
+              tipo: c.tipo_atencion && c.tipo_atencion.toLowerCase().includes('inmun') ? 'inmunizacion' : 'consulta',
+              resumen: c.diagnostico || c.tratamiento || '',
+              recetas,
+            });
+          } catch {
+            return ({
+              id: c.id,
+              fecha: c.created_at || c.fecha,
+              motivo: c.motivo,
+              veterinario: c.veterinario_id || '',
+              tipo: c.tipo_atencion && c.tipo_atencion.toLowerCase().includes('inmun') ? 'inmunizacion' : 'consulta',
+              resumen: c.diagnostico || c.tratamiento || '',
+              recetas: [],
+            });
+          }
+        }));
+        setConsultas(mapped);
+      }
+    } catch (e) {
+      console.error("Error al cargar consultas:", e);
+    }
+  };
+
   // Cargar consultas existentes
   useEffect(() => {
-    const loadConsultas = async () => {
-      try {
-        const res = await fetch(`/api/consultas?mascota_id=${encodeURIComponent(String(id))}`);
-        const json = await res.json();
-        if (res.ok && json?.ok) {
-          // Enriquecer cada consulta con sus recetas
-          const mapped = await Promise.all((json.data || []).map(async (c: any) => {
-            try {
-              const resR = await fetch(`/api/recetas?consulta_id=${c.id}`);
-              const jsonR = await resR.json();
-              const recetas = resR.ok && jsonR?.ok ? jsonR.data : [];
-              return ({
-                id: c.id,
-                fecha: c.created_at || c.fecha,
-                motivo: c.motivo,
-                veterinario: c.veterinario_id || '',
-                tipo: c.tipo_atencion && c.tipo_atencion.toLowerCase().includes('inmun') ? 'inmunizacion' : 'consulta',
-                resumen: c.diagnostico || c.tratamiento || '',
-                recetas,
-              });
-            } catch {
-              return ({
-                id: c.id,
-                fecha: c.created_at || c.fecha,
-                motivo: c.motivo,
-                veterinario: c.veterinario_id || '',
-                tipo: c.tipo_atencion && c.tipo_atencion.toLowerCase().includes('inmun') ? 'inmunizacion' : 'consulta',
-                resumen: c.diagnostico || c.tratamiento || '',
-                recetas: [],
-              });
-            }
-          }));
-          setConsultas(mapped);
-        }
-      } catch {}
-    };
     if (id) loadConsultas();
   }, [id]);
 
@@ -1168,7 +1156,9 @@ body * {
       const json = await res.json();
       if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo crear la consulta");
       setSuccess("Consulta creada.");
-      setConsultas((prev) => [{ id: json.data.id, fecha: json.data.fecha }, ...prev]);
+
+      // Recargar consultas para actualizar el historial completamente
+      await loadConsultas();
       setUltimaConsultaId(String(json.data.id));
     } catch (e: any) {
       setError(e?.message || "Error inesperado");
@@ -1197,7 +1187,8 @@ body * {
       setSuccess("Guardado.");
       setParvoOpen(false);
       setUltimaConsultaId(String(json.data.id));
-      setConsultas((prev) => [{ id: json.data.id, fecha: json.data.fecha, motivo: payload.motivo, tipo: 'consulta', resumen: parvoTexto }, ...prev]);
+      // Recargar consultas para actualizar el historial completamente
+      await loadConsultas();
     } catch (e: any) {
       setError(e?.message || "Error inesperado");
     } finally {
@@ -1474,17 +1465,29 @@ body * {
                     <textarea className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2" value={editConsulta.tratamiento || ''} onChange={(e) => setEditConsulta({ ...editConsulta, tratamiento: e.target.value })} />
                   </div>
                 </div>
+                <div className="px-5 pb-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Próximo control <span className="text-gray-400">(Opcional)</span></label>
+                      <input type="date" className="w-full rounded-lg border border-gray-300 px-3 py-2" value={editConsulta.proximo_control || ""} onChange={(e) => setEditConsulta({ ...editConsulta, proximo_control: e.target.value || null })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
+                      <textarea className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2" value={editConsulta.observaciones || ''} onChange={(e) => setEditConsulta({ ...editConsulta, observaciones: e.target.value })} />
+                    </div>
+                  </div>
+                </div>
                 <div className="px-5 py-4 bg-gray-50 rounded-b-xl flex justify-end gap-2 sticky bottom-0">
                   <button onClick={() => setEditConsulta(null)} className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50">Cerrar</button>
                   <button onClick={async () => {
                     setSavingEditConsulta(true);
                     try {
-                      const payload: any = { id: editConsulta.id, motivo: editConsulta.motivo, tipo_atencion: editConsulta.tipo_atencion, anamnesis: editConsulta.anamnesis, diagnostico: editConsulta.diagnostico, tratamiento: editConsulta.tratamiento, fecha: editConsulta.fecha };
+                      const payload: any = { id: editConsulta.id, motivo: editConsulta.motivo, tipo_atencion: editConsulta.tipo_atencion, anamnesis: editConsulta.anamnesis, diagnostico: editConsulta.diagnostico, tratamiento: editConsulta.tratamiento, fecha: editConsulta.fecha, proximo_control: editConsulta.proximo_control, observaciones: editConsulta.observaciones };
                       const res = await fetch('/api/consultas', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                       const json = await res.json();
                       if (!res.ok || json?.ok === false) throw new Error(json?.error || 'Error al guardar');
                       // refrescar lista
-                      setConsultas((prev) => prev.map((x) => x.id === editConsulta.id ? { ...x, fecha: payload.fecha || x.fecha, motivo: payload.motivo || x.motivo, resumen: payload.diagnostico || payload.tratamiento || x.resumen } : x));
+                      await loadConsultas();
                       setEditConsulta(null);
                     } catch (e: any) {
                       alert(e?.message || 'Error');
@@ -1617,7 +1620,7 @@ body * {
                   const res = await fetch('/api/consultas', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: confirmDelete.id }) });
                   const json = await res.json();
                   if (!res.ok || json?.ok === false) throw new Error(json?.error || 'Error al eliminar');
-                  setConsultas((prev) => prev.filter((x) => String(x.id) !== String(confirmDelete.id)));
+                  await loadConsultas();
                 } catch (e: any) {
                   alert(e?.message || 'Error');
                 } finally {
@@ -1708,7 +1711,7 @@ body * {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Próximo control <span className="text-gray-400">(Opcional)</span></label>
-                      <input type="date" className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.proximo_control} onChange={(e) => setConsultaForm({ ...consultaForm, proximo_control: e.target.value })} />
+                      <input type="date" className="w-full rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.proximo_control || ""} onChange={(e) => setConsultaForm({ ...consultaForm, proximo_control: e.target.value || null })} />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
@@ -1842,8 +1845,20 @@ body * {
 
           {/* Resumen última receta */}
           {ultimaReceta && (
-            <div className="mt-4 rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6">
-              <div className="flex items-center justify-between">
+            <div className="mt-4 rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6 relative">
+              {/* Botón X para cerrar receta */}
+              <button
+                type="button"
+                aria-label="Cerrar receta"
+                title="Cerrar receta"
+                onClick={() => setUltimaReceta(null)}
+                className="absolute -top-2 -right-2 p-1.5 rounded-full bg-white shadow ring-1 ring-gray-200 hover:bg-gray-50 z-10"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="flex items-center justify-between pr-8">
                 <h4 className="text-sm font-semibold text-indigo-600">Receta #{ultimaReceta.id}</h4>
                 <div className="text-sm text-gray-500">{ultimaReceta.fecha ? new Date(ultimaReceta.fecha).toLocaleString('es-CL') : ''}</div>
               </div>

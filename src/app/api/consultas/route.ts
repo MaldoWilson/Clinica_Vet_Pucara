@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       anamnesis: body?.anamnesis ?? null,
       diagnostico: body?.diagnostico ?? null,
       tratamiento: body?.tratamiento ?? null,
-      proximo_control: body?.proximo_control ?? null,
+      proximo_control: (body?.proximo_control && body.proximo_control.trim() !== "") ? body.proximo_control : null,
       observaciones: body?.observaciones ?? null,
     };
 
@@ -75,7 +75,13 @@ export async function PUT(req: NextRequest) {
 
     const updates: any = {};
     for (const k of ["fecha","motivo","tipo_atencion","anamnesis","diagnostico","tratamiento","proximo_control","observaciones"]) {
-      if (k in body) updates[k] = body[k] ?? null;
+      if (k in body) {
+        if (k === "proximo_control") {
+          updates[k] = (body[k] && body[k].trim() !== "") ? body[k] : null;
+        } else {
+          updates[k] = body[k] ?? null;
+        }
+      }
     }
     if (Object.keys(updates).length === 0) return NextResponse.json({ ok: false, error: "Sin cambios" }, { status: 400 });
 
