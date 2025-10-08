@@ -22,6 +22,7 @@ npm install
 ```bash
 npm install xlsx
 npm install recharts
+npm install jspdf html2canvas
 ```
 
 2. Variables de entorno:

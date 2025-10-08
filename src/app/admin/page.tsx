@@ -166,7 +166,7 @@ export default function AdminHome() {
   return (
     <div className="space-y-12 pb-8">
       {/* Header mejorado */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-green-800 p-8 shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br bg-indigo-500  p-8 shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">
@@ -197,19 +197,11 @@ export default function AdminHome() {
               <Link href={item.href} key={item.title}>
                 <div className="group relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer">
                   {/* Fondo gradiente decorativo */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+                  
                   
                   <div className="relative p-6 space-y-4">
                     {/* Icono */}
-                    <div className="flex items-start justify-between">
-                      <div className={`p-4 rounded-2xl ${item.iconBg} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      </div>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
+                    
                     
                     {/* Contenido */}
                     <div className="space-y-2">
@@ -223,7 +215,7 @@ export default function AdminHome() {
                     
                     {/* Botón */}
                     <div className="pt-2">
-                      <div className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 group-hover:text-gray-900">
+                      <div className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-500 group-hover:text-indigo-400">
                         Acceder
                         <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
