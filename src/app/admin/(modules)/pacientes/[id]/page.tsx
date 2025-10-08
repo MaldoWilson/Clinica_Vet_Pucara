@@ -331,8 +331,8 @@ export default function PacienteDetailPage() {
   function imprimirConsulta(consulta: any) {
     const w = window.open("", "_blank", "width=800,height=900");
     if (!w) return;
-    
-    const css = `
+    //Primer CSS PARA CONSULTA
+    const css1 = `
       @page { margin: 20mm; }
       body { 
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -482,13 +482,13 @@ export default function PacienteDetailPage() {
       month: 'long',
       day: 'numeric'
     }) : '';
-    
+    //PRIMER HTML PARA IMPRIMIR CONSULTA
     const html = `<!doctype html>
       <html>
         <head>
           <meta charset='utf-8'>
           <title>Consulta Médica Veterinaria - ${consulta.id}</title>
-          <style>${css}</style>
+          <style>${css1}</style>
         </head>
         <body>
           <div class="header">
@@ -596,8 +596,8 @@ export default function PacienteDetailPage() {
   function imprimirReceta(receta: any) {
     const w = window.open("", "_blank", "width=800,height=900");
     if (!w) return;
-    
-    const css = `
+    //Segundo css RECETA
+    const css2 = `
 @page { 
   margin: 15mm; 
   size: A4;
@@ -936,13 +936,13 @@ body * {
     const dia = fecha.getDate().toString().padStart(2, '0');
     const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
     const año = fecha.getFullYear().toString();
-    
+    //Segundo HTML PARA IMPRIMIR RECETA
     const html = `<!doctype html>
       <html>
         <head>
           <meta charset='utf-8'>
           <title>Receta Médica - ${receta.id}</title>
-          <style>${css}</style>
+          <style>${css2}</style>
         </head>
         <body>
           <div class="watermark">
@@ -1047,8 +1047,8 @@ body * {
       // Crear una ventana temporal para generar el HTML
       const w = window.open("", "_blank", "width=800,height=900");
       if (!w) return;
-      
-      const css = `
+      //Tercer css DESCARGAR EN PDF
+      const css3 = `
 @page { 
   margin: 15mm; 
   size: A4;
@@ -1350,13 +1350,13 @@ body * {
       const dia = fecha.getDate().toString().padStart(2, '0');
       const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
       const año = fecha.getFullYear().toString();
-      
+    //Tercer Html para DESCARGAR EN PDF
       const html = `<!doctype html>
         <html>
           <head>
             <meta charset='utf-8'>
             <title>Receta Médica - ${receta.id}</title>
-            <style>${css}</style>
+            <style>${css3}</style>
           </head>
           <body>
             <div class="watermark">
