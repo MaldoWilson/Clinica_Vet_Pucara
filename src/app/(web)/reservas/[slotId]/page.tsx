@@ -104,6 +104,9 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
       setShowConfirmation(false);
       setFormData(null);
       
+      // Marcar en localStorage que hubo una reserva exitosa
+      localStorage.setItem('reserva_exitosa', 'true');
+      
       // Crear modal de éxito
       const successModal = document.createElement('div');
       successModal.className = 'fixed inset-0 z-50 flex items-center justify-center';

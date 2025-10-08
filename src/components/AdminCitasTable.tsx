@@ -199,6 +199,25 @@ export default function AdminCitasTable({
           >
             Limpiar
           </button>
+          
+          <button
+            className="px-3 py-2 rounded-xl text-sm font-medium bg-red-100 hover:bg-red-200 text-red-700"
+            onClick={async () => {
+              if (confirm('¿Limpiar datos de citas canceladas? Esto limpiará los horarios de citas ya canceladas.')) {
+                try {
+                  const res = await fetch('/api/admin/citas', { method: 'PUT' });
+                  const data = await res.json();
+                  alert(data.message || 'Limpieza completada');
+                  window.location.reload();
+                } catch (err) {
+                  alert('Error: ' + err);
+                }
+              }
+            }}
+            title="Limpiar datos de citas canceladas"
+          >
+            🧹 Limpiar Canceladas
+          </button>
           {pending && <span className="text-sm text-neutral-500">Cargando…</span>}
         </div>
         <div className="text-sm text-gray-600">

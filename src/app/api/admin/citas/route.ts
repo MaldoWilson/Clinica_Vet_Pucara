@@ -1,6 +1,38 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseClient";
 
+// Endpoint temporal para limpiar citas canceladas con datos inconsistentes
+export async function PUT() {
+  try {
+    const supa = supabaseServer();
+    
+    // Limpiar todas las citas canceladas que aún tienen horario_id
+    const { data, error } = await supa
+      .from("citas")
+      .update({ 
+        horario_id: null,
+        inicio: null,
+        fin: null
+      })
+      .eq("estado", "CANCELADA")
+      .not("horario_id", "is", null)
+      .select("id, tutor_nombre, mascota_nombre");
+    
+    if (error) throw error;
+    
+    console.log(`🧹 Limpieza completada: ${data?.length || 0} citas canceladas limpiadas`);
+    
+    return NextResponse.json({ 
+      ok: true, 
+      message: `Se limpiaron ${data?.length || 0} citas canceladas`,
+      cleaned: data?.length || 0
+    });
+  } catch (e: any) {
+    console.error("Error en limpieza:", e);
+    return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
+  }
+}
+
 export async function PATCH(req: Request) {
   try {
     const { id, action } = (await req.json()) as { id: string; action: "confirmar"|"atendida"|"cancelar" };
@@ -78,7 +110,7 @@ export async function PATCH(req: Request) {
         .from("citas")
         .update({ 
           estado: "CANCELADA",
-          horario_id: null  // Limpiar la relación para evitar conflictos
+          horario_id: null  // Limpiar la relación para que no aparezcan datos en admin
         })
         .eq("id", id);
       if (e2) throw e2;

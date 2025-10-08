@@ -75,7 +75,25 @@ export async function POST(req: Request) {
       if (new Date(slot.inicio).getTime() < Date.now()) {
         throw new Error("No es posible reservar un horario en el pasado");
       }
-      if (slot.reservado) throw new Error("Este horario ya está reservado por otra cita");
+      if (slot.reservado) {
+        // Verificar si hay una cita activa para este horario
+        const { data: citaActiva, error: citaActivaError } = await supa
+          .from("citas")
+          .select("tutor_nombre, mascota_nombre")
+          .eq("horario_id", body.horarioId)
+          .neq("estado", "CANCELADA")
+          .single();
+        
+        if (citaActivaError && citaActivaError.code !== 'PGRST116') {
+          throw citaActivaError;
+        }
+        
+        if (citaActiva) {
+          throw new Error(`Este horario ya está reservado por ${citaActiva.tutor_nombre} (${citaActiva.mascota_nombre})`);
+        } else {
+          throw new Error("Este horario ya está reservado por otra cita");
+        }
+      }
 
       // Obtener información del horario para calcular inicio y fin
       const { data: horarioData, error: horarioError } = await supa
@@ -132,30 +150,35 @@ export async function POST(req: Request) {
 
     while (intentos < maxIntentos) {
       try {
-        // Verificar disponibilidad del slot principal
-        const { data: citaExistente, error: citaExistenteError } = await supa
+        // Verificar si ya existe una cita activa para este horario
+        const { data: citasExistentes, error: citasExistentesError } = await supa
           .from("citas")
-          .select("id")
+          .select("id, estado, tutor_nombre, mascota_nombre")
           .eq("horario_id", body.horarioId)
-          .single();
+          .neq("estado", "CANCELADA");
 
-        if (citaExistenteError && citaExistenteError.code !== 'PGRST116') {
-          throw citaExistenteError;
+        if (citasExistentesError) {
+          throw citasExistentesError;
         }
 
-        if (citaExistente) {
-          throw new Error("Este horario ya está reservado por otra cita");
+        if (citasExistentes && citasExistentes.length > 0) {
+          const citaExistente = citasExistentes[0];
+          throw new Error(`Este horario ya está reservado por ${citaExistente.tutor_nombre} (${citaExistente.mascota_nombre})`);
         }
 
         // Obtener el slot inicial
         const { data: slotInicial, error: slotError } = await supa
           .from("horarios")
-          .select("id, inicio, fin, veterinario_id")
+          .select("id, inicio, fin, veterinario_id, reservado")
           .eq("id", body.horarioId)
-          .eq("reservado", false)
           .single();
 
         if (slotError) throw slotError;
+
+        // Verificar que el slot esté disponible
+        if (slotInicial.reservado) {
+          throw new Error("Este horario ya está reservado");
+        }
 
         // Evitar slots en el pasado
         if (new Date(slotInicial.inicio).getTime() < Date.now()) {
