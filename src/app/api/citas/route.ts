@@ -90,6 +90,19 @@ export async function POST(req: Request) {
       const inicio = new Date(horarioData.inicio);
       const fin = new Date(inicio.getTime() + serviceDuration * 60000);
 
+      // Verificar que no hay conflictos de tiempo con otras citas ACTIVAS (no canceladas)
+      const { data: citasConflictivas, error: citasConflictivasError } = await supa
+        .from("citas")
+        .select("id, inicio, fin, mascota_nombre, estado")
+        .or(`and(inicio.lt.${toLocalISOString(fin)},fin.gt.${toLocalISOString(inicio)})`)
+        .neq("estado", "CANCELADA")  // Excluir citas canceladas
+        .limit(1);
+        
+      if (citasConflictivasError) throw citasConflictivasError;
+      if (citasConflictivas && citasConflictivas.length > 0) {
+        throw new Error(`Ya existe una cita (${citasConflictivas[0].mascota_nombre}) en ese horario`);
+      }
+
       // Crear la cita directamente con inicio y fin calculados
       const { data, error } = await supa
         .from("citas")
@@ -180,11 +193,12 @@ export async function POST(req: Request) {
         const inicio = new Date(slotInicial.inicio);
         const fin = new Date(inicio.getTime() + serviceDuration * 60000);
         
-        // Verificar que no hay conflictos de tiempo con otras citas
+        // Verificar que no hay conflictos de tiempo con otras citas ACTIVAS (no canceladas)
         const { data: citasConflictivas, error: citasConflictivasError } = await supa
           .from("citas")
-          .select("id, inicio, fin, mascota_nombre")
+          .select("id, inicio, fin, mascota_nombre, estado")
           .or(`and(inicio.lt.${toLocalISOString(fin)},fin.gt.${toLocalISOString(inicio)})`)
+          .neq("estado", "CANCELADA")  // Excluir citas canceladas
           .limit(1);
           
         if (citasConflictivasError) throw citasConflictivasError;

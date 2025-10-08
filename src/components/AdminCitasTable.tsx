@@ -230,6 +230,7 @@ export default function AdminCitasTable({
             <thead className="bg-gray-50 text-gray-700">
               <tr>
                 <th className="text-left p-3 font-semibold">📅 Fecha Creación</th>
+                <th className="text-left p-3 font-semibold">📆 Día de Servicio</th>
                 <th className="text-left p-3 font-semibold">👤 Tutor</th>
                 <th className="text-left p-3 font-semibold">🐾 Mascota</th>
                 <th className="text-left p-3 font-semibold">💊 Servicio</th>
@@ -248,6 +249,14 @@ export default function AdminCitasTable({
                 return (
                   <tr key={c.id} className="border-t hover:bg-gray-50">
                     <td className="p-3">{fechaCreacion}</td>
+                    <td className="p-3">
+                      {c.horarios ? (() => {
+                        const fechaServicio = new Date(c.horarios!.inicio);
+                        return fechaServicio.toLocaleDateString("es-CL", { 
+                          dateStyle: "medium"
+                        });
+                      })() : "-"}
+                    </td>
                     <td className="p-3">
                       <div>
                         <div className="font-medium">{c.tutor_nombre}</div>

@@ -658,28 +658,15 @@ export default function CalendarView({}: CalendarViewProps) {
                         <div
                           key={citaIndex}
                           onClick={() => handleCitaClick(cita)}
-                          className="absolute left-1 right-1 bg-amber-300 border border-amber-400 rounded-lg p-3 text-sm overflow-hidden cursor-pointer hover:bg-amber-400 hover:shadow-md transition-all duration-200 z-10"
-                          style={{ height: `${alturaTotal - 8}px` }}
+                          className="absolute left-1 right-1 bg-gradient-to-br from-yellow-300 to-amber-400 border border-yellow-500 rounded-lg p-2 text-sm overflow-hidden cursor-pointer hover:from-yellow-400 hover:to-amber-500 hover:shadow-lg transition-all duration-200 z-10 flex flex-col justify-center min-h-[48px]"
+                          style={{ height: `${Math.max(alturaTotal - 4, 48)}px` }}
                           title={`${cita.tutor_nombre} - ${cita.mascota_nombre} - ${cita.servicios.nombre} (${duracionMinutos} min)`}
                         >
-                          <div className="font-bold text-amber-900 text-lg">
+                          <div className="font-bold text-amber-900 text-base leading-tight text-center">
                             {cita.mascota_nombre}
                           </div>
-                          <div className="text-amber-800 font-medium">
+                          <div className="text-amber-800 font-medium text-sm leading-tight text-center">
                             {cita.servicios.nombre}
-                          </div>
-                          <div className="text-amber-700 text-sm">
-                            {cita.tutor_nombre}
-                          </div>
-                          <div className="text-amber-600 text-xs">
-                            {(() => {
-                              const start = new Date(cita.inicio);
-                              const end = new Date(cita.fin);
-                              return `${formatTime(start)} - ${formatTime(end)}`;
-                            })()}
-                          </div>
-                          <div className="text-amber-500 text-xs">
-                            {duracionMinutos} min
                           </div>
                         </div>
                       );
