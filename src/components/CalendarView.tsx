@@ -308,25 +308,25 @@ export default function CalendarView({}: CalendarViewProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       {/* Header del calendario */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-indigo-400 text-white">
-        <div className="flex items-center space-x-4">
+      <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 border-b border-gray-200 bg-indigo-400 text-white">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <button
               onClick={goToToday}
-              className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white rounded-md hover:bg-gray-100 transition-colors"
+              className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white rounded-md hover:bg-gray-100 transition-colors w-full sm:w-auto"
             >
               Hoy
             </button>
             
             <button
               onClick={fetchCitas}
-              className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white rounded-md hover:bg-gray-100 transition-colors"
+              className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white rounded-md hover:bg-gray-100 transition-colors w-full sm:w-auto"
             >
               Actualizar
             </button>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => navigate("prev")}
               className="p-1.5 text-white hover:bg-indigo-500 rounded-md transition-colors"
@@ -359,19 +359,19 @@ export default function CalendarView({}: CalendarViewProps) {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <button className="flex items-center space-x-2 px-3 py-1.5 text-sm text-indigo-400 bg-white border border-white rounded-md hover:bg-gray-100 transition-colors">
+        <div className="flex flex-wrap items-center gap-2 justify-end md:justify-start">
+          <button className="flex w-full items-center justify-center gap-2 px-3 py-1.5 text-sm text-indigo-400 bg-white border border-white rounded-md hover:bg-gray-100 transition-colors sm:w-auto">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             <span>Filtrar</span>
           </button>
           
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value as "semana" | "dia" | "mes")}
-              className="px-3 py-1.5 text-sm text-indigo-400 bg-white border border-white rounded-md hover:bg-gray-100 transition-colors appearance-none pr-8"
+              className="w-full px-3 py-1.5 text-sm text-indigo-400 bg-white border border-white rounded-md hover:bg-gray-100 transition-colors appearance-none pr-8"
             >
               <option value="semana">SEMANA</option>
               <option value="mes">MES</option>
@@ -460,11 +460,11 @@ export default function CalendarView({}: CalendarViewProps) {
       <div className="relative">
         {viewMode === "mes" ? (
           /* Vista mensual */
-          <div className="p-4">
-            <div className="grid grid-cols-7 gap-1">
+          <div className="p-4 overflow-x-auto">
+            <div className="min-w-[720px] grid grid-cols-7 gap-1">
               {/* Headers de días */}
               {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map(day => (
-                <div key={day} className="p-2 text-center text-sm font-medium text-gray-500 bg-gray-50">
+                <div key={day} className="p-2 text-center text-xs font-medium text-gray-500 bg-gray-50 uppercase tracking-wide">
                   {day}
                 </div>
               ))}
@@ -482,7 +482,7 @@ export default function CalendarView({}: CalendarViewProps) {
                       isCurrentMonth ? "bg-white" : "bg-gray-50"
                     } ${isToday ? "bg-blue-50 border-blue-300" : ""}`}
                   >
-                    <div className={`text-sm font-medium mb-1 ${
+                    <div className={`text-xs md:text-sm font-medium mb-1 ${
                       isCurrentMonth 
                         ? isToday 
                           ? "text-blue-600" 
@@ -497,7 +497,7 @@ export default function CalendarView({}: CalendarViewProps) {
                         <div
                           key={citaIndex}
                           onClick={() => handleCitaClick(cita)}
-                          className="bg-amber-300 border border-amber-400 rounded p-1 text-xs cursor-pointer hover:bg-amber-400 hover:shadow-sm transition-all duration-200"
+                          className="bg-amber-300 border border-amber-400 rounded p-1 text-[11px] md:text-xs cursor-pointer hover:bg-amber-400 hover:shadow-sm transition-all duration-200"
                         >
                           <div className="font-medium text-amber-900 truncate">
                             {cita.mascota_nombre}
@@ -519,34 +519,35 @@ export default function CalendarView({}: CalendarViewProps) {
             </div>
           </div>
         ) : viewMode === "semana" ? (
-          <div className="grid grid-cols-8">
-            {/* Columna de tiempo */}
-            <div className="border-r border-gray-200">
-              <div className="h-12 border-b border-gray-200"></div>
-              {timeSlots.map((time, index) => (
-                <div key={index} className="h-12 border-b border-gray-100 flex items-start justify-end pr-2 pt-1">
-                  <span className="text-xs text-gray-500">
+          <div className="overflow-x-auto">
+            <div className="min-w-[720px] grid grid-cols-8">
+              {/* Columna de tiempo */}
+              <div className="border-r border-gray-200 bg-white sticky left-0 z-20">
+                <div className="h-12 border-b border-gray-200"></div>
+                {timeSlots.map((time, index) => (
+                <div key={index} className="h-12 border-b border-gray-100 flex items-start justify-end pr-2 pt-1 bg-white">
+                  <span className="text-[11px] text-gray-500">
                     {formatTime(time)}
                   </span>
                 </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Días de la semana */}
-            {weekDates.map((date, dayIndex) => {
-              const citasDelDia = getCitasForDate(date);
-              const isToday = date.toDateString() === new Date().toDateString();
-              
-              return (
-                <div key={dayIndex} className="border-r border-gray-200 last:border-r-0">
+              {/* Días de la semana */}
+              {weekDates.map((date, dayIndex) => {
+                const citasDelDia = getCitasForDate(date);
+                const isToday = date.toDateString() === new Date().toDateString();
+                
+                return (
+                <div key={dayIndex} className="border-r border-gray-200 last:border-r-0 bg-white">
                   {/* Header del día */}
                   <div className={`h-12 border-b border-gray-200 flex flex-col items-center justify-center ${
                     isToday ? "bg-blue-50" : ""
                   }`}>
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-xs md:text-sm font-medium text-gray-900 uppercase tracking-wide">
                       {["lun", "mar", "mié", "jue", "vie", "sáb", "dom"][dayIndex]}
                     </div>
-                    <div className={`text-lg font-bold ${
+                    <div className={`text-base md:text-lg font-bold ${
                       isToday ? "text-blue-600" : "text-gray-900"
                     }`}>
                       {date.getDate()}
@@ -567,9 +568,12 @@ export default function CalendarView({}: CalendarViewProps) {
                           const duracionMinutos = cita.servicios?.duracion_min || 30;
                           const slotsOcupados = Math.ceil(duracionMinutos / 30);
                           const alturaTotal = slotsOcupados * slotHeightPx;
+                          const citaStart = new Date(cita.inicio);
+                          const citaEnd = new Date(cita.fin);
+                          const rangoHorario = `${formatTime(citaStart)} - ${formatTime(citaEnd)}`;
+                          const esCorta = duracionMinutos <= 30;
                           
                           // Solo mostrar la cita en el primer slot
-                          const citaStart = new Date(cita.inicio);
                           const slotStart = new Date(timeSlot);
                           const esPrimerSlot = citaStart.getHours() === slotStart.getHours() && 
                                              citaStart.getMinutes() === slotStart.getMinutes();
@@ -580,26 +584,33 @@ export default function CalendarView({}: CalendarViewProps) {
                             <div
                               key={citaIndex}
                               onClick={() => handleCitaClick(cita)}
-                              className="absolute left-1 right-1 bg-amber-300 border border-amber-400 rounded-lg p-2 text-sm overflow-hidden cursor-pointer hover:bg-amber-400 hover:shadow-md transition-all duration-200 z-10"
+                              className="absolute left-1 right-1 bg-amber-300 border border-amber-400 rounded-lg px-2 py-1.5 text-xs md:text-sm overflow-hidden cursor-pointer hover:bg-amber-400 hover:shadow-md transition-all duration-200 z-10"
                               style={{ height: `${alturaTotal - 8}px` }}
                               title={`${cita.tutor_nombre} - ${cita.mascota_nombre} - ${cita.servicios.nombre} (${duracionMinutos} min)`}
                             >
-                              <div className="font-bold text-amber-900 truncate text-base">
-                                {cita.mascota_nombre}
-                              </div>
-                              <div className="text-amber-800 truncate font-medium">
-                                {cita.servicios.nombre}
-                              </div>
-                              <div className="text-amber-700 truncate text-xs">
-                                {(() => {
-                                  const start = new Date(cita.inicio);
-                                  const end = new Date(cita.fin);
-                                  return `${formatTime(start)} - ${formatTime(end)}`;
-                                })()}
-                              </div>
-                              <div className="text-amber-600 truncate text-xs">
-                                {duracionMinutos} min
-                              </div>
+                              {esCorta ? (
+                                <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-900 md:text-xs">
+                                  <span className="truncate max-w-[40%] text-xs md:text-sm">
+                                    {cita.mascota_nombre}
+                                  </span>
+                                  <span className="text-amber-700">•</span>
+                                  <span className="truncate max-w-[35%] text-amber-800">
+                                    {cita.servicios.nombre}
+                                  </span>
+                                  <span className="text-amber-800 whitespace-nowrap hidden sm:inline">{rangoHorario}</span>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="font-bold text-amber-900 truncate text-base">
+                                    {cita.mascota_nombre}
+                                  </div>
+                                  <div className="text-amber-800 truncate font-medium">
+                                    {cita.servicios.nombre}
+                                  </div>
+                                  <div className="text-amber-700 truncate text-[11px] md:text-xs">{rangoHorario}</div>
+                                  <div className="text-amber-600 truncate text-[11px] md:text-xs">{duracionMinutos} min</div>
+                                </>
+                              )}
                             </div>
                           );
                         })}
@@ -609,26 +620,28 @@ export default function CalendarView({}: CalendarViewProps) {
                 </div>
               );
             })}
+            </div>
           </div>
         ) : (
           /* Vista diaria */
-          <div className="grid grid-cols-8">
-            {/* Columna de tiempo */}
-            <div className="border-r border-gray-200">
-              <div className="h-12 border-b border-gray-200"></div>
-              {timeSlots.map((time, index) => (
-                <div key={index} className="h-12 border-b border-gray-100 flex items-start justify-end pr-2 pt-1">
-                  <span className="text-xs text-gray-500">
+          <div className="overflow-x-auto">
+            <div className="min-w-[540px] grid grid-cols-8">
+              {/* Columna de tiempo */}
+              <div className="border-r border-gray-200 bg-white sticky left-0 z-20">
+                <div className="h-12 border-b border-gray-200"></div>
+                {timeSlots.map((time, index) => (
+                  <div key={index} className="h-12 border-b border-gray-100 flex items-start justify-end pr-2 pt-1">
+                  <span className="text-[11px] text-gray-500">
                     {formatTime(time)}
                   </span>
                 </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Día actual */}
-            <div className="col-span-7">
-              <div className="h-12 border-b border-gray-200 flex items-center justify-center bg-blue-50">
-                <div className="text-lg font-bold text-blue-600">
+              {/* Día actual */}
+              <div className="col-span-7">
+                <div className="h-12 border-b border-gray-200 flex items-center justify-center bg-blue-50">
+                <div className="text-base md:text-lg font-bold text-blue-600 text-center px-2">
                   {formatFullDate(currentDate)}
                 </div>
               </div>
@@ -645,9 +658,12 @@ export default function CalendarView({}: CalendarViewProps) {
                       const duracionMinutos = cita.servicios?.duracion_min || 30;
                       const slotsOcupados = Math.ceil(duracionMinutos / 30);
                       const alturaTotal = slotsOcupados * slotHeightPx;
+                      const citaStart = new Date(cita.inicio);
+                      const citaEnd = new Date(cita.fin);
+                      const rangoHorario = `${formatTime(citaStart)} - ${formatTime(citaEnd)}`;
+                      const esCorta = duracionMinutos <= 30;
                       
                       // Solo mostrar la cita en el primer slot
-                      const citaStart = new Date(cita.inicio);
                       const slotStart = new Date(timeSlot);
                       const esPrimerSlot = citaStart.getHours() === slotStart.getHours() && 
                                          citaStart.getMinutes() === slotStart.getMinutes();
@@ -658,22 +674,40 @@ export default function CalendarView({}: CalendarViewProps) {
                         <div
                           key={citaIndex}
                           onClick={() => handleCitaClick(cita)}
-                          className="absolute left-1 right-1 bg-gradient-to-br from-yellow-300 to-amber-400 border border-yellow-500 rounded-lg p-2 text-sm overflow-hidden cursor-pointer hover:from-yellow-400 hover:to-amber-500 hover:shadow-lg transition-all duration-200 z-10 flex flex-col justify-center min-h-[48px]"
+                          className="absolute left-1 right-1 bg-gradient-to-br from-yellow-300 to-amber-400 border border-yellow-500 rounded-lg px-2 py-1.5 text-xs md:text-sm overflow-hidden cursor-pointer hover:from-yellow-400 hover:to-amber-500 hover:shadow-lg transition-all duration-200 z-10 flex flex-col justify-center min-h-[48px]"
                           style={{ height: `${Math.max(alturaTotal - 4, 48)}px` }}
                           title={`${cita.tutor_nombre} - ${cita.mascota_nombre} - ${cita.servicios.nombre} (${duracionMinutos} min)`}
                         >
-                          <div className="font-bold text-amber-900 text-base leading-tight text-center">
-                            {cita.mascota_nombre}
-                          </div>
-                          <div className="text-amber-800 font-medium text-sm leading-tight text-center">
-                            {cita.servicios.nombre}
-                          </div>
+                          {esCorta ? (
+                            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-amber-900 md:text-xs">
+                              <span className="truncate max-w-[40%] text-xs md:text-sm">
+                                {cita.mascota_nombre}
+                              </span>
+                              <span className="text-amber-700">•</span>
+                              <span className="truncate max-w-[35%] text-amber-800">
+                                {cita.servicios.nombre}
+                              </span>
+                              <span className="text-amber-800 whitespace-nowrap hidden sm:inline">{rangoHorario}</span>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="font-bold text-amber-900 text-base leading-tight text-center">
+                                {cita.mascota_nombre}
+                              </div>
+                              <div className="text-amber-800 font-medium text-sm leading-tight text-center">
+                                {cita.servicios.nombre}
+                              </div>
+                              <div className="text-amber-700 text-[11px] md:text-xs leading-tight text-center">{rangoHorario}</div>
+                              <div className="text-amber-600 text-[11px] md:text-xs leading-tight text-center">{duracionMinutos} min</div>
+                            </>
+                          )}
                         </div>
                       );
                     })}
                   </div>
                 );
               })}
+            </div>
             </div>
           </div>
         )}
