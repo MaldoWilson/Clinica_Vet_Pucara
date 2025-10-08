@@ -621,31 +621,6 @@ body > * {
   z-index: 1;
 }
 
-/* --- Marca de agua con logo --- */
-.watermark {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 350px;
-  height: 350px;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.08;
-}
-
-/* Fallback para impresión */
-@media print {
-  .watermark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 350px;
-    height: 350px;
-    z-index: -1;
-  }
-}
 
 /* ENCABEZADO PROFESIONAL MEJORADO */
 .header {
@@ -748,7 +723,7 @@ body > * {
 .recipe-number {
   position: absolute;
   top: 110px;
-  right: 30px;
+  right: 50px;
   font-weight: 800;
   font-size: 13px;
   color: #2563eb;
@@ -834,9 +809,8 @@ body > * {
 
 /* PRÓXIMO CONTROL PROFESIONAL MEJORADO */
 .next-control {
-  position: absolute;
-  bottom: 25px;
-  left: 25px;
+  margin-top: 160px;
+  margin-left: 250px;
   font-size: 13px;
   font-weight: 800;
   color: #2563eb;
@@ -945,10 +919,6 @@ body * {
           <style>${css2}</style>
         </head>
         <body>
-          <div class="watermark">
-            <img src="/logo.webp" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; opacity: 0.15;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-            <div style="display: none; width: 100%; height: 100%; background: #e3f2fd; border: 2px dashed #1976d2; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; color: #1976d2; opacity: 0.15;"></div>
-          </div>
           <div class="header">
             <div class="clinic-title">VETERINARIA PUCARA</div>
             <div class="vet-info">
@@ -1048,292 +1018,302 @@ body * {
       const w = window.open("", "_blank", "width=800,height=900");
       if (!w) return;
       //Tercer css DESCARGAR EN PDF
-      const css3 = `
-@page { 
-  margin: 15mm; 
-  size: A4;
-  @top-center { content: "VETERINARIA PUCARA - Receta Médica"; }
-}
-
-body {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  font-size: 13px;
-  color: #1a202c;
-  background: #fff;
-  margin: 0;
-  padding: 20px 40px;
-  position: relative;
-  line-height: 1.5;
-}
-
-/* Asegurar que el contenido esté por encima del sello de agua */
-body > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* --- Marca de agua con logo --- */
-.watermark {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 350px;
-  height: 350px;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.08;
-}
-
-/* ENCABEZADO PROFESIONAL MEJORADO */
-.header {
-  text-align: center;
-  margin-bottom: 25px;
-  padding: 20px 0;
-  border-top: 3px solid #2563eb;
-  border-bottom: 2px solid #e2e8f0;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.clinic-title {
-  font-size: 20px;
-  font-weight: 900;
-  color: #2563eb;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.vet-info {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #374151;
-  font-weight: 500;
-}
-
-.vet-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #2563eb;
-  margin-bottom: 4px;
-}
-
-.contact-info {
-  font-size: 11px;
-  color: #6b7280;
-  margin: 2px 0;
-}
-
-/* CAMPOS DE FORMULARIO PROFESIONALES MEJORADOS */
-.form-fields {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 25px 0;
-  padding: 15px 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.field-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.peso-label {
-  font-weight: 800;
-  color: #2563eb;
-  font-size: 14px;
-}
-
-.field-box {
-  border: 2px solid #2563eb;
-  padding: 6px 15px;
-  min-width: 90px;
-  text-align: center;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: bold;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  color: #1e40af;
-}
-
-.date-labels {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  color: #2563eb;
-  font-size: 13px;
-}
-
-.date-labels span {
-  font-size: 12px;
-  margin: 0 6px;
-  color: #1e40af;
-  font-weight: bold;
-}
-
-/* NÚMERO DE RECETA PROFESIONAL MEJORADO */
-.recipe-number {
-  position: absolute;
-  top: 110px;
-  right: 30px;
-  font-weight: 800;
-  font-size: 13px;
-  color: #2563eb;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 2px solid #93c5fd;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-/* INFO DEL PACIENTE MEJORADA */
-.patient-info {
-  border: 2px solid #e2e8f0;
-  padding: 15px 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  font-size: 13px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.patient-info strong {
-  color: #2563eb;
-  font-weight: 700;
-}
-
-/* TABLA DE MEDICAMENTOS PROFESIONAL MEJORADA */
-.medications-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 20px 0;
-  font-size: 12px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid #e2e8f0;
-}
-
-.medications-table th {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-  color: white;
-  padding: 12px 8px;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid #1e40af;
-}
-
-.medications-table td {
-  border: 1px solid #e2e8f0;
-  padding: 10px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #374151;
-  vertical-align: top;
-}
-
-.medications-table tr:nth-child(even) {
-  background: #f8fafc;
-}
-
-/* OBSERVACIONES PROFESIONALES MEJORADAS */
-.observations {
-  margin-top: 25px;
-  padding: 15px 20px;
-  border-left: 4px solid #2563eb;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  font-size: 13px;
-  border-radius: 0 8px 8px 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.observations strong {
-  color: #2563eb;
-  font-weight: 800;
-}
-
-/* PRÓXIMO CONTROL PROFESIONAL MEJORADO */
-.next-control {
-  position: absolute;
-  bottom: 25px;
-  left: 25px;
-  font-size: 13px;
-  font-weight: 800;
-  color: #2563eb;
-  background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
-  padding: 12px 18px;
-  border-radius: 8px;
-  border: 2px solid #93c5fd;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.control-line {
-  border-bottom: 3px solid #2563eb;
-  width: 220px;
-  height: 30px;
-  margin-top: 10px;
-  border-radius: 3px;
-}
-
-/* SECCIÓN DE FIRMA PROFESIONAL MEJORADA */
-.signature-section {
-  margin-top: 30px;
-  padding: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.signature-line {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.signature-label {
-  font-weight: 800;
-  color: #2563eb;
-  font-size: 13px;
-  margin-right: 15px;
-}
-
-.signature-space {
-  flex: 1;
-  border-bottom: 3px solid #2563eb;
-  height: 30px;
-  margin-left: 10px;
-}
-
-.vet-signature {
-  text-align: right;
-  font-size: 12px;
-  color: #374151;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-/* Para que el contenido quede por encima */
-body * {
-  position: relative;
-  z-index: 1;
-}
-      `;
+      const css2 = `
+      @page { 
+        margin: 15mm; 
+        size: A4;
+        @top-center { content: "VETERINARIA PUCARA - Receta Médica"; }
+      }
       
+      body {
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        font-size: 13px;
+        color: #1a202c;
+        background: #fff;
+        margin: 0;
+        padding: 20px 40px;
+        position: relative;
+        line-height: 1.5;
+      }
+      
+      /* Asegurar que el contenido esté por encima del sello de agua */
+      body > * {
+        position: relative;
+        z-index: 1;
+      }
+      
+      
+      /* ENCABEZADO PROFESIONAL MEJORADO */
+      .header {
+        text-align: center;
+        margin-bottom: 25px;
+        padding: 20px 0;
+        border-top: 3px solid #2563eb;
+        border-bottom: 2px solid #e2e8f0;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      
+      .clinic-title {
+        font-size: 20px;
+        font-weight: 900;
+        color: #2563eb;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      }
+      
+      .vet-info {
+        font-size: 12px;
+        line-height: 1.5;
+        color: #374151;
+        font-weight: 500;
+      }
+      
+      .vet-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #2563eb;
+        margin-bottom: 4px;
+      }
+      
+      .contact-info {
+        font-size: 11px;
+        color: #6b7280;
+        margin: 2px 0;
+      }
+      
+      /* CAMPOS DE FORMULARIO PROFESIONALES MEJORADOS */
+      .form-fields {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 25px 0;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      }
+      
+      .field-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      
+      .peso-label {
+        font-weight: 800;
+        color: #2563eb;
+        font-size: 14px;
+      }
+      
+      .field-box {
+        border: 2px solid #2563eb;
+        padding: 6px 15px;
+        min-width: 90px;
+        text-align: center;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        color: #1e40af;
+      }
+      
+      .date-labels {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        color: #2563eb;
+        font-size: 13px;
+      }
+      
+      .date-labels span {
+        font-size: 12px;
+        margin: 0 6px;
+        color: #1e40af;
+        font-weight: bold;
+      }
+      
+      /* NÚMERO DE RECETA PROFESIONAL MEJORADO */
+      .recipe-number {
+        position: absolute;
+        top: 110px;
+        right: 50px;
+        font-weight: 800;
+        font-size: 13px;
+        color: #2563eb;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 2px solid #93c5fd;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      }
+      
+      /* INFO DEL PACIENTE MEJORADA */
+      .patient-info {
+        border: 2px solid #e2e8f0;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        font-size: 13px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      }
+      
+      .patient-info strong {
+        color: #2563eb;
+        font-weight: 700;
+      }
+      
+      /* TABLA DE MEDICAMENTOS PROFESIONAL MEJORADA */
+      .medications-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 12px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+      }
+      
+      .medications-table th {
+        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        color: white;
+        padding: 12px 8px;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #1e40af;
+      }
+      
+      .medications-table td {
+        border: 1px solid #e2e8f0;
+        padding: 10px 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #374151;
+        vertical-align: top;
+      }
+      
+      .medications-table tr:nth-child(even) {
+        background: #f8fafc;
+      }
+      
+      .medications-table tr:hover {
+        background: #f0f9ff;
+      }
+      
+      /* OBSERVACIONES PROFESIONALES MEJORADAS */
+      .observations {
+        margin-top: 25px;
+        padding: 15px 20px;
+        border-left: 4px solid #2563eb;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        font-size: 13px;
+        border-radius: 0 8px 8px 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      }
+      
+      .observations strong {
+        color: #2563eb;
+        font-weight: 800;
+      }
+      
+      /* PRÓXIMO CONTROL PROFESIONAL MEJORADO */
+      .next-control {
+        margin-top: 160px;
+        margin-left: 250px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #2563eb;
+        background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+        padding: 12px 18px;
+        border-radius: 8px;
+        border: 2px solid #93c5fd;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      }
+      
+      .control-line {
+        border-bottom: 3px solid #2563eb;
+        width: 220px;
+        height: 30px;
+        margin-top: 10px;
+        border-radius: 3px;
+      }
+      
+      /* SECCIÓN DE FIRMA PROFESIONAL MEJORADA */
+      .signature-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      }
+      
+      .signature-line {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      
+      .signature-label {
+        font-weight: 800;
+        color: #2563eb;
+        font-size: 13px;
+        margin-right: 15px;
+      }
+      
+      .signature-space {
+        flex: 1;
+        border-bottom: 3px solid #2563eb;
+        height: 30px;
+        margin-left: 10px;
+      }
+      
+      .vet-signature {
+        text-align: right;
+        font-size: 12px;
+        color: #374151;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+      
+      /* Para que el contenido quede por encima */
+      body * {
+        position: relative;
+        z-index: 1;
+      }
+      
+      /* Mejoras adicionales para impresión */
+      @media print {
+        body {
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+        
+        .header {
+          page-break-inside: avoid;
+        }
+        
+        .medications-table {
+          page-break-inside: avoid;
+        }
+        
+        .signature-section {
+          page-break-inside: avoid;
+        }
+      }
+          `;
       const itemsRows = receta.items?.map((it: any, i: number) => `
         <tr>
           <td style="font-weight: 500;">${it.nombre_medicamento || ''}</td>
@@ -1356,13 +1336,9 @@ body * {
           <head>
             <meta charset='utf-8'>
             <title>Receta Médica - ${receta.id}</title>
-            <style>${css3}</style>
+            <style>${css2}</style>
           </head>
           <body>
-            <div class="watermark">
-              <img src="/logo.webp" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; opacity: 0.15;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-              <div style="display: none; width: 100%; height: 100%; background: #e3f2fd; border: 2px dashed #1976d2; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; color: #1976d2; opacity: 0.15;"></div>
-            </div>
             <div class="header">
               <div class="clinic-title">VETERINARIA PUCARA</div>
               <div class="vet-info">
