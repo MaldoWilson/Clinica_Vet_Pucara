@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { formatRutPretty, isValidRut } from "@/lib/rut";
 import Image from "next/image";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import CertificateModal from "@/components/CertificateModal";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -187,6 +188,9 @@ export default function PacienteDetailPage() {
   const [parvoTexto, setParvoTexto] = useState("");
   const [savingParvo, setSavingParvo] = useState(false);
   const [veterinarios, setVeterinarios] = useState<Array<{id: string; nombre: string; especialidad?: string;}>>([]);
+  const [certs, setCerts] = useState<Array<{ id: number; nombre_archivo: string; url_archivo: string }>>([]);
+  const [certModalOpen, setCertModalOpen] = useState(false);
+  const [selectedCert, setSelectedCert] = useState<null | { id: number; nombre_archivo: string; url_archivo: string }>(null);
   const [recetaForm, setRecetaForm] = useState({
     peso: "",
     notas: "",
@@ -235,26 +239,48 @@ export default function PacienteDetailPage() {
     };
   }, [certMenuOpen]);
 
-  const certOptions = [
-    "Certificado SAG INGLES.docx",
-    "Certificado DE ALTA MEDICA.docx",
-    "Certificado de defuncion.rtf",
-    "Certificado PARVOVIRUS.docx",
-    "Certificado RETROVIRALES PUCARA - copia.docx",
-    "Certificado SALUD FELINOS SAG.docx",
-    "Certificado SALUD pucara.docx",
-    "Certificado SALUD SAG.docx",
-    "Certificado DE EPICRISIS.docx",
-  ];
+  // certs state ya definido arriba
 
-  function onSelectCert(name: string) {
+  useEffect(() => {
+    const loadCerts = async () => {
+      try {
+        const res = await fetch("/api/archivos-adjuntos", { cache: "no-store" });
+        const json = await res.json();
+        if (res.ok && json?.ok && Array.isArray(json.data)) {
+          const list = json.data
+            .filter((x: any) => x?.nombre_archivo)
+            .map((x: any) => ({ id: Number(x.id), nombre_archivo: String(x.nombre_archivo), url_archivo: x?.url_archivo ? String(x.url_archivo) : "" }));
+          setCerts(list);
+        }
+      } catch (e) {
+        console.error("Error cargando certificados:", e);
+      }
+    };
+    loadCerts();
+  }, []);
+
+  function onSelectCert(item: { id: number; nombre_archivo: string; url_archivo: string }) {
     setCertMenuOpen(false);
-    if (name.toLowerCase().includes("parvovirus")) {
-      setParvoTexto("");
-      setParvoOpen(true);
+    if (!item.url_archivo) {
+      alert("Este certificado no tiene archivo asociado aún (url_archivo vacío).");
       return;
     }
+    setSelectedCert(item);
+    setCertModalOpen(true);
   }
+
+  const pacienteForCert = useMemo(() => {
+    const especie = data?.especie ?? null;
+    return {
+      id: String(data?.mascotas_id || ""),
+      nombre: String(data?.nombre || ""),
+      especie: especie,
+      raza: data?.raza ?? null,
+      sexo: data?.sexo ?? null,
+      fecha_nacimiento: data?.fecha_nacimiento ?? null,
+      propietario: data?.propietario ? { nombre: data.propietario.nombre || "", apellido: data.propietario.apellido || "" } : null,
+    };
+  }, [data]);
 
   async function crearReceta() {
     if (!ultimaConsultaId) {
@@ -2127,18 +2153,23 @@ body * {
                       Crear Certificados
                     </button>
                     {certMenuOpen && (
-                      <div ref={certMenuRef} className="absolute left-0 mt-2 w-72 rounded-xl bg-white ring-1 ring-gray-200 shadow-lg z-20 overflow-hidden">
-                        <ul className="py-2">
-                          {certOptions.map((opt) => (
-                            <li key={opt}>
-                              <button
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                onClick={() => onSelectCert(opt)}
-                              >
-                                {opt}
-                              </button>
-                            </li>
-                          ))}
+                      <div ref={certMenuRef} className="absolute left-0 mt-2 w-80 rounded-xl bg-white ring-1 ring-gray-200 shadow-lg z-20 overflow-hidden">
+                        <div className="px-3 py-2 text-xs text-gray-500 border-b bg-gray-50">Plantillas globales</div>
+                        <ul className="max-h-72 overflow-auto py-2">
+                          {certs.length === 0 ? (
+                            <li className="px-4 py-2 text-sm text-gray-500">No hay certificados</li>
+                          ) : (
+                            certs.map((c) => (
+                              <li key={c.id}>
+                                <button
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                  onClick={() => onSelectCert(c)}
+                                >
+                                  {c.nombre_archivo}
+                                </button>
+                              </li>
+                            ))
+                          )}
                         </ul>
                       </div>
                     )}
@@ -2245,6 +2276,17 @@ body * {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Modal de certificados PDF */}
+          {certModalOpen && selectedCert && data && (
+            <CertificateModal
+              open={certModalOpen}
+              onClose={() => setCertModalOpen(false)}
+              templateMeta={{ id: selectedCert.id, nombre_archivo: selectedCert.nombre_archivo, url_archivo: selectedCert.url_archivo }}
+              paciente={pacienteForCert}
+              veterinarios={veterinarios.map(v => ({ id: String(v.id), nombre: v.nombre }))}
+            />
           )}
 
           {/* Formulario receta */}
