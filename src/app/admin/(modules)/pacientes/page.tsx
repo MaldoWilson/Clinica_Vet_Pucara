@@ -63,6 +63,7 @@ type Paciente = {
 
 export default function PacientesPage() {
   const [search, setSearch] = useState("");
+  const [especieFilter, setEspecieFilter] = useState<string>(""); // "" = todos, "gato" = gatos, "perro" = perros
   const [loading, setLoading] = useState(true); // Iniciar en true para mostrar skeletons
   const [items, setItems] = useState<Paciente[]>([]);
   const [page, setPage] = useState(1);
@@ -78,6 +79,9 @@ export default function PacientesPage() {
         const stripped = q.replace(/[\.\-\s]/g, '').toUpperCase();
         const isRutCandidate = /^[0-9]+[0-9K]$/.test(stripped) && stripped.length >= 7 && stripped.length <= 9;
         params.set("search", isRutCandidate ? normalizeRutPlain(q) : q);
+      }
+      if (especieFilter) {
+        params.set("especie", especieFilter);
       }
       params.set("page", String(Math.max(1, p)));
       params.set("pageSize", "9");
@@ -101,7 +105,7 @@ export default function PacientesPage() {
 
   useEffect(() => {
     fetchPacientes("", 1);
-  }, []);
+  }, [especieFilter]);
 
   const total = items.length;
 
@@ -118,22 +122,35 @@ export default function PacientesPage() {
       <div className="bg-white rounded-2xl shadow-sm border p-4 md:p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
           <div className="flex-1">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar: mascota, propietario, RUT, sexo, raza, teléfono, dirección"
-                className="w-full border rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') fetchPacientes(search, 1); }}
-              />
-              <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-                onClick={() => fetchPacientes(search, 1)}
-                title="Buscar"
-              >
-                Buscar
-              </button>
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Buscar: mascota, propietario, RUT, sexo, raza, teléfono, dirección"
+                  className="w-full border rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') fetchPacientes(search, 1); }}
+                />
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                  onClick={() => fetchPacientes(search, 1)}
+                  title="Buscar"
+                >
+                  Buscar
+                </button>
+              </div>
+              <div className="flex-shrink-0">
+                <select
+                  value={especieFilter}
+                  onChange={(e) => setEspecieFilter(e.target.value)}
+                  className="border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                >
+                  <option value="">Todos</option>
+                  <option value="gato">Gatos</option>
+                  <option value="perro">Perros</option>
+                </select>
+              </div>
             </div>
           </div>
           <div className="text-sm text-gray-600">

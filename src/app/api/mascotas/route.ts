@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const search = (searchParams.get("search") || "").trim().toLowerCase();
+    const especie = searchParams.get("especie"); // "gato" o "perro"
     const id = searchParams.get("id");
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const pageSize = Math.max(1, Math.min(50, parseInt(searchParams.get("pageSize") || "9", 10))); // default 9
@@ -35,10 +36,19 @@ export async function GET(req: NextRequest) {
 
     // Primero obtenemos todas las mascotas y propietarios necesarios (listado/paginado)
     // Nota: Si hay muchas filas, en el futuro se puede paginar y/o usar RPC/materialized view.
-    const { data: mascotas, error } = await supa
+    let query = supa
       .from("mascotas")
       .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, propietario_id, created_at")
       .order("created_at", { ascending: false });
+    
+    // Aplicar filtro de especie si se proporciona
+    if (especie === "gato") {
+      query = query.eq("especie", true);
+    } else if (especie === "perro") {
+      query = query.eq("especie", false);
+    }
+    
+    const { data: mascotas, error } = await query;
     if (error) throw error;
 
     // Cargar propietarios relacionados en un segundo query (evitamos N+1 usando in)

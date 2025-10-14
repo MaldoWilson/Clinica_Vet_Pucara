@@ -16,7 +16,6 @@ CREATE TABLE public.antecedentes (
 );
 CREATE TABLE public.archivos_adjuntos (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
-  historial_id bigint,
   nombre_archivo text,
   tipo_archivo text,
   url_archivo text,
