@@ -143,8 +143,8 @@ export default function CertificateModal({
   async function handleDownload() {
     if (!template || !templateMeta) return;
     
-    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3, ID 5, ID 6 e ID 7)
-    if (template.id !== 3 && template.id !== 5 && template.id !== 6 && template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
+    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3, ID 5, ID 6, ID 7 e ID 8)
+    if (template.id !== 3 && template.id !== 5 && template.id !== 6 && template.id !== 7 && template.id !== 8 && (!veterinarioId || veterinarioId.trim() === "")) {
       alert("Debe elegir un veterinario antes de continuar.");
       return;
     }
@@ -172,8 +172,8 @@ export default function CertificateModal({
   async function handleOpenPrint() {
     if (!template || !templateMeta) return;
     
-    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3, ID 5, ID 6 e ID 7)
-    if (template.id !== 3 && template.id !== 5 && template.id !== 6 && template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
+    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3, ID 5, ID 6, ID 7 e ID 8)
+    if (template.id !== 3 && template.id !== 5 && template.id !== 6 && template.id !== 7 && template.id !== 8 && (!veterinarioId || veterinarioId.trim() === "")) {
       alert("Debe elegir un veterinario antes de continuar.");
       return;
     }
@@ -293,7 +293,7 @@ export default function CertificateModal({
                     </button>
                   </div>
                 ) : f.type === "manual" ? (
-                  f.key === "Texbox11" ? (
+                  f.key === "Texbox11" && template?.id === 6 ? (
                     <textarea
                       className="col-span-2 rounded border-gray-300 text-sm min-h-[150px] resize-y"
                       placeholder={f.placeholder || ""}
@@ -384,7 +384,7 @@ export default function CertificateModal({
                             </button>
                           </div>
                         ) : f.type === "manual" ? (
-                          f.key === "Texbox11" ? (
+                          f.key === "Texbox11" && template?.id === 6 ? (
                             <textarea
                               className="col-span-2 rounded border-gray-300 text-sm min-h-[150px] resize-y"
                               placeholder={f.placeholder || ""}

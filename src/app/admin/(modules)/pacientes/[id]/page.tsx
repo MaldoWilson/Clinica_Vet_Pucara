@@ -246,14 +246,25 @@ export default function PacienteDetailPage() {
       try {
         const res = await fetch("/api/archivos-adjuntos", { cache: "no-store" });
         const json = await res.json();
+        console.log("🔍 Respuesta de la API de certificados:", json);
         if (res.ok && json?.ok && Array.isArray(json.data)) {
+          console.log("📋 Datos brutos de certificados:", json.data);
+          console.log("🔍 Buscando certificados ID 8 y 9:", json.data.filter(x => x.id == 8 || x.id == 9));
           const list = json.data
-            .filter((x: any) => x?.nombre_archivo)
+            .filter((x: any) => {
+              const hasName = x?.nombre_archivo;
+              console.log(`🔍 Certificado ID ${x.id}: nombre_archivo="${x?.nombre_archivo}", hasName=${hasName}`);
+              return hasName;
+            })
             .map((x: any) => ({ id: Number(x.id), nombre_archivo: String(x.nombre_archivo), url_archivo: x?.url_archivo ? String(x.url_archivo) : "" }));
+          console.log("✅ Lista final de certificados:", list);
+          console.log("🔍 IDs en la lista final:", list.map(x => x.id));
           setCerts(list);
+        } else {
+          console.error("❌ Error en la respuesta de la API:", json);
         }
       } catch (e) {
-        console.error("Error cargando certificados:", e);
+        console.error("❌ Error cargando certificados:", e);
       }
     };
     loadCerts();
@@ -2161,8 +2172,8 @@ body * {
                     </button>
                     {certMenuOpen && (
                       <div ref={certMenuRef} className="absolute left-0 mt-2 w-80 rounded-xl bg-white ring-1 ring-gray-200 shadow-lg z-20 overflow-hidden">
-                        <div className="px-3 py-2 text-xs text-gray-500 border-b bg-gray-50">Plantillas globales</div>
-                        <ul className="max-h-72 overflow-auto py-2">
+                        <div className="px-3 py-2 text-xs text-gray-500 border-b bg-gray-50">Certificados disponibles</div>
+                        <ul className="max-h-96 overflow-y-auto py-2">
                           {certs.length === 0 ? (
                             <li className="px-4 py-2 text-sm text-gray-500">No hay certificados</li>
                           ) : (

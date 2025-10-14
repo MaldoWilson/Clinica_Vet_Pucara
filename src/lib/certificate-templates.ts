@@ -1139,6 +1139,171 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
       return map;
     })(),
   },
+  // Certificado ID 8 con 21 campos para certificado de hospitalización
+  "8": {
+    id: 8,
+    name: "Certificado de Hospitalización ID 8",
+    description: "Certificado de hospitalización con fechas de ingreso/egreso, diagnóstico y tratamiento",
+    fields: [
+      {
+        key: "Texbox1",
+        label: "Fecha de ingreso",
+        type: "manual",
+        placeholder: "DD/MM/YYYY",
+      },
+      {
+        key: "Texbox2",
+        label: "Fecha de egreso",
+        type: "manual",
+        placeholder: "DD/MM/YYYY",
+      },
+      {
+        key: "Texbox3",
+        label: "Nombre del propietario",
+        type: "auto",
+        source: ({ propietario }) =>
+          [propietario?.nombre || "", propietario?.apellido || ""].filter(Boolean).join(" "),
+      },
+      {
+        key: "Texbox4",
+        label: "Dirección del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.direccion || "",
+      },
+      {
+        key: "Texbox5",
+        label: "RUT del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.rut || "",
+      },
+      {
+        key: "Texbox6",
+        label: "Teléfono del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.telefono || "",
+      },
+      {
+        key: "Texbox7",
+        label: "Nombre de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.nombre || "",
+      },
+      {
+        key: "Texbox8",
+        label: "Especie de la mascota",
+        type: "auto",
+        source: ({ paciente }) => especieTexto(paciente.especie),
+      },
+      {
+        key: "Texbox9",
+        label: "Edad de la mascota",
+        type: "auto",
+        source: ({ paciente }) => calcularEdadDesde(paciente.fecha_nacimiento),
+      },
+      {
+        key: "Texbox10",
+        label: "Raza de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.raza || "",
+      },
+      {
+        key: "Texbox11",
+        label: "Peso de la mascota",
+        type: "manual",
+        placeholder: "Ingrese el peso en kg",
+      },
+      {
+        key: "Texbox12",
+        label: "Color de la mascota",
+        type: "manual",
+        placeholder: "Ingrese el color de la mascota",
+      },
+      {
+        key: "Texbox13",
+        label: "Sexo de la mascota",
+        type: "auto",
+        source: ({ paciente }) => sexoTexto(paciente.sexo),
+      },
+      {
+        key: "Textbox14",
+        label: "Síntomas y signos clínicos de ingreso",
+        type: "manual",
+        placeholder: "Describa los síntomas y signos clínicos al ingreso",
+      },
+      {
+        key: "Textbox15",
+        label: "Diagnóstico de ingreso",
+        type: "manual",
+        placeholder: "Ingrese el diagnóstico al momento del ingreso",
+      },
+      {
+        key: "Textbox16",
+        label: "Diagnóstico de egreso",
+        type: "manual",
+        placeholder: "Ingrese el diagnóstico al momento del egreso",
+      },
+      {
+        key: "Textbox17",
+        label: "Causa del egreso",
+        type: "manual",
+        placeholder: "Describa la causa del egreso (alta médica, alta relativa, etc.)",
+      },
+      {
+        key: "Textbox18",
+        label: "Exámenes complementarios realizados",
+        type: "manual",
+        placeholder: "Liste los exámenes complementarios realizados",
+      },
+      {
+        key: "Textbox19",
+        label: "Tratamiento realizado durante la hospitalización",
+        type: "manual",
+        placeholder: "Describa el tratamiento realizado durante la estancia",
+      },
+      {
+        key: "Textbox20",
+        label: "Tratamiento a seguir después del egreso",
+        type: "manual",
+        placeholder: "Indique el tratamiento domiciliario o seguimiento",
+      },
+      {
+        key: "Textbox21",
+        label: "Recomendaciones finales del médico veterinario",
+        type: "manual",
+        placeholder: "Escriba las recomendaciones finales (cuidados, controles, medicación, etc.)",
+      },
+    ],
+    acroFieldAlias: (() => {
+      const map: Record<string, string> = {};
+      // Mapea TexboxN -> TextboxN para compatibilidad con PDFs que usan "Textbox"
+      for (let i = 1; i <= 21; i++) {
+        map[`Texbox${i}`] = `Textbox${i}`;
+        map[`Textbox${i}`] = `Textbox${i}`;
+      }
+      return map;
+    })(),
+  },
+  // Certificado ID 9 - Plantilla básica (pendiente de definir campos específicos)
+  "9": {
+    id: 9,
+    name: "Certificado ID 9",
+    description: "Certificado ID 9 - Campos pendientes de definir",
+    fields: [
+      {
+        key: "Texbox1",
+        label: "Campo 1",
+        type: "auto",
+        source: ({ paciente }) => paciente.nombre || "",
+      },
+    ],
+    acroFieldAlias: (() => {
+      const map: Record<string, string> = {};
+      for (let i = 1; i <= 10; i++) {
+        map[`Texbox${i}`] = `Textbox${i}`;
+      }
+      return map;
+    })(),
+  },
 };
 
 export type CertificateTemplateKey = keyof typeof certificateTemplates;
