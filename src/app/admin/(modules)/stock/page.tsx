@@ -96,6 +96,12 @@ export default function StockPage() {
     unidad: "",
     precio: 0,
   });
+  // Filtro de mes para gráfico de uso por producto (sintético)
+  const getCurrentMonthString = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  };
+  const [usageMonth, setUsageMonth] = useState<string>(getCurrentMonthString());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -208,6 +214,45 @@ export default function StockPage() {
       .filter((i) => getStatus(Number(i.cantidad || 0), i.stock_min) !== "OK")
       .sort((a, b) => Number(a.cantidad || 0) - Number(b.cantidad || 0));
   }, [items]);
+
+  // Gráfico: Uso por producto (mensual) — datos sintéticos sin persistencia
+  function seededRandom(key: string) {
+    // xmur3 + mulberry32 para PRNG determinístico por clave
+    function xmur3(str: string) {
+      let h = 1779033703 ^ str.length;
+      for (let i = 0; i < str.length; i++) {
+        h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+        h = (h << 13) | (h >>> 19);
+      }
+      return function () {
+        h = Math.imul(h ^ (h >>> 16), 2246822507);
+        h = Math.imul(h ^ (h >>> 13), 3266489909);
+        return (h ^= h >>> 16) >>> 0;
+      };
+    }
+    function mulberry32(a: number) {
+      return function () {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const seed = xmur3(key)();
+    const rnd = mulberry32(seed);
+    return rnd();
+  }
+
+  const usageData = useMemo(() => {
+    const dataset = items.map((it) => {
+      const r = seededRandom(`${it.id}-${usageMonth}`);
+      const base = Math.max(4, Math.round((it.stock_min || 8) * 1.6));
+      // uso sintético en rango [20% .. 180%] del base, pero entero y >=0
+      const uso = Math.max(0, Math.round(base * (0.2 + r * 1.6)));
+      return { nombre: it.nombre, uso };
+    });
+    return dataset.sort((a, b) => b.uso - a.uso).slice(0, 12);
+  }, [items, usageMonth]);
 
   // acciones
   const abrirNuevo = () => {
@@ -398,6 +443,38 @@ export default function StockPage() {
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
+
+      {/* Uso por producto (mensual, datos simulados) */}
+      <div className="bg-white rounded-xl shadow p-5 border">
+        <div className="flex items-center justify-between mb-2">
+          <p className="font-semibold text-gray-900">Uso por Producto (mensual)</p>
+          <div className="flex items-center gap-2">
+            <input
+              type="month"
+              value={usageMonth}
+              onChange={(e) => setUsageMonth(e.target.value)}
+              className="px-3 py-2 border rounded-md"
+              title="Seleccionar mes"
+            />
+          </div>
+        </div>
+        {usageData.length === 0 ? (
+          <div className="text-sm text-gray-500">Sin datos</div>
+        ) : (
+          <div className="h-[320px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={usageData} layout="vertical" margin={{ top: 10, right: 20, left: 20, bottom: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis type="number" tickFormatter={(v) => `${v}`} />
+                <YAxis dataKey="nombre" type="category" width={120} tick={{ fontSize: 12 }} />
+                <Tooltip labelStyle={{ fontWeight: 600 }} formatter={(v: any) => [`${v} usos`, "Uso"]} />
+                <Bar dataKey="uso" fill="#6366F1" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+        <p className="mt-2 text-xs text-gray-500">Datos de uso simulados (no persistidos).</p>
       </div>
 
       {/* Alertas */}
