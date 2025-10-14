@@ -143,8 +143,8 @@ export default function CertificateModal({
   async function handleDownload() {
     if (!template || !templateMeta) return;
     
-    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3 y ID 7)
-    if (template.id !== 3 && template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
+    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3, ID 5 e ID 7)
+    if (template.id !== 3 && template.id !== 5 && template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
       alert("Debe elegir un veterinario antes de continuar.");
       return;
     }
@@ -172,8 +172,8 @@ export default function CertificateModal({
   async function handleOpenPrint() {
     if (!template || !templateMeta) return;
     
-    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3 y ID 7)
-    if (template.id !== 3 && template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
+    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3, ID 5 e ID 7)
+    if (template.id !== 3 && template.id !== 5 && template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
       alert("Debe elegir un veterinario antes de continuar.");
       return;
     }

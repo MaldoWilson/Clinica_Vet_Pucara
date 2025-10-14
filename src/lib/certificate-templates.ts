@@ -967,6 +967,95 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
       return map;
     })(),
   },
+  // Certificado ID 5 con 12 campos para certificado médico/veterinario
+  "5": {
+    id: 5,
+    name: "Certificado Médico ID 5",
+    description: "Certificado médico/veterinario con diagnóstico, tratamiento y observaciones",
+    fields: [
+      {
+        key: "Texbox1",
+        label: "Día de emisión",
+        type: "auto",
+        source: ({ now }) => String(now.getDate()).padStart(2, '0'),
+      },
+      {
+        key: "Texbox2",
+        label: "Mes de emisión",
+        type: "auto",
+        source: ({ now }) => String(now.getMonth() + 1).padStart(2, '0'),
+      },
+      {
+        key: "Texbox3",
+        label: "Año de emisión",
+        type: "auto",
+        source: ({ now }) => String(now.getFullYear()),
+      },
+      {
+        key: "Texbox4",
+        label: "Nombre de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.nombre || "",
+      },
+      {
+        key: "Texbox5",
+        label: "Nombre del propietario",
+        type: "auto",
+        source: ({ propietario }) =>
+          [propietario?.nombre || "", propietario?.apellido || ""].filter(Boolean).join(" "),
+      },
+      {
+        key: "Texbox6",
+        label: "Diagnóstico",
+        type: "manual",
+        placeholder: "Ingrese el diagnóstico",
+      },
+      {
+        key: "Texbox7",
+        label: "Tratamiento",
+        type: "manual",
+        placeholder: "Ingrese el tratamiento",
+      },
+      {
+        key: "Texbox8",
+        label: "Observaciones",
+        type: "manual",
+        placeholder: "Ingrese las observaciones",
+      },
+      {
+        key: "Texbox9",
+        label: "Próximo control",
+        type: "manual",
+        placeholder: "Ingrese la fecha del próximo control",
+      },
+      {
+        key: "Texbox10",
+        label: "Edad de la mascota",
+        type: "auto",
+        source: ({ paciente }) => calcularEdadDesde(paciente.fecha_nacimiento),
+      },
+      {
+        key: "Texbox11",
+        label: "Peso de la mascota",
+        type: "manual",
+        placeholder: "Ingrese el peso en kg",
+      },
+      {
+        key: "Texbox12",
+        label: "Alimentación para la mascota",
+        type: "manual",
+        placeholder: "Ingrese las recomendaciones de alimentación",
+      },
+    ],
+    acroFieldAlias: (() => {
+      const map: Record<string, string> = {};
+      // Mapea TexboxN -> TextboxN para compatibilidad con PDFs que usan "Textbox"
+      for (let i = 1; i <= 12; i++) {
+        map[`Texbox${i}`] = `Textbox${i}`;
+      }
+      return map;
+    })(),
+  },
 };
 
 export type CertificateTemplateKey = keyof typeof certificateTemplates;
