@@ -278,7 +278,13 @@ export default function PacienteDetailPage() {
       raza: data?.raza ?? null,
       sexo: data?.sexo ?? null,
       fecha_nacimiento: data?.fecha_nacimiento ?? null,
-      propietario: data?.propietario ? { nombre: data.propietario.nombre || "", apellido: data.propietario.apellido || "" } : null,
+      propietario: data?.propietario ? { 
+        nombre: data.propietario.nombre || "", 
+        apellido: data.propietario.apellido || "",
+        direccion: data.propietario.direccion || "",
+        rut: data.propietario.rut || "",
+        telefono: data.propietario.telefono || ""
+      } : null,
     };
   }, [data]);
 

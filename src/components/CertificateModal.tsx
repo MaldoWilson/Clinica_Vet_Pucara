@@ -13,7 +13,13 @@ type PacienteCompact = {
   raza?: string | null;
   sexo?: boolean | null;
   fecha_nacimiento?: string | null;
-  propietario?: { nombre?: string | null; apellido?: string | null } | null;
+  propietario?: { 
+    nombre?: string | null; 
+    apellido?: string | null;
+    direccion?: string | null;
+    rut?: string | null;
+    telefono?: string | null;
+  } | null;
 };
 
 export default function CertificateModal({
@@ -33,6 +39,9 @@ export default function CertificateModal({
   const [error, setError] = useState<string | null>(null);
   const [manualValues, setManualValues] = useState<Record<string, string>>({});
   const [veterinarioId, setVeterinarioId] = useState<string>("");
+  const [showAutoFields, setShowAutoFields] = useState(true);
+  const [showManualFields, setShowManualFields] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   const template: CertificateTemplate | null = useMemo(() => {
     if (!templateMeta) return null;
@@ -46,6 +55,9 @@ export default function CertificateModal({
       setError(null);
       setManualValues({});
       setVeterinarioId("");
+      setShowAutoFields(true);
+      setShowManualFields(false);
+      setExpandedGroups({});
     }
   }, [open]);
 
@@ -63,9 +75,18 @@ export default function CertificateModal({
     now: new Date(),
   }), [paciente, veterinarios]);
 
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
+  };
+
   const fillValues = useMemo(() => {
     if (!template) return {} as Record<string, string>;
     const base: Record<string, string> = {};
+    
+    // Procesar campos individuales
     for (const f of template.fields) {
       if (f.type === "auto") {
         base[f.key] = f.source(autoContext) || "";
@@ -79,11 +100,38 @@ export default function CertificateModal({
         }
       }
     }
+    
+    // Procesar campos de grupos
+    if (template.fieldGroups) {
+      for (const group of template.fieldGroups) {
+        for (const f of group.fields) {
+          if (f.type === "auto") {
+            base[f.key] = f.source(autoContext) || "";
+          }
+          if (f.type === "manual") {
+            if (f.key === "Texbox4" && veterinarioId) {
+              const v = veterinarios.find(x => String(x.id) === String(veterinarioId));
+              base[f.key] = v?.nombre || "";
+            } else {
+              base[f.key] = manualValues[f.key] || "";
+            }
+          }
+        }
+      }
+    }
+    
     return base;
   }, [template, autoContext, manualValues, veterinarioId, veterinarios]);
 
   async function handleDownload() {
     if (!template || !templateMeta) return;
+    
+    // Validar que se haya seleccionado un veterinario (excepto para certificado ID 7)
+    if (template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
+      alert("Debe elegir un veterinario antes de continuar.");
+      return;
+    }
+    
     setLoading(true); setError(null);
     try {
       const res = await fetch(`/api/archivos-adjuntos/file?id=${encodeURIComponent(String(templateMeta.id))}`, { cache: 'no-store' });
@@ -106,6 +154,13 @@ export default function CertificateModal({
 
   async function handleOpenPrint() {
     if (!template || !templateMeta) return;
+    
+    // Validar que se haya seleccionado un veterinario (excepto para certificado ID 7)
+    if (template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
+      alert("Debe elegir un veterinario antes de continuar.");
+      return;
+    }
+    
     setLoading(true); setError(null);
     try {
       const res = await fetch(`/api/archivos-adjuntos/file?id=${encodeURIComponent(String(templateMeta.id))}`, { cache: 'no-store' });
@@ -137,8 +192,46 @@ export default function CertificateModal({
           {error && (
             <div className="text-sm text-red-600 bg-red-50 ring-1 ring-red-200 rounded p-2">{error}</div>
           )}
+          
+          {/* Botones de toggle */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => {
+                setShowAutoFields(true);
+                setShowManualFields(false);
+              }}
+              className={`px-4 py-2 rounded text-sm font-medium ${
+                showAutoFields 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Datos Automáticos
+            </button>
+            <button
+              onClick={() => {
+                setShowAutoFields(false);
+                setShowManualFields(true);
+              }}
+              className={`px-4 py-2 rounded text-sm font-medium ${
+                showManualFields 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Campos a Llenar
+            </button>
+          </div>
+
           <div className="space-y-3">
-            {template.fields.map((f) => (
+            {/* Campos individuales */}
+            {template.fields
+              .filter((f) => {
+                if (showAutoFields && f.type === "auto") return true;
+                if (showManualFields && f.type === "manual") return true;
+                return false;
+              })
+              .map((f) => (
               <div key={f.key} className="grid grid-cols-3 items-center gap-3">
                 <label className="text-sm text-gray-700 col-span-1">{f.label}</label>
                 {f.type === "manual" && f.key === "Texbox4" ? (
@@ -165,6 +258,61 @@ export default function CertificateModal({
                     value={fillValues[f.key] || ""}
                     readOnly
                   />
+                )}
+              </div>
+            ))}
+
+            {/* Grupos de campos */}
+            {template.fieldGroups && showManualFields && template.fieldGroups.map((group) => (
+              <div key={group.id} className="border border-gray-200 rounded-lg">
+                <button
+                  onClick={() => toggleGroup(group.id)}
+                  className="w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 rounded-t-lg flex items-center justify-between"
+                >
+                  <div>
+                    <div className="font-medium text-gray-900">{group.name}</div>
+                    {group.description && (
+                      <div className="text-sm text-gray-600">{group.description}</div>
+                    )}
+                  </div>
+                  <div className="text-gray-500">
+                    {expandedGroups[group.id] ? '▼' : '▶'}
+                  </div>
+                </button>
+                
+                {expandedGroups[group.id] && (
+                  <div className="p-4 space-y-3 bg-white">
+                    {group.fields.map((f) => (
+                      <div key={f.key} className="grid grid-cols-3 items-center gap-3">
+                        <label className="text-sm text-gray-700 col-span-1">{f.label}</label>
+                        {f.type === "manual" && f.key === "Texbox4" ? (
+                          <select
+                            className="col-span-2 rounded border-gray-300 text-sm"
+                            value={veterinarioId}
+                            onChange={(e) => setVeterinarioId(e.target.value)}
+                          >
+                            <option value="">Selecciona un veterinario</option>
+                            {veterinarios.map(v => (
+                              <option key={v.id} value={v.id}>{v.nombre}</option>
+                            ))}
+                          </select>
+                        ) : f.type === "manual" ? (
+                          <input
+                            className="col-span-2 rounded border-gray-300 text-sm"
+                            placeholder={f.placeholder || ""}
+                            value={manualValues[f.key] || ""}
+                            onChange={(e) => setManualValues((m) => ({ ...m, [f.key]: e.target.value }))}
+                          />
+                        ) : (
+                          <input
+                            className="col-span-2 rounded border-gray-200 bg-gray-50 text-sm"
+                            value={fillValues[f.key] || ""}
+                            readOnly
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}
