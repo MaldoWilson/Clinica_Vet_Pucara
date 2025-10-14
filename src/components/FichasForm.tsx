@@ -214,7 +214,6 @@ export default function FichaForm() {
       <div className="relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />
         <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Crear Ficha de Mascota</h2>
           <form onSubmit={handleSubmit}>
           {/* Propietario */}
           <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">

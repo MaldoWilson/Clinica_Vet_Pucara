@@ -124,6 +124,12 @@ export default function AdminEquipoPage() {
 
   return (
     <div className="space-y-8 max-w-[90rem] mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Gestión del Equipo</h1>
+          <p className="text-gray-600">Administra el personal veterinario</p>
+        </div>
+      </div>
       {error && (<div className="p-3 rounded border border-red-200 bg-red-50 text-red-700 text-sm">{error}</div>)}
       <div className="relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />

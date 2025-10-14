@@ -328,7 +328,7 @@ export default function StockPage() {
         </div>
         <button
           onClick={abrirNuevo}
-          className="px-5 py-3 rounded-lg font-semibold text-white bg-emerald-600 hover:bg-emerald-700"
+          className="px-5 py-3 rounded-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700"
         >
           + Agregar Producto
         </button>

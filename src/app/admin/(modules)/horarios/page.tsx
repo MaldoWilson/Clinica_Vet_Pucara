@@ -173,6 +173,12 @@ export default function AdminHorariosPage() {
 
   return (
     <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Gestión de Horarios</h1>
+          <p className="text-gray-600">Crear, listar y administrar bloques de atención</p>
+        </div>
+      </div>
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-xl font-semibold mb-4">Generar horarios</h3>
         {error && <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">{error}</div>}

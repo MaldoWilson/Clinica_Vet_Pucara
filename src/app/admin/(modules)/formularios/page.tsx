@@ -32,6 +32,10 @@ export default async function FormulariosPage() {
 
   return (
     <div className="px-4 py-12 space-y-4">
+      <div className="mb-2">
+        <h1 className="text-3xl font-bold text-gray-900">Formularios de Contacto</h1>
+        <p className="text-gray-600 mt-1">Mensajes recibidos desde el sitio</p>
+      </div>
       {mensajes.length === 0 ? (
         <div className="border rounded-xl p-8 text-center text-gray-500 bg-white">
           <div className="text-4xl mb-2">📬</div>
