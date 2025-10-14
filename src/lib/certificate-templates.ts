@@ -1056,6 +1056,89 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
       return map;
     })(),
   },
+  // Certificado ID 6 con 11 campos para descripción general del paciente
+  "6": {
+    id: 6,
+    name: "Certificado de Descripción General ID 6",
+    description: "Certificado con descripción general del paciente y datos básicos",
+    fields: [
+      {
+        key: "Texbox1",
+        label: "Fecha de emisión",
+        type: "auto",
+        source: ({ now }) => formatFechaDDMMYYYY(now),
+      },
+      {
+        key: "Texbox2",
+        label: "Nombre de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.nombre || "",
+      },
+      {
+        key: "Texbox3",
+        label: "Especie de la mascota",
+        type: "auto",
+        source: ({ paciente }) => especieTexto(paciente.especie),
+      },
+      {
+        key: "Texbox4",
+        label: "Raza de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.raza || "",
+      },
+      {
+        key: "Texbox5",
+        label: "Sexo de la mascota",
+        type: "auto",
+        source: ({ paciente }) => sexoTexto(paciente.sexo),
+      },
+      {
+        key: "Texbox6",
+        label: "Edad de la mascota",
+        type: "auto",
+        source: ({ paciente }) => calcularEdadDesde(paciente.fecha_nacimiento),
+      },
+      {
+        key: "Texbox7",
+        label: "Peso de la mascota",
+        type: "manual",
+        placeholder: "Ingrese el peso en kg",
+      },
+      {
+        key: "Texbox8",
+        label: "Nombre del propietario",
+        type: "auto",
+        source: ({ propietario }) =>
+          [propietario?.nombre || "", propietario?.apellido || ""].filter(Boolean).join(" "),
+      },
+      {
+        key: "Texbox9",
+        label: "Teléfono del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.telefono || "",
+      },
+      {
+        key: "Texbox10",
+        label: "Dirección del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.direccion || "",
+      },
+      {
+        key: "Texbox11",
+        label: "Descripción general del paciente",
+        type: "manual",
+        placeholder: "Ingrese una descripción detallada del paciente",
+      },
+    ],
+    acroFieldAlias: (() => {
+      const map: Record<string, string> = {};
+      // Mapea TexboxN -> TextboxN para compatibilidad con PDFs que usan "Textbox"
+      for (let i = 1; i <= 11; i++) {
+        map[`Texbox${i}`] = `Textbox${i}`;
+      }
+      return map;
+    })(),
+  },
 };
 
 export type CertificateTemplateKey = keyof typeof certificateTemplates;
