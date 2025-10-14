@@ -1,4 +1,5 @@
-
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
 
 CREATE TABLE public.antecedentes (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -42,6 +43,8 @@ CREATE TABLE public.citas (
   notas text,
   estado text DEFAULT 'PENDIENTE'::text,
   creado_en timestamp with time zone DEFAULT now(),
+  inicio timestamp without time zone,
+  fin timestamp without time zone,
   CONSTRAINT citas_pkey PRIMARY KEY (id),
   CONSTRAINT citas_servicio_id_fkey FOREIGN KEY (servicio_id) REFERENCES public.servicios(id),
   CONSTRAINT citas_horario_id_fkey FOREIGN KEY (horario_id) REFERENCES public.horarios(id)
@@ -63,12 +66,29 @@ CREATE TABLE public.consultas (
   CONSTRAINT consultas_mascota_id_fkey FOREIGN KEY (mascota_id) REFERENCES public.mascotas(mascotas_id),
   CONSTRAINT consultas_veterinario_id_fkey FOREIGN KEY (veterinario_id) REFERENCES public.veterinarios(id)
 );
+CREATE TABLE public.flujo_caja (
+  id integer NOT NULL DEFAULT nextval('flujo_caja_id_seq'::regclass),
+  dia integer,
+  tipo text,
+  categoria text,
+  nombre text,
+  efectivo numeric,
+  debito numeric,
+  credito numeric,
+  transferencia numeric,
+  deuda numeric,
+  egreso numeric,
+  dr text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT flujo_caja_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.horarios (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   veterinario_id uuid,
   inicio timestamp with time zone NOT NULL,
   fin timestamp with time zone NOT NULL,
   reservado boolean DEFAULT false,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT horarios_pkey PRIMARY KEY (id),
   CONSTRAINT horarios_veterinario_id_fkey FOREIGN KEY (veterinario_id) REFERENCES public.veterinarios(id)
 );
@@ -143,8 +163,7 @@ CREATE TABLE public.recetas (
   notas text,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT recetas_pkey PRIMARY KEY (id),
-  CONSTRAINT recetas_consulta_id_fkey FOREIGN KEY (consulta_id) REFERENCES public.consultas(id),
-  CONSTRAINT recetas_emitida_por_fkey FOREIGN KEY (emitida_por) REFERENCES public.veterinarios(id)
+  CONSTRAINT recetas_consulta_id_fkey FOREIGN KEY (consulta_id) REFERENCES public.consultas(id)
 );
 CREATE TABLE public.servicios (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -157,6 +176,18 @@ CREATE TABLE public.servicios (
   porcentaje_vet numeric DEFAULT 0,
   CONSTRAINT servicios_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.stock (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  nombre text NOT NULL,
+  categoria text NOT NULL,
+  cantidad numeric,
+  stock_min numeric NOT NULL,
+  unidad text NOT NULL,
+  precio numeric NOT NULL,
+  estado text NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT stock_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.veterinarios (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   nombre text NOT NULL,
@@ -166,22 +197,3 @@ CREATE TABLE public.veterinarios (
   descripcion text,
   CONSTRAINT veterinarios_pkey PRIMARY KEY (id)
 );
--- Crear tabla flujo_caja con dia calculado automáticamente desde created_at
-CREATE TABLE flujo_caja (
-    id SERIAL PRIMARY KEY,
-    dia INT GENERATED ALWAYS AS (EXTRACT(DAY FROM created_at)) STORED,
-    tipo TEXT,
-    categoria TEXT,
-    nombre TEXT,
-    efectivo NUMERIC,
-    debito NUMERIC,
-    credito NUMERIC,
-    transferencia NUMERIC,
-    deuda NUMERIC,
-    egreso NUMERIC,
-    dr TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Actualizar registros existentes para que dia coincida con created_at
-UPDATE flujo_caja SET dia = EXTRACT(DAY FROM created_at) WHERE dia != EXTRACT(DAY FROM created_at);

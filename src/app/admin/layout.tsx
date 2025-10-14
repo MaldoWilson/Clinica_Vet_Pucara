@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="bg-white shadow-sm border-b">
+          <header className="bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b">
             <div className="px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center h-16">
                 <div className="flex items-center">
@@ -93,21 +93,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     className="p-2 mr-2 rounded hover:bg-gray-100 md:hidden"
                     onClick={() => setMobileOpen(true)}
                   >
-                    ☰
+
                   </button>
-                  <h1 className="text-lg md:text-xl font-semibold text-gray-900">Panel de Administración</h1>
+                  <div className="flex items-center gap-3">
+
+                    <h1 className="text-lg md:text-xl font-semibold text-gray-900">Panel de Administración</h1>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="hidden sm:inline text-sm text-gray-600">{user.email}</span>
-                  <button
-                    onClick={async () => {
-                      await supabase.auth.signOut();
-                      router.push("/admin/login");
-                    }}
-                    className="text-sm text-red-600 hover:text-red-700"
-                  >
-                    Cerrar sesión
-                  </button>
+                <div className="hidden md:flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">Admin</span>
                 </div>
               </div>
             </div>
