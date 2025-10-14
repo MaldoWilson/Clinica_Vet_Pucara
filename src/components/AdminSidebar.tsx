@@ -86,8 +86,7 @@ export default function AdminSidebar() {
     },
     {
       label: "Gestión de Stock",
-      href: "#",
-      disabled: true,
+      href: "/admin/stock",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M5 11h14M7 15h10" />
