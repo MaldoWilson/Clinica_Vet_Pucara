@@ -17,6 +17,7 @@ export type AutoContext = {
     direccion?: string | null;
     rut?: string | null;
     telefono?: string | null;
+    correo_electronico?: string | null;
   } | null;
   veterinarios: Array<{ id: string; nombre: string }>;
   now: Date;
@@ -843,6 +844,125 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
       // Mapea TextboxN -> TextboxN para compatibilidad con PDFs
       for (let i = 1; i <= 63; i++) {
         map[`Textbox${i}`] = `Textbox${i}`;
+      }
+      return map;
+    })(),
+  },
+  // Certificado ID 3 con 17 campos para autorización quirúrgica
+  "3": {
+    id: 3,
+    name: "Certificado de Autorización Quirúrgica ID 3",
+    description: "Certificado de autorización para intervenciones quirúrgicas con 17 campos",
+    fields: [
+      {
+        key: "Texbox1",
+        label: "Nombre de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.nombre || "",
+      },
+      {
+        key: "Texbox2",
+        label: "Fecha actual de emisión",
+        type: "auto",
+        source: ({ now }) => formatFechaDDMMYYYY(now),
+      },
+      {
+        key: "Texbox3",
+        label: "Especie de la mascota",
+        type: "auto",
+        source: ({ paciente }) => especieTexto(paciente.especie),
+      },
+      {
+        key: "Texbox4",
+        label: "Raza de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.raza || "",
+      },
+      {
+        key: "Texbox5",
+        label: "Color de la mascota",
+        type: "manual",
+        placeholder: "Ingrese el color de la mascota",
+      },
+      {
+        key: "Texbox6",
+        label: "Sexo de la mascota",
+        type: "auto",
+        source: ({ paciente }) => sexoTexto(paciente.sexo),
+      },
+      {
+        key: "Texbox7",
+        label: "Edad de la mascota",
+        type: "auto",
+        source: ({ paciente }) => calcularEdadDesde(paciente.fecha_nacimiento),
+      },
+      {
+        key: "Texbox8",
+        label: "Peso de la mascota",
+        type: "manual",
+        placeholder: "Ingrese el peso en kg",
+      },
+      {
+        key: "Texbox9",
+        label: "Nombre del propietario",
+        type: "auto",
+        source: ({ propietario }) =>
+          [propietario?.nombre || "", propietario?.apellido || ""].filter(Boolean).join(" "),
+      },
+      {
+        key: "Texbox10",
+        label: "C.I del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.rut || "",
+      },
+      {
+        key: "Texbox11",
+        label: "Dirección del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.direccion || "",
+      },
+      {
+        key: "Texbox12",
+        label: "Teléfono del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.telefono || "",
+      },
+      {
+        key: "Texbox13",
+        label: "Correo del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.correo_electronico || "",
+      },
+      {
+        key: "Texbox14",
+        label: "Autorización de intervención quirúrgica",
+        type: "manual",
+        placeholder: "Ingrese la autorización quirúrgica",
+      },
+      {
+        key: "Texbox15",
+        label: "Exámenes prequirúrgicos - SÍ",
+        type: "manual",
+        placeholder: "Sí",
+      },
+      {
+        key: "Texbox16",
+        label: "Exámenes prequirúrgicos - NO",
+        type: "manual",
+        placeholder: "No",
+      },
+      {
+        key: "Texbox17",
+        label: "Aranceles de los exámenes",
+        type: "manual",
+        placeholder: "Ingrese los aranceles de los exámenes",
+      },
+    ],
+    acroFieldAlias: (() => {
+      const map: Record<string, string> = {};
+      // Mapea TexboxN -> TextboxN para compatibilidad con PDFs que usan "Textbox"
+      for (let i = 1; i <= 21; i++) {
+        map[`Texbox${i}`] = `Textbox${i}`;
       }
       return map;
     })(),

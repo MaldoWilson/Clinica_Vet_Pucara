@@ -283,7 +283,8 @@ export default function PacienteDetailPage() {
         apellido: data.propietario.apellido || "",
         direccion: data.propietario.direccion || "",
         rut: data.propietario.rut || "",
-        telefono: data.propietario.telefono || ""
+        telefono: data.propietario.telefono || "",
+        correo_electronico: data.propietario.correo_electronico || ""
       } : null,
     };
   }, [data]);

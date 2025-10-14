@@ -19,6 +19,7 @@ type PacienteCompact = {
     direccion?: string | null;
     rut?: string | null;
     telefono?: string | null;
+    correo_electronico?: string | null;
   } | null;
 };
 
@@ -42,6 +43,7 @@ export default function CertificateModal({
   const [showAutoFields, setShowAutoFields] = useState(true);
   const [showManualFields, setShowManualFields] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [examenesPrequirurgicos, setExamenesPrequirurgicos] = useState<"si" | "no" | "">("");
 
   const template: CertificateTemplate | null = useMemo(() => {
     if (!templateMeta) return null;
@@ -58,6 +60,7 @@ export default function CertificateModal({
       setShowAutoFields(true);
       setShowManualFields(false);
       setExpandedGroups({});
+      setExamenesPrequirurgicos("");
     }
   }, [open]);
 
@@ -95,6 +98,13 @@ export default function CertificateModal({
         if (f.key === "Texbox4" && veterinarioId) {
           const v = veterinarios.find(x => String(x.id) === String(veterinarioId));
           base[f.key] = v?.nombre || "";
+        } else if (f.key === "Texbox15" || f.key === "Texbox16") {
+          // Manejar campos de exámenes prequirúrgicos
+          if (f.key === "Texbox15") {
+            base[f.key] = examenesPrequirurgicos === "si" ? "Sí" : "";
+          } else if (f.key === "Texbox16") {
+            base[f.key] = examenesPrequirurgicos === "no" ? "No" : "";
+          }
         } else {
           base[f.key] = manualValues[f.key] || "";
         }
@@ -112,6 +122,13 @@ export default function CertificateModal({
             if (f.key === "Texbox4" && veterinarioId) {
               const v = veterinarios.find(x => String(x.id) === String(veterinarioId));
               base[f.key] = v?.nombre || "";
+            } else if (f.key === "Texbox15" || f.key === "Texbox16") {
+              // Manejar campos de exámenes prequirúrgicos
+              if (f.key === "Texbox15") {
+                base[f.key] = examenesPrequirurgicos === "si" ? "Sí" : "";
+              } else if (f.key === "Texbox16") {
+                base[f.key] = examenesPrequirurgicos === "no" ? "No" : "";
+              }
             } else {
               base[f.key] = manualValues[f.key] || "";
             }
@@ -121,13 +138,13 @@ export default function CertificateModal({
     }
     
     return base;
-  }, [template, autoContext, manualValues, veterinarioId, veterinarios]);
+  }, [template, autoContext, manualValues, veterinarioId, veterinarios, examenesPrequirurgicos]);
 
   async function handleDownload() {
     if (!template || !templateMeta) return;
     
-    // Validar que se haya seleccionado un veterinario (excepto para certificado ID 7)
-    if (template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
+    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3 y ID 7)
+    if (template.id !== 3 && template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
       alert("Debe elegir un veterinario antes de continuar.");
       return;
     }
@@ -155,8 +172,8 @@ export default function CertificateModal({
   async function handleOpenPrint() {
     if (!template || !templateMeta) return;
     
-    // Validar que se haya seleccionado un veterinario (excepto para certificado ID 7)
-    if (template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
+    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3 y ID 7)
+    if (template.id !== 3 && template.id !== 7 && (!veterinarioId || veterinarioId.trim() === "")) {
       alert("Debe elegir un veterinario antes de continuar.");
       return;
     }
@@ -245,6 +262,36 @@ export default function CertificateModal({
                       <option key={v.id} value={v.id}>{v.nombre}</option>
                     ))}
                   </select>
+                ) : f.type === "manual" && f.key === "Texbox15" ? (
+                  <div className="col-span-2">
+                    <button
+                      type="button"
+                      onClick={() => setExamenesPrequirurgicos("si")}
+                      className={`px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${
+                        examenesPrequirurgicos === "si" 
+                          ? 'bg-green-600 text-white' 
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {examenesPrequirurgicos === "si" && "✗"}
+                      Sí
+                    </button>
+                  </div>
+                ) : f.type === "manual" && f.key === "Texbox16" ? (
+                  <div className="col-span-2">
+                    <button
+                      type="button"
+                      onClick={() => setExamenesPrequirurgicos("no")}
+                      className={`px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${
+                        examenesPrequirurgicos === "no" 
+                          ? 'bg-red-600 text-white' 
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {examenesPrequirurgicos === "no" && "✗"}
+                      No
+                    </button>
+                  </div>
                 ) : f.type === "manual" ? (
                   <input
                     className="col-span-2 rounded border-gray-300 text-sm"
@@ -296,6 +343,36 @@ export default function CertificateModal({
                               <option key={v.id} value={v.id}>{v.nombre}</option>
                             ))}
                           </select>
+                        ) : f.type === "manual" && f.key === "Texbox15" ? (
+                          <div className="col-span-2">
+                            <button
+                              type="button"
+                              onClick={() => setExamenesPrequirurgicos("si")}
+                              className={`px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${
+                                examenesPrequirurgicos === "si" 
+                                  ? 'bg-green-600 text-white' 
+                                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                              }`}
+                            >
+                              {examenesPrequirurgicos === "si" && "✗"}
+                              Sí
+                            </button>
+                          </div>
+                        ) : f.type === "manual" && f.key === "Texbox16" ? (
+                          <div className="col-span-2">
+                            <button
+                              type="button"
+                              onClick={() => setExamenesPrequirurgicos("no")}
+                              className={`px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${
+                                examenesPrequirurgicos === "no" 
+                                  ? 'bg-red-600 text-white' 
+                                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                              }`}
+                            >
+                              {examenesPrequirurgicos === "no" && "✗"}
+                              No
+                            </button>
+                          </div>
                         ) : f.type === "manual" ? (
                           <input
                             className="col-span-2 rounded border-gray-300 text-sm"
