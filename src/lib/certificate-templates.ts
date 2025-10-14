@@ -1304,6 +1304,106 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
       return map;
     })(),
   },
+  // Certificado ID 10 - Certificado de defunción (14 campos)
+  "10": {
+    id: 10,
+    name: "Certificado de Defunción ID 10",
+    description: "Certificado de defunción del paciente con datos del propietario y del evento",
+    fields: [
+      {
+        key: "Textbox1",
+        label: "Nombre completo del propietario",
+        type: "auto",
+        source: ({ propietario }) => [propietario?.nombre || "", propietario?.apellido || ""].filter(Boolean).join(" "),
+      },
+      {
+        key: "Textbox2",
+        label: "Dirección del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.direccion || "",
+      },
+      {
+        key: "Textbox3",
+        label: "RUT o pasaporte del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.rut || "",
+      },
+      {
+        key: "Textbox4",
+        label: "Teléfono del propietario",
+        type: "auto",
+        source: ({ propietario }) => propietario?.telefono || "",
+      },
+      {
+        key: "Textbox5",
+        label: "Nombre de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.nombre || "",
+      },
+      {
+        key: "Textbox6",
+        label: "Especie del animal",
+        type: "auto",
+        source: ({ paciente }) => especieTexto(paciente.especie),
+      },
+      {
+        key: "Textbox7",
+        label: "Raza de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.raza || "",
+      },
+      {
+        key: "Textbox8",
+        label: "Color del animal",
+        type: "manual",
+        placeholder: "Ingrese el color del pelaje o del animal",
+      },
+      {
+        key: "Textbox9",
+        label: "Sexo del animal",
+        type: "auto",
+        source: ({ paciente }) => sexoTexto(paciente.sexo),
+      },
+      {
+        key: "Textbox10",
+        label: "Motivo de defunción",
+        type: "manual",
+        placeholder: "Enfermedad, accidente, eutanasia, etc.",
+      },
+      {
+        key: "Textbox11",
+        label: "Lugar de defunción",
+        type: "manual",
+        placeholder: "Clínica, domicilio u otro",
+      },
+      {
+        key: "Textbox12",
+        label: "Peso al momento de la defunción",
+        type: "manual",
+        placeholder: "Ingrese el peso en kg",
+      },
+      {
+        key: "Textbox13",
+        label: "Fecha de nacimiento del animal",
+        type: "auto",
+        source: ({ paciente }) => paciente?.fecha_nacimiento ? formatFechaDDMMYYYY(new Date(paciente.fecha_nacimiento)) : "",
+      },
+      {
+        key: "Textbox14",
+        label: "Fecha de defunción",
+        type: "manual",
+        placeholder: "DD/MM/YYYY",
+      },
+    ],
+    acroFieldAlias: (() => {
+      const map: Record<string, string> = {};
+      for (let i = 1; i <= 14; i++) {
+        map[`Texbox${i}`] = `Textbox${i}`;
+        map[`Textbox${i}`] = `Textbox${i}`;
+      }
+      return map;
+    })(),
+  },
 };
 
 export type CertificateTemplateKey = keyof typeof certificateTemplates;

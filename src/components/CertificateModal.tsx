@@ -143,8 +143,16 @@ export default function CertificateModal({
   async function handleDownload() {
     if (!template || !templateMeta) return;
     
-    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3, ID 5, ID 6, ID 7 e ID 8)
-    if (template.id !== 3 && template.id !== 5 && template.id !== 6 && template.id !== 7 && template.id !== 8 && (!veterinarioId || veterinarioId.trim() === "")) {
+    // Validar que se haya seleccionado un veterinario (excepto para certificados que no lo requieren)
+    if (
+      template.id !== 3 &&
+      template.id !== 5 &&
+      template.id !== 6 &&
+      template.id !== 7 &&
+      template.id !== 8 &&
+      template.id !== 10 &&
+      (!veterinarioId || veterinarioId.trim() === "")
+    ) {
       alert("Debe elegir un veterinario antes de continuar.");
       return;
     }
@@ -155,7 +163,8 @@ export default function CertificateModal({
       if (!res.ok) throw new Error(`No se pudo obtener el PDF (${res.status})`);
       const ab = await res.arrayBuffer();
       const bytes = await fillPdfFormFromBytes(ab, fillValues, template.acroFieldAlias);
-      const blob = new Blob([bytes], { type: "application/pdf" });
+      const copy = new Uint8Array(bytes);
+      const blob = new Blob([copy], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -172,8 +181,16 @@ export default function CertificateModal({
   async function handleOpenPrint() {
     if (!template || !templateMeta) return;
     
-    // Validar que se haya seleccionado un veterinario (excepto para certificados ID 3, ID 5, ID 6, ID 7 e ID 8)
-    if (template.id !== 3 && template.id !== 5 && template.id !== 6 && template.id !== 7 && template.id !== 8 && (!veterinarioId || veterinarioId.trim() === "")) {
+    // Validar que se haya seleccionado un veterinario (excepto para certificados que no lo requieren)
+    if (
+      template.id !== 3 &&
+      template.id !== 5 &&
+      template.id !== 6 &&
+      template.id !== 7 &&
+      template.id !== 8 &&
+      template.id !== 10 &&
+      (!veterinarioId || veterinarioId.trim() === "")
+    ) {
       alert("Debe elegir un veterinario antes de continuar.");
       return;
     }
@@ -184,7 +201,8 @@ export default function CertificateModal({
       if (!res.ok) throw new Error(`No se pudo obtener el PDF (${res.status})`);
       const ab = await res.arrayBuffer();
       const bytes = await fillPdfFormFromBytes(ab, fillValues, template.acroFieldAlias);
-      const blob = new Blob([bytes], { type: "application/pdf" });
+      const copy = new Uint8Array(bytes);
+      const blob = new Blob([copy], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
       // No revocar inmediatamente porque el visor puede necesitar acceso

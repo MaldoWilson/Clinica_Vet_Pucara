@@ -249,7 +249,7 @@ export default function PacienteDetailPage() {
         console.log("🔍 Respuesta de la API de certificados:", json);
         if (res.ok && json?.ok && Array.isArray(json.data)) {
           console.log("📋 Datos brutos de certificados:", json.data);
-          console.log("🔍 Buscando certificados ID 8 y 9:", json.data.filter(x => x.id == 8 || x.id == 9));
+          console.log("🔍 Buscando certificados ID 8, 9 y 10:", json.data.filter((x: any) => x.id == 8 || x.id == 9 || x.id == 10));
           const list = json.data
             .filter((x: any) => {
               const hasName = x?.nombre_archivo;
@@ -258,7 +258,7 @@ export default function PacienteDetailPage() {
             })
             .map((x: any) => ({ id: Number(x.id), nombre_archivo: String(x.nombre_archivo), url_archivo: x?.url_archivo ? String(x.url_archivo) : "" }));
           console.log("✅ Lista final de certificados:", list);
-          console.log("🔍 IDs en la lista final:", list.map(x => x.id));
+          console.log("🔍 IDs en la lista final:", list.map((x: any) => x.id));
           setCerts(list);
         } else {
           console.error("❌ Error en la respuesta de la API:", json);
