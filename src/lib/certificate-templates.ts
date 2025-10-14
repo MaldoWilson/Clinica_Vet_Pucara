@@ -1286,20 +1286,131 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
   // Certificado ID 9 - Plantilla básica (pendiente de definir campos específicos)
   "9": {
     id: 9,
-    name: "Certificado ID 9",
-    description: "Certificado ID 9 - Campos pendientes de definir",
+    name: "Certificado de Identificación y Vacunación ID 9",
+    description: "Identificación del animal, del propietario, vacunación y desparasitación (46 campos)",
     fields: [
+      // 🐾 Identificación del animal (auto)
+      { key: "Textbox1",  label: "Nombre de la mascota", type: "auto", source: ({ paciente }) => paciente.nombre || "" },
+      { key: "Textbox2",  label: "Raza del animal", type: "auto", source: ({ paciente }) => paciente.raza || "" },
+      { key: "Textbox6",  label: "Edad del animal", type: "auto", source: ({ paciente }) => calcularEdadDesde(paciente.fecha_nacimiento) },
+      { key: "Textbox7",  label: "Sexo del animal", type: "auto", source: ({ paciente }) => sexoTexto(paciente.sexo) },
+
+      // 👤 Identificación del propietario (auto)
+      { key: "Textbox10", label: "Nombre completo del propietario", type: "auto", source: ({ propietario }) => [propietario?.nombre || "", propietario?.apellido || ""].filter(Boolean).join(" ") },
+      { key: "Textbox11", label: "RUT o pasaporte del propietario", type: "auto", source: ({ propietario }) => propietario?.rut || "" },
+      { key: "Textbox12", label: "Dirección del propietario", type: "auto", source: ({ propietario }) => propietario?.direccion || "" },
+      { key: "Textbox13", label: "Teléfono del propietario", type: "auto", source: ({ propietario }) => propietario?.telefono || "" },
+    ],
+    fieldGroups: [
       {
-        key: "Texbox1",
-        label: "Campo 1",
-        type: "auto",
-        source: ({ paciente }) => paciente.nombre || "",
+        id: "datos-fisicos",
+        name: "Datos Físicos y Microchip",
+        description: "Información física de la mascota y datos del microchip",
+        fields: [
+          { key: "Textbox3",  label: "Número de microchip", type: "manual", placeholder: "Ingrese el N° de microchip" },
+          { key: "Textbox4",  label: "Especie del animal", type: "auto", source: ({ paciente }) => especieTexto(paciente.especie) },
+          { key: "Textbox5",  label: "Color del animal", type: "manual", placeholder: "Ingrese el color" },
+          { key: "Textbox8",  label: "Fecha de aplicación del microchip", type: "manual", placeholder: "DD/MM/YYYY" },
+          { key: "Textbox9",  label: "Sitio de aplicación del microchip", type: "manual", placeholder: "Ej: subcutáneo, escapular izq., etc." },
+        ],
+        collapsed: true,
+      },
+      {
+        id: "vacuna-panleucopenia",
+        name: "Vacuna Panleucopenia",
+        description: "Información de la vacuna contra Panleucopenia",
+        fields: [
+          { key: "Textbox15", label: "Nombre de la vacuna", type: "manual", placeholder: "Nombre de la vacuna" },
+          { key: "Textbox16", label: "Laboratorio", type: "manual", placeholder: "Laboratorio" },
+          { key: "Textbox17", label: "Número de serie", type: "manual", placeholder: "Número de serie" },
+          { key: "Textbox18", label: "Fecha de vacunación", type: "manual", placeholder: "DD/MM/YYYY" },
+          { key: "Textbox19", label: "Fecha de vigencia", type: "manual", placeholder: "DD/MM/YYYY" },
+        ],
+        collapsed: true,
+      },
+      {
+        id: "vacuna-rinotraqueitis",
+        name: "Vacuna Rinotraqueítis",
+        description: "Información de la vacuna contra Rinotraqueítis",
+        fields: [
+          { key: "Textbox20", label: "Nombre de la vacuna", type: "manual", placeholder: "Nombre de la vacuna" },
+          { key: "Textbox21", label: "Laboratorio", type: "manual", placeholder: "Laboratorio" },
+          { key: "Textbox22", label: "Número de serie", type: "manual", placeholder: "Número de serie" },
+          { key: "Textbox23", label: "Fecha de vacunación", type: "manual", placeholder: "DD/MM/YYYY" },
+          { key: "Textbox24", label: "Fecha de vigencia", type: "manual", placeholder: "DD/MM/YYYY" },
+        ],
+        collapsed: true,
+      },
+      {
+        id: "vacuna-calicivirus",
+        name: "Vacuna Calicivirus",
+        description: "Información de la vacuna contra Calicivirus",
+        fields: [
+          { key: "Textbox25", label: "Nombre de la vacuna", type: "manual", placeholder: "Nombre de la vacuna" },
+          { key: "Textbox26", label: "Laboratorio", type: "manual", placeholder: "Laboratorio" },
+          { key: "Textbox27", label: "Número de serie", type: "manual", placeholder: "Número de serie" },
+          { key: "Textbox28", label: "Fecha de vacunación", type: "manual", placeholder: "DD/MM/YYYY" },
+          { key: "Textbox29", label: "Fecha de vigencia", type: "manual", placeholder: "DD/MM/YYYY" },
+        ],
+        collapsed: true,
+      },
+      {
+        id: "vacuna-antirrabica",
+        name: "Vacuna Antirrábica",
+        description: "Información de la vacuna Antirrábica",
+        fields: [
+          { key: "Textbox30", label: "Nombre de la vacuna", type: "manual", placeholder: "Nombre de la vacuna" },
+          { key: "Textbox31", label: "Laboratorio", type: "manual", placeholder: "Laboratorio" },
+          { key: "Textbox32", label: "Número de serie", type: "manual", placeholder: "Número de serie" },
+          { key: "Textbox33", label: "Fecha de vacunación", type: "manual", placeholder: "DD/MM/YYYY" },
+          { key: "Textbox34", label: "Fecha de vigencia", type: "manual", placeholder: "DD/MM/YYYY" },
+        ],
+        collapsed: true,
+      },
+      {
+        id: "desparasitacion-interna",
+        name: "Desparasitación Interna",
+        description: "Información de la desparasitación interna",
+        fields: [
+          { key: "Textbox35", label: "Nombre del producto", type: "manual", placeholder: "Nombre comercial" },
+          { key: "Textbox36", label: "Laboratorio", type: "manual", placeholder: "Laboratorio" },
+          { key: "Textbox37", label: "Principio activo", type: "manual", placeholder: "Principio activo" },
+          { key: "Textbox38", label: "Lote", type: "manual", placeholder: "Lote" },
+          { key: "Textbox39", label: "Fecha de desparasitación", type: "manual", placeholder: "DD/MM/YYYY" },
+          { key: "Textbox40", label: "Hora de aplicación", type: "manual", placeholder: "HH:MM" },
+        ],
+        collapsed: true,
+      },
+      {
+        id: "desparasitacion-externa",
+        name: "Desparasitación Externa",
+        description: "Información de la desparasitación externa",
+        fields: [
+          { key: "Textbox41", label: "Nombre del producto", type: "manual", placeholder: "Nombre comercial" },
+          { key: "Textbox42", label: "Laboratorio", type: "manual", placeholder: "Laboratorio" },
+          { key: "Textbox43", label: "Principio activo", type: "manual", placeholder: "Principio activo" },
+          { key: "Textbox44", label: "Lote", type: "manual", placeholder: "Lote" },
+          { key: "Textbox45", label: "Fecha de desparasitación", type: "manual", placeholder: "DD/MM/YYYY" },
+          { key: "Textbox46", label: "Hora de aplicación", type: "manual", placeholder: "HH:MM" },
+        ],
+        collapsed: true,
+      },
+      {
+        id: "fechas-certificado",
+        name: "Fechas del Certificado",
+        description: "Fechas de inspección y emisión del certificado",
+        fields: [
+          { key: "Textbox14", label: "Fecha de inspección física", type: "manual", placeholder: "DD/MM/YYYY" },
+          { key: "Textbox47", label: "Fecha de emisión del certificado", type: "auto", source: ({ now }) => formatFechaDDMMYYYY(now) },
+        ],
+        collapsed: true,
       },
     ],
     acroFieldAlias: (() => {
       const map: Record<string, string> = {};
-      for (let i = 1; i <= 10; i++) {
+      for (let i = 1; i <= 47; i++) {
         map[`Texbox${i}`] = `Textbox${i}`;
+        map[`Textbox${i}`] = `Textbox${i}`;
       }
       return map;
     })(),

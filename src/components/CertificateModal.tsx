@@ -150,6 +150,7 @@ export default function CertificateModal({
       template.id !== 6 &&
       template.id !== 7 &&
       template.id !== 8 &&
+      template.id !== 9 &&
       template.id !== 10 &&
       (!veterinarioId || veterinarioId.trim() === "")
     ) {
@@ -188,6 +189,7 @@ export default function CertificateModal({
       template.id !== 6 &&
       template.id !== 7 &&
       template.id !== 8 &&
+      template.id !== 9 &&
       template.id !== 10 &&
       (!veterinarioId || veterinarioId.trim() === "")
     ) {
