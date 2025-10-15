@@ -317,221 +317,210 @@ export default function ProductosForm() {
   }
 
   return (
-    <div className="space-y-8 max-w-[90rem] mx-auto">
-      <div className="relative overflow-hidden rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />
-        <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">{editing ? "Editar Producto" : "Crear un Producto"}</h2>
-          <form onSubmit={editing ? (e) => { e.preventDefault(); handleUpdate(); } : handleSubmit}>
-            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Información Básica</h3>
+    <div className="space-y-6">
+      {/* Formulario principal: estilo tarjetas Stock */}
+      <div className="bg-white rounded-xl shadow p-5">
+        <h2 className="text-xl font-bold mb-4">{editing ? "Editar Producto" : "Crear un Producto"}</h2>
+        <form onSubmit={editing ? (e) => { e.preventDefault(); handleUpdate(); } : handleSubmit} className="space-y-6">
+          <div>
+            <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Información Básica</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Nombre *</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  placeholder="Ej: Alimento Premium para Perros"
+                />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                <div>
-                  <label className="block font-medium">Nombre *</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
-                    placeholder="Ej: Alimento Premium para Perros"
-                  />
-                </div>
-                <div>
-                  <label className="block font-medium">SKU *</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
-                    value={sku}
-                    onChange={(e) => setSku(e.target.value)}
-                    placeholder="Ej: ALI-PER-001"
-                  />
-                </div>
-              </div>
-              <div className="mt-4">
-                <label className="block font-medium">Descripción *</label>
-                <textarea
-                  className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white min-h-[120px]"
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                  placeholder="Describe el producto..."
+              <div>
+                <label className="block text-sm font-medium text-gray-700">SKU *</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={sku}
+                  onChange={(e) => setSku(e.target.value)}
+                  placeholder="Ej: ALI-PER-001"
                 />
               </div>
             </div>
-
-            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Precio y Stock</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
-                <div>
-                  <label className="block font-medium">Precio (CLP) *</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
-                    value={precio}
-                    onChange={(e) => setPrecio(e.target.value)}
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label className="block font-medium">Stock *</label>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label className="block font-medium">Categoría</label>
-                  <select
-                    className="w-full rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
-                    value={categoria}
-                    onChange={(e) => setCategoria(e.target.value)}
-                  >
-                    <option value="">Selecciona categoría</option>
-                    <option value="Alimentos">Alimentos</option>
-                    <option value="Medicamentos">Medicamentos</option>
-                    <option value="Accesorios">Accesorios</option>
-                  </select>
-                </div>
-              </div>
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700">Descripción *</label>
+              <textarea
+                className="w-full px-3 py-2 border rounded-md min-h-[120px]"
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                placeholder="Describe el producto..."
+              />
             </div>
+          </div>
 
-            <div className="rounded-xl ring-1 ring-gray-200 p-4 bg-white/90 mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Imágenes del Producto</h3>
+          <div>
+            <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Precio y Stock</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Precio (CLP) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={precio}
+                  onChange={(e) => setPrecio(e.target.value)}
+                  placeholder="0"
+                />
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-3">
-                <div>
-                  <label className="block font-medium">Imagen Principal</label>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <input 
-                      aria-label="Subir imagen principal del producto" 
-                      className="block w-full sm:w-auto rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        setImageFile(file);
-                        setImagePreview(file ? URL.createObjectURL(file) : null);
-                      }}
-                    />
-                    {imagePreview && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
-
-                  <div className="mt-8">
-                <div className="flex items-center gap-2">
-                  <div>
-                    <label className="block font-medium mb-1">Público</label>
-                    <button
-                      type="button"
-                      aria-pressed={publico}
-                      onClick={() => setPublico(!publico)}
-                      className={`relative inline-flex items-center h-8 rounded-full w-14 transition-colors ${publico ? 'bg-emerald-600' : 'bg-gray-300'}`}
-                      title="Marcar si el producto es público"
-                    >
-                      <span
-                        className={`inline-block w-7 h-7 transform bg-white rounded-full shadow transition-transform ${publico ? 'translate-x-6' : 'translate-x-1'}`}
-                      />
-                    </button>
-                  </div>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Stock *</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  placeholder="0"
+                />
               </div>
-                </div>
-
-                <div>
-                  <label className="block font-medium">Imágenes adicionales (hasta 3)</label>
-                  <div className="grid grid-cols-1 gap-3 mt-1">
-                    {[0,1,2].map((idx) => (
-                      <div key={idx} className="flex items-center gap-3 flex-wrap">
-                        <input 
-                          className="block w-full sm:w-auto rounded-lg border border-indigo-300/70 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 bg-white"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0] || null;
-                            setExtraFiles((prev) => {
-                              const next = [...prev];
-                              next[idx] = file;
-                              return next;
-                            });
-                            setExtraPreviews((prev) => {
-                              const next = [...prev];
-                              next[idx] = file ? URL.createObjectURL(file) : prev[idx];
-                              return next;
-                            });
-                          }}
-                        />
-                        {(extraPreviews[idx]) && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={extraPreviews[idx] as string} alt={`extra-${idx+1}`} className="w-16 h-16 object-cover rounded border shrink-0" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">Opcional. Se reemplazarán si subes nuevas al editar.</p>
-                </div>
-              </div>
-            </div>
-            
-            {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
-            {success && <p className="text-sm text-green-600 mt-3">{success}</p>}
-
-            <div className="flex items-center gap-2 mt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${loading ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700'}`}
-              >
-                {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar" : "Crear Producto")}
-              </button>
-              
-              {editing && (
-                <button 
-                  type="button" 
-                  className="px-3 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50" 
-                  onClick={() => {
-                    setEditing(null);
-                    setNombre("");
-                    setDescripcion("");
-                    setPrecio("");
-                    setSku("");
-                    setCategoria("");
-                    setStock("");
-                    setPublico(false);
-                    setImageFile(null);
-                    setImagePreview(null);
-                    setExtraFiles([null, null, null]);
-                    setExtraPreviews([null, null, null]);
-                  }}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Categoría</label>
+                <select
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={categoria}
+                  onChange={(e) => setCategoria(e.target.value)}
                 >
-                  Cancelar
-                </button>
-              )}
+                  <option value="">Selecciona categoría</option>
+                  <option value="Alimentos">Alimentos</option>
+                  <option value="Medicamentos">Medicamentos</option>
+                  <option value="Accesorios">Accesorios</option>
+                </select>
+              </div>
             </div>
-          </form>
-        </div>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Imágenes del Producto</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Imagen Principal</label>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <input 
+                    aria-label="Subir imagen principal del producto" 
+                    className="block w-full sm:w-auto px-3 py-2 border rounded-md"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setImageFile(file);
+                      setImagePreview(file ? URL.createObjectURL(file) : null);
+                    }}
+                  />
+                  {imagePreview && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
+
+                <div className="mt-8">
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Público</label>
+                      <button
+                        type="button"
+                        aria-pressed={publico}
+                        onClick={() => setPublico(!publico)}
+                        className={`relative inline-flex items-center h-8 rounded-full w-14 transition-colors ${publico ? 'bg-emerald-600' : 'bg-gray-300'}`}
+                        title="Marcar si el producto es público"
+                      >
+                        <span
+                          className={`inline-block w-7 h-7 transform bg-white rounded-full shadow transition-transform ${publico ? 'translate-x-6' : 'translate-x-1'}`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Imágenes adicionales (hasta 3)</label>
+                <div className="grid grid-cols-1 gap-3 mt-1">
+                  {[0,1,2].map((idx) => (
+                    <div key={idx} className="flex items-center gap-3 flex-wrap">
+                      <input 
+                        className="block w-full sm:w-auto px-3 py-2 border rounded-md"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setExtraFiles((prev) => {
+                            const next = [...prev];
+                            next[idx] = file;
+                            return next;
+                          });
+                          setExtraPreviews((prev) => {
+                            const next = [...prev];
+                            next[idx] = file ? URL.createObjectURL(file) : prev[idx];
+                            return next;
+                          });
+                        }}
+                      />
+                      {(extraPreviews[idx]) && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={extraPreviews[idx] as string} alt={`extra-${idx+1}`} className="w-16 h-16 object-cover rounded border shrink-0" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Opcional. Se reemplazarán si subes nuevas al editar.</p>
+              </div>
+            </div>
+          </div>
+
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          {success && <p className="text-sm text-green-600">{success}</p>}
+
+          <div className="flex items-center gap-2 pt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className={`px-5 py-2 rounded-md ${loading ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-emerald-600 hover:bg-emerald-700'}`}
+            >
+              {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar Producto" : "Guardar Producto")}
+            </button>
+            {editing && (
+              <button 
+                type="button" 
+                className="px-4 py-2 rounded-md border" 
+                onClick={() => {
+                  setEditing(null);
+                  setNombre("");
+                  setDescripcion("");
+                  setPrecio("");
+                  setSku("");
+                  setCategoria("");
+                  setStock("");
+                  setPublico(false);
+                  setImageFile(null);
+                  setImagePreview(null);
+                  setExtraFiles([null, null, null]);
+                  setExtraPreviews([null, null, null]);
+                }}
+              >
+                Cancelar
+              </button>
+            )}
+          </div>
+        </form>
       </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Productos</h3>
-        {/* Filtros */}
+      {/* Listado de productos con filtros al estilo Stock */}
+      <div className="bg-white rounded-xl shadow p-5">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex flex-wrap items-center gap-3">
             <label className="text-sm font-medium text-gray-700">Filtrar:</label>
             <div className="flex flex-wrap gap-2">
-              {/* Estados */}
               {[
                 { key: 'Agotados', label: 'Agotados' },
                 { key: 'Disponibles', label: 'Disponibles' },
@@ -541,7 +530,7 @@ export default function ProductosForm() {
                   <button
                     key={key}
                     type="button"
-                    className={`px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                     onClick={() => {
                       setSelectedEstados((prev) => prev.includes(key) ? prev.filter((v) => v !== key) : [...prev, key]);
                     }}
@@ -551,7 +540,6 @@ export default function ProductosForm() {
                   </button>
                 );
               })}
-              {/* Categorías */}
               {[
                 { key: 'Alimentos', label: 'Alimentos' },
                 { key: 'Medicamentos', label: 'Medicamentos' },
@@ -562,7 +550,7 @@ export default function ProductosForm() {
                   <button
                     key={key}
                     type="button"
-                    className={`px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                     onClick={() => {
                       setSelectedCategorias((prev) => prev.includes(key) ? prev.filter((v) => v !== key) : [...prev, key]);
                     }}
@@ -579,25 +567,25 @@ export default function ProductosForm() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-64 border rounded px-2 py-1"
+              className="w-64 px-3 py-2 border rounded-lg"
               placeholder="Buscar por nombre o SKU"
             />
             <div className="text-sm text-gray-600">
               <span className="font-medium">{
-              (() => {
-                const filtered = productos.filter((p) => {
-                  const estadoOk = selectedEstados.length === 0 || selectedEstados.some((s) => (
-                    (s === 'Agotados' && (p.stock || 0) === 0) ||
-                    (s === 'Disponibles' && (p.stock || 0) > 0)
-                  ));
-                  const categoriaOk = selectedCategorias.length === 0 || selectedCategorias.includes(p.categoria || '')
-                  const q = search.trim().toLowerCase();
-                  const searchOk = q.length === 0 || (p.nombre || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q);
-                  return estadoOk && categoriaOk && searchOk;
-                });
-                return filtered.length;
-              })()
-            }</span> ítem(s)
+                (() => {
+                  const filtered = productos.filter((p) => {
+                    const estadoOk = selectedEstados.length === 0 || selectedEstados.some((s) => (
+                      (s === 'Agotados' && (p.stock || 0) === 0) ||
+                      (s === 'Disponibles' && (p.stock || 0) > 0)
+                    ));
+                    const categoriaOk = selectedCategorias.length === 0 || selectedCategorias.includes(p.categoria || '')
+                    const q = search.trim().toLowerCase();
+                    const searchOk = q.length === 0 || (p.nombre || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q);
+                    return estadoOk && categoriaOk && searchOk;
+                  });
+                  return filtered.length;
+                })()
+              }</span> ítem(s)
             </div>
           </div>
         </div>
