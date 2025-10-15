@@ -9,6 +9,7 @@ export type AutoContext = {
     especie: boolean | null;
     raza?: string | null;
     sexo?: boolean | null;
+    color?: string | null;
     fecha_nacimiento?: string | null; // YYYY-MM-DD
   };
   propietario: {
@@ -46,6 +47,76 @@ function formatFechaDDMMYYYY(d: Date) {
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const yyyy = d.getFullYear();
   return `${dd}/${mm}/${yyyy}`;
+}
+
+// Translation functions for English certificates
+export function translateToEnglish(text: string): string {
+  const translations: Record<string, string> = {
+    // Species
+    "Perro": "Dog",
+    "Gato": "Cat",
+    "perro": "dog",
+    "gato": "cat",
+    
+    // Gender
+    "Macho": "Male",
+    "Hembra": "Female",
+    "macho": "male", 
+    "hembra": "female",
+    
+    // Common terms
+    "Nombre": "Name",
+    "Especie": "Species",
+    "Raza": "Breed",
+    "Sexo": "Gender",
+    "Edad": "Age",
+    "Color": "Color",
+    "Peso": "Weight",
+    "Microchip": "Microchip",
+    "Fecha": "Date",
+    "Dirección": "Address",
+    "Teléfono": "Phone",
+    "Propietario": "Owner",
+    "Mascota": "Pet",
+    "Animal": "Animal",
+    
+    // Vaccines
+    "Vacuna": "Vaccine",
+    "Laboratorio": "Laboratory",
+    "Serie": "Serial",
+    "Vacunación": "Vaccination",
+    "Vigencia": "Validity",
+    "Producto": "Product",
+    
+    // Deworming
+    "Desparasitación": "Deworming",
+    "Interna": "Internal",
+    "Externa": "External",
+    "Principio activo": "Active ingredient",
+    "Lote": "Batch",
+    "Hora": "Time",
+    
+    // Dates
+    "Enero": "January",
+    "Febrero": "February", 
+    "Marzo": "March",
+    "Abril": "April",
+    "Mayo": "May",
+    "Junio": "June",
+    "Julio": "July",
+    "Agosto": "August",
+    "Septiembre": "September",
+    "Octubre": "October",
+    "Noviembre": "November",
+    "Diciembre": "December"
+  };
+  
+  let translated = text;
+  for (const [spanish, english] of Object.entries(translations)) {
+    translated = translated.replace(new RegExp(spanish, 'gi'), english);
+  }
+  
+  return translated;
 }
 
 function calcularEdadDesde(fechaYYYYMMDD?: string | null): string {
@@ -270,8 +341,8 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
       {
         key: "Texbox7",
         label: "Color de la mascota",
-        type: "manual",
-        placeholder: "Ingrese el color de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.color || "",
       },
       {
         key: "Texbox8",
@@ -446,8 +517,8 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
           {
             key: "Textbox6",
             label: "Color del pelaje o del animal",
-            type: "manual",
-            placeholder: "Ingrese el color del animal",
+            type: "auto",
+            source: ({ paciente }) => paciente.color || "",
           },
           {
             key: "Textbox8",
@@ -881,8 +952,8 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
       {
         key: "Texbox5",
         label: "Color de la mascota",
-        type: "manual",
-        placeholder: "Ingrese el color de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.color || "",
       },
       {
         key: "Texbox6",
@@ -1215,8 +1286,8 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
       {
         key: "Texbox12",
         label: "Color de la mascota",
-        type: "manual",
-        placeholder: "Ingrese el color de la mascota",
+        type: "auto",
+        source: ({ paciente }) => paciente.color || "",
       },
       {
         key: "Texbox13",
@@ -1309,7 +1380,7 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
         fields: [
           { key: "Textbox3",  label: "Número de microchip", type: "manual", placeholder: "Ingrese el N° de microchip" },
           { key: "Textbox4",  label: "Especie del animal", type: "auto", source: ({ paciente }) => especieTexto(paciente.especie) },
-          { key: "Textbox5",  label: "Color del animal", type: "manual", placeholder: "Ingrese el color" },
+          { key: "Textbox5",  label: "Color del animal", type: "auto", source: ({ paciente }) => paciente.color || "" },
           { key: "Textbox8",  label: "Fecha de aplicación del microchip", type: "manual", placeholder: "DD/MM/YYYY" },
           { key: "Textbox9",  label: "Sitio de aplicación del microchip", type: "manual", placeholder: "Ej: subcutáneo, escapular izq., etc." },
         ],
@@ -1466,8 +1537,8 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
       {
         key: "Textbox8",
         label: "Color del animal",
-        type: "manual",
-        placeholder: "Ingrese el color del pelaje o del animal",
+        type: "auto",
+        source: ({ paciente }) => paciente.color || "",
       },
       {
         key: "Textbox9",
@@ -1523,10 +1594,10 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
     fields: [
       // 🐾 Identificación del animal (auto)
       { key: "Textbox1",  label: "Nombre de la mascota", type: "auto", source: ({ paciente }) => paciente.nombre || "" },
-      { key: "Textbox2",  label: "Especie del animal", type: "auto", source: ({ paciente }) => especieTexto(paciente.especie) },
+      { key: "Textbox2",  label: "Especie del animal", type: "auto", source: ({ paciente }) => translateToEnglish(especieTexto(paciente.especie)) },
       { key: "Textbox3",  label: "Edad de la mascota", type: "auto", source: ({ paciente }) => calcularEdadDesde(paciente.fecha_nacimiento) },
       { key: "Textbox6",  label: "Raza de la mascota", type: "auto", source: ({ paciente }) => paciente.raza || "" },
-      { key: "Textbox5",  label: "Sexo de la mascota", type: "auto", source: ({ paciente }) => sexoTexto(paciente.sexo) },
+      { key: "Textbox5",  label: "Sexo de la mascota", type: "auto", source: ({ paciente }) => translateToEnglish(sexoTexto(paciente.sexo)) },
 
       // 👤 Identificación del propietario (auto)
       { key: "Textbox11", label: "Nombre del propietario", type: "auto", source: ({ propietario }) => [propietario?.nombre || "", propietario?.apellido || ""].filter(Boolean).join(" ") },
@@ -1544,7 +1615,7 @@ export const certificateTemplates: Record<string, CertificateTemplate> = {
         description: "Información física de la mascota y datos del microchip",
         fields: [
           { key: "Textbox7",  label: "Peso de la mascota", type: "manual", placeholder: "Ingrese el peso en kg" },
-          { key: "Textbox4",  label: "Color de la mascota", type: "manual", placeholder: "Ingrese el color" },
+          { key: "Textbox4",  label: "Color de la mascota", type: "auto", source: ({ paciente }) => translateToEnglish(paciente.color || "") },
           { key: "Textbox8",  label: "Número de microchip", type: "manual", placeholder: "Ingrese el N° de microchip" },
           { key: "Textbox9",  label: "Fecha de aplicación del microchip", type: "manual", placeholder: "DD/MM/YYYY" },
           { key: "Textbox10", label: "Sitio de aplicación del microchip", type: "manual", placeholder: "Ej: subcutáneo, escapular izq., etc." },

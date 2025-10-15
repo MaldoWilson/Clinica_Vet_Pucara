@@ -12,6 +12,7 @@ type PacienteCompact = {
   especie: boolean | null;
   raza?: string | null;
   sexo?: boolean | null;
+  color?: string | null;
   fecha_nacimiento?: string | null;
   propietario?: { 
     nombre?: string | null; 
@@ -71,6 +72,7 @@ export default function CertificateModal({
       especie: paciente.especie,
       raza: paciente.raza,
       sexo: paciente.sexo,
+      color: paciente.color,
       fecha_nacimiento: paciente.fecha_nacimiento,
     },
     propietario: paciente.propietario ?? null,

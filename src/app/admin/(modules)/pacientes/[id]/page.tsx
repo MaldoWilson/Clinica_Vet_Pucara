@@ -288,6 +288,7 @@ export default function PacienteDetailPage() {
       especie: especie,
       raza: data?.raza ?? null,
       sexo: data?.sexo ?? null,
+      color: data?.color ?? null,
       fecha_nacimiento: data?.fecha_nacimiento ?? null,
       propietario: data?.propietario ? { 
         nombre: data.propietario.nombre || "", 
