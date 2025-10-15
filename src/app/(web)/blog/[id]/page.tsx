@@ -57,6 +57,61 @@ export default function BlogDetailPage() {
     });
   };
 
+  // Render Markdown simple (mismo formato que vista previa del admin)
+  function escapeHtml(s: string) {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function applyInline(md: string) {
+    let out = md;
+    out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    out = out.replace(/_(.+?)_/g, "<em>$1</em>");
+    out = out.replace(/`([^`]+)`/g, "<code class=\"px-1 py-0.5 bg-gray-200 rounded\">$1</code>");
+    return out;
+  }
+
+  function renderMarkdown(md: string) {
+    const lines = (md || "").split(/\r?\n/);
+    const html: string[] = [];
+    let inList = false;
+    for (const raw of lines) {
+      const h1 = raw.match(/^#\s+(.+)/);
+      const h2 = raw.match(/^##\s+(.+)/);
+      const h3 = raw.match(/^###\s+(.+)/);
+      if (/^\s*-\s+/.test(raw)) {
+        if (!inList) {
+          html.push('<ul class="list-disc pl-6 mb-2">');
+          inList = true;
+        }
+        const item = applyInline(escapeHtml(raw.replace(/^\s*-\s+/, "")));
+        html.push(`<li>${item}</li>`);
+        continue;
+      } else if (inList) {
+        html.push('</ul>');
+        inList = false;
+      }
+
+      if (h3) {
+        html.push(`<h3 class=\"text-lg font-semibold mt-3\">${applyInline(escapeHtml(h3[1]))}</h3>`);
+      } else if (h2) {
+        html.push(`<h2 class=\"text-xl font-bold mt-3\">${applyInline(escapeHtml(h2[1]))}</h2>`);
+      } else if (h1) {
+        html.push(`<h1 class=\"text-2xl font-bold mt-3\">${applyInline(escapeHtml(h1[1]))}</h1>`);
+      } else if (raw.trim() === "") {
+        html.push('<div class="h-2"></div>');
+      } else {
+        html.push(`<p class=\"mb-2 leading-relaxed\">${applyInline(escapeHtml(raw))}</p>`);
+      }
+    }
+    if (inList) html.push('</ul>');
+    return html.join("");
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
@@ -187,12 +242,9 @@ export default function BlogDetailPage() {
             )}
           </header>
 
-          <div className="prose prose-lg max-w-none">
-            <div 
-              className="text-gray-700 leading-relaxed whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ 
-                __html: blog.contenido.replace(/\n/g, '<br>') 
-              }}
+          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+            <div
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(blog.contenido) }}
             />
           </div>
         </article>

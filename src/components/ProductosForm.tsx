@@ -485,7 +485,7 @@ export default function ProductosForm() {
             <button
               type="submit"
               disabled={loading}
-              className={`px-5 py-2 rounded-md ${loading ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-emerald-600 hover:bg-emerald-700'}`}
+              className={`px-5 py-2 rounded-md ${loading ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700'}`}
             >
               {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar Producto" : "Guardar Producto")}
             </button>

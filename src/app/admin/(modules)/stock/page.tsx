@@ -474,7 +474,6 @@ export default function StockPage() {
             </ResponsiveContainer>
           </div>
         )}
-        <p className="mt-2 text-xs text-gray-500">Datos de uso simulados (no persistidos).</p>
       </div>
 
       {/* Alertas */}
