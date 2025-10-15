@@ -177,7 +177,7 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`${common} transition-colors ${active ? "bg-indigo-400 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+              className={`${common} transition-colors ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
             >
               {item.icon}
               <span>{item.label}</span>
@@ -205,7 +205,7 @@ export default function AdminSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${common} transition-colors ${active ? "bg-indigo-400 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+                className={`${common} transition-colors ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -224,7 +224,7 @@ export default function AdminSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${common} transition-colors ${active ? "bg-indigo-400 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+                className={`${common} transition-colors ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
               >
                 {item.icon}
                 <span>{item.label}</span>
