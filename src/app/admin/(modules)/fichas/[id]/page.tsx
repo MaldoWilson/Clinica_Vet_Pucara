@@ -2311,6 +2311,12 @@ body * {
               templateMeta={{ id: selectedCert.id, nombre_archivo: selectedCert.nombre_archivo, url_archivo: selectedCert.url_archivo }}
               paciente={pacienteForCert}
               veterinarios={veterinarios.map(v => ({ id: String(v.id), nombre: v.nombre }))}
+              consulta={{
+                diagnostico: consultaForm.diagnostico,
+                tratamiento: consultaForm.tratamiento,
+                observaciones: consultaForm.observaciones,
+                proximo_control: consultaForm.proximo_control || undefined,
+              }}
             />
           )}
 

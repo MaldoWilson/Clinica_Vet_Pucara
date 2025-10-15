@@ -30,12 +30,14 @@ export default function CertificateModal({
   templateMeta,
   paciente,
   veterinarios,
+  consulta,
 }: {
   open: boolean;
   onClose: () => void;
   templateMeta: { id: number; nombre_archivo: string; url_archivo: string } | null;
   paciente: PacienteCompact;
   veterinarios: Veterinario[];
+  consulta?: { diagnostico?: string; tratamiento?: string; observaciones?: string; proximo_control?: string | null; peso?: string | null; alimentacion?: string | null } | null;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -138,9 +140,20 @@ export default function CertificateModal({
         }
       }
     }
+
+    // Autorrelleno especial: Certificado ID 5 desde la última consulta
+    if (template.id === 5 && consulta) {
+      // Mostrar en Datos Automáticos (conversión a campos auto en template)
+      if (consulta.diagnostico) base["Texbox6"] = consulta.diagnostico;
+      if (consulta.tratamiento) base["Texbox7"] = consulta.tratamiento;
+      if (consulta.observaciones) base["Texbox8"] = consulta.observaciones;
+      if (consulta.proximo_control) base["Texbox9"] = consulta.proximo_control || "";
+      if (base["Texbox11"] === "" && consulta.peso) base["Texbox11"] = consulta.peso || "";
+      if (base["Texbox12"] === "" && consulta.alimentacion) base["Texbox12"] = consulta.alimentacion || "";
+    }
     
     return base;
-  }, [template, autoContext, manualValues, veterinarioId, veterinarios, examenesPrequirurgicos]);
+  }, [template, autoContext, manualValues, veterinarioId, veterinarios, examenesPrequirurgicos, consulta]);
 
   async function handleDownload() {
     if (!template || !templateMeta) return;
