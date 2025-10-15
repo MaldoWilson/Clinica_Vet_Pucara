@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { normalizeRutPlain, formatRutPretty } from "@/lib/rut";
+import FichaCreateModal from "@/components/FichaCreateModal";
 
 // Componente skeleton para tarjetas de pacientes
 function PacienteSkeletonCard() {
@@ -61,13 +62,15 @@ type Paciente = {
   } | null;
 };
 
-export default function PacientesPage() {
+export default function FichasPage() {
   const [search, setSearch] = useState("");
   const [especieFilter, setEspecieFilter] = useState<string>(""); // "" = todos, "gato" = gatos, "perro" = perros
   const [loading, setLoading] = useState(true); // Iniciar en true para mostrar skeletons
   const [items, setItems] = useState<Paciente[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [speciesOpen, setSpeciesOpen] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
 
   async function fetchPacientes(query: string, p: number = 1) {
     setLoading(true);
@@ -113,13 +116,21 @@ export default function PacientesPage() {
   const showSkeletons = loading;
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Pacientes</h1>
-        <p className="text-gray-600 mt-1">Listado de mascotas y sus propietarios</p>
+    <div className="space-y-6 px-4 py-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Fichas</h1>
+          <p className="text-gray-600">Listado de fichas y propietarios</p>
+        </div>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="px-5 py-3 rounded-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700"
+        >
+          + Crear Ficha
+        </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border p-4 md:p-6 mb-6">
+      <div className="bg-white rounded-xl shadow p-4">
         <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
           <div className="flex-1">
             <div className="flex gap-3">
@@ -127,29 +138,60 @@ export default function PacientesPage() {
                 <input
                   type="text"
                   placeholder="Buscar: mascota, propietario, RUT, sexo, raza, teléfono, dirección"
-                  className="w-full border rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border rounded-md pr-24"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') fetchPacientes(search, 1); }}
                 />
                 <button
-                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
                   onClick={() => fetchPacientes(search, 1)}
                   title="Buscar"
                 >
                   Buscar
                 </button>
               </div>
-              <div className="flex-shrink-0">
-                <select
-                  value={especieFilter}
-                  onChange={(e) => setEspecieFilter(e.target.value)}
-                  className="border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+              <div className="flex-shrink-0 relative">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-between gap-2 px-3 py-2 border rounded-lg bg-white min-w-[140px]"
+                  onClick={() => setSpeciesOpen((o) => !o)}
+                  aria-haspopup="listbox"
+                  aria-expanded={speciesOpen}
                 >
-                  <option value="">Todos</option>
-                  <option value="gato">Gatos</option>
-                  <option value="perro">Perros</option>
-                </select>
+                  <span className="text-sm text-gray-700">
+                    {especieFilter === '' ? 'Todos' : especieFilter === 'gato' ? 'Gatos' : 'Perros'}
+                  </span>
+                  <svg className={`w-4 h-4 text-gray-500 transition-transform ${speciesOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.585l3.71-3.355a.75.75 0 111.02 1.1l-4.22 3.815a.75.75 0 01-1.02 0L5.25 8.33a.75.75 0 01-.02-1.06z" clipRule="evenodd"/></svg>
+                </button>
+                {speciesOpen && (
+                  <div className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow border z-10 overflow-hidden" role="listbox">
+                    {[
+                      { key: '', label: 'Todos' },
+                      { key: 'gato', label: 'Gatos' },
+                      { key: 'perro', label: 'Perros' },
+                    ].map((opt) => {
+                      const active = especieFilter === opt.key;
+                      return (
+                        <button
+                          type="button"
+                          key={opt.key || 'all'}
+                          className={`w-full text-left px-3 py-2 text-sm hover:bg-indigo-50 ${active ? 'bg-indigo-500 text-white' : 'text-gray-700'}`}
+                          onClick={() => { setEspecieFilter(opt.key); setSpeciesOpen(false); }}
+                          role="option"
+                          aria-selected={active}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span>{opt.label}</span>
+                            {active && (
+                              <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.071 7.071a1 1 0 01-1.414 0L3.293 8.85a1 1 0 011.414-1.414l3.121 3.121 6.364-6.364a1 1 0 011.415 0z" clipRule="evenodd"/></svg>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -158,6 +200,10 @@ export default function PacientesPage() {
           </div>
         </div>
       </div>
+
+      {showCreate && (
+        <FichaCreateModal isOpen={showCreate} onClose={() => setShowCreate(false)} onSaved={() => fetchPacientes("", 1)} />
+      )}
 
       <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {showSkeletons ? (

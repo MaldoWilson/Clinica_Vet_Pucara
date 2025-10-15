@@ -72,15 +72,13 @@ const modules = [
     ),
   },
   {
-    title: "Fichas de Mascotas",
+    title: "Fichas",
     href: "/admin/fichas",
-    desc: "Registros médicos",
-    bg: "bg-purple-50",
-    color: "text-purple-600",
+    desc: "Crear fichas y ver mascotas",
+    bg: "bg-rose-50",
+    color: "text-rose-600",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-      </svg>
+      <span className="text-lg leading-none">🐾</span>
     ),
   },
   {
@@ -153,16 +151,6 @@ const modules = [
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M8 6h8a2 2 0 012 2v10a2 2 0 01-2 2H8l-4-4V8a2 2 0 012-2h2z" />
       </svg>
-    ),
-  },
-  {
-    title: "Pacientes",
-    href: "/admin/pacientes",
-    desc: "Mascotas registradas",
-    bg: "bg-rose-50",
-    color: "text-rose-600",
-    icon: (
-      <span className="text-lg leading-none">🐾</span>
     ),
   },
   {
