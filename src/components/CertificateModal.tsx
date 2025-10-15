@@ -152,6 +152,7 @@ export default function CertificateModal({
       template.id !== 8 &&
       template.id !== 9 &&
       template.id !== 10 &&
+      template.id !== 11 &&
       (!veterinarioId || veterinarioId.trim() === "")
     ) {
       alert("Debe elegir un veterinario antes de continuar.");
@@ -191,6 +192,7 @@ export default function CertificateModal({
       template.id !== 8 &&
       template.id !== 9 &&
       template.id !== 10 &&
+      template.id !== 11 &&
       (!veterinarioId || veterinarioId.trim() === "")
     ) {
       alert("Debe elegir un veterinario antes de continuar.");

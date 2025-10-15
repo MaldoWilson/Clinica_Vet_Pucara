@@ -20,11 +20,13 @@ export async function GET(_req: NextRequest) {
       .select("id, nombre_archivo, tipo_archivo, url_archivo, created_at")
       // Tolerante a mayúsculas/minúsculas y espacios/sufijos accidentales
       .ilike("tipo_archivo", "Certificado%")
-      .order("id", { ascending: true }); // Cambio el ordenamiento por ID en lugar de created_at
+      .order("id", { ascending: true }) // Cambio el ordenamiento por ID en lugar de created_at
+      .range(0, 999);
 
     console.log("🗄️ Consulta filtrada - archivos_adjuntos:");
+    console.log("📊 Datos encontrados (len):", data?.length);
     console.log("📊 Datos encontrados:", data);
-    console.log("🔍 Buscando específicamente ID 8, 9 y 10:", data?.filter(x => x.id == 8 || x.id == 9 || x.id == 10));
+    console.log("🔍 Buscando específicamente ID 8, 9, 10, 11:", data?.filter(x => x.id == 8 || x.id == 9 || x.id == 10 || x.id == 11));
     console.log("🔍 Verificando tipo_archivo para ID 10:", allData?.filter(x => x.id == 10));
     console.log("❌ Errores:", error);
 
