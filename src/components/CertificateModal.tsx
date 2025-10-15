@@ -226,7 +226,7 @@ export default function CertificateModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <div className="w-[95vw] max-w-2xl rounded-xl bg-white ring-1 ring-gray-200 shadow-xl overflow-hidden">
         <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
-          <div className="text-sm font-semibold text-gray-700">{template.name} · {templateMeta.nombre_archivo}</div>
+          <div className="text-sm font-semibold text-gray-700">Ficha N° {paciente.id} · {templateMeta.nombre_archivo}</div>
           <button onClick={onClose} className="p-2 rounded hover:bg-gray-100" title="Cerrar">✕</button>
         </div>
         <div className="p-4 space-y-4">

@@ -2161,38 +2161,6 @@ body * {
               {!consultaOpen ? (
                 <div className="flex items-center gap-3">
                   <button onClick={() => setConsultaOpen(true)} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">Generar consulta</button>
-                  <div className="relative">
-                    <button
-                      ref={certBtnRef}
-                      aria-haspopup="menu"
-                      aria-expanded={certMenuOpen}
-                      onClick={() => setCertMenuOpen((v) => !v)}
-                      className="px-5 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 shadow-sm"
-                    >
-                      Crear Certificados
-                    </button>
-                    {certMenuOpen && (
-                      <div ref={certMenuRef} className="absolute left-0 mt-2 w-80 rounded-xl bg-white ring-1 ring-gray-200 shadow-lg z-20 overflow-hidden">
-                        <div className="px-3 py-2 text-xs text-gray-500 border-b bg-gray-50">Certificados disponibles</div>
-                        <ul className="max-h-96 overflow-y-auto py-2">
-                          {certs.length === 0 ? (
-                            <li className="px-4 py-2 text-sm text-gray-500">No hay certificados</li>
-                          ) : (
-                            certs.map((c) => (
-                              <li key={c.id}>
-                                <button
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                  onClick={() => onSelectCert(c)}
-                                >
-                                  {c.nombre_archivo}
-                                </button>
-                              </li>
-                            ))
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
                 </div>
               ) : (
                 <div className="w-full max-w-4xl relative mt-16">
@@ -2257,6 +2225,44 @@ body * {
                     >
                       Crear receta
                     </button>
+                    <div className="relative">
+                      <button
+                        ref={certBtnRef}
+                        aria-haspopup="menu"
+                        aria-expanded={certMenuOpen}
+                        onClick={() => (ultimaConsultaId ? setCertMenuOpen((v) => !v) : null)}
+                        disabled={!ultimaConsultaId}
+                        className={`px-5 ml-5 py-2 rounded-lg text-white shadow-sm ${
+                          ultimaConsultaId 
+                            ? 'bg-purple-600 hover:bg-purple-700' 
+                            : 'bg-gray-400 cursor-not-allowed'
+                        }`}
+                        title={!ultimaConsultaId ? 'Debes crear una consulta primero' : 'Crear certificados'}
+                      >
+                        Crear certificados
+                      </button>
+                      {certMenuOpen && (
+                        <div ref={certMenuRef} className="absolute left-0 mt-2 w-80 rounded-xl bg-white ring-1 ring-gray-200 shadow-lg z-20 overflow-hidden">
+                          <div className="px-3 py-2 text-xs text-gray-500 border-b bg-gray-50">Certificados disponibles</div>
+                          <ul className="max-h-96 overflow-y-auto py-2">
+                            {certs.length === 0 ? (
+                              <li className="px-4 py-2 text-sm text-gray-500">No hay certificados</li>
+                            ) : (
+                              certs.map((c) => (
+                                <li key={c.id}>
+                                  <button
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                    onClick={() => onSelectCert(c)}
+                                  >
+                                    {c.nombre_archivo}
+                                  </button>
+                                </li>
+                              ))
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
 
                   </div>
                 </div>
