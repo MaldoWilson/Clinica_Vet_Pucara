@@ -11,6 +11,7 @@ type Cita = {
   tutor_telefono: string | null;
   tutor_email: string | null;
   mascota_nombre: string;
+  especie: boolean | null;
   notas: string | null;
   servicio_id: string | null;
   horario_id: string | null;
@@ -259,6 +260,7 @@ export default function AdminCitasTable({
                 <th className="text-left p-3 font-semibold">📆 Día de Servicio</th>
                 <th className="text-left p-3 font-semibold">👤 Tutor</th>
                 <th className="text-left p-3 font-semibold">🐾 Mascota</th>
+                <th className="text-left p-3 font-semibold">🧬 Especie</th>
                 <th className="text-left p-3 font-semibold">💊 Servicio</th>
                 <th className="text-left p-3 font-semibold">🕒 Horario</th>
                 <th className="text-left p-3 font-semibold">📊 Estado</th>
@@ -292,6 +294,7 @@ export default function AdminCitasTable({
                       </div>
                     </td>
                     <td className="p-3 font-medium">{c.mascota_nombre}</td>
+                    <td className="p-3">{c.especie === true ? "Gato" : c.especie === false ? "Perro" : "-"}</td>
                     <td className="p-3">{c.servicios?.nombre || "-"}</td>
                     <td className="p-3">
                       {c.horarios ? (() => {

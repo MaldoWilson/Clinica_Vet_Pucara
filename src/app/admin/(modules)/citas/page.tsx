@@ -16,7 +16,7 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
     .from("citas")
     .select(`
       id, estado, creado_en,
-      tutor_nombre, tutor_telefono, tutor_email, mascota_nombre, notas,
+      tutor_nombre, tutor_telefono, tutor_email, mascota_nombre, especie, notas,
       servicio_id, horario_id,
       servicios:servicios(nombre, duracion_min),
       horarios:horarios(inicio, fin)

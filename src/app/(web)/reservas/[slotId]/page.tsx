@@ -63,12 +63,14 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
     const tutorTelefono = String(f.get("tutorTelefono") || "");
     const tutorEmail = String(f.get("tutorEmail") || "");
     const mascotaNombre = String(f.get("mascotaNombre") || "");
+    const especieStr = String(f.get("especie") || "");
     const notas = String(f.get("notas") || "");
 
     // Validaciones
     if (!servicioId) return setError("Selecciona un servicio.");
     if (!tutorNombre.trim()) return setError("Ingresa tu nombre.");
     if (!mascotaNombre.trim()) return setError("Ingresa el nombre de tu mascota.");
+    if (!especieStr) return setError("Indica si tu mascota es perro o gato.");
     if (!tutorTelefono.trim() && !tutorEmail.trim()) {
       return setError("Indica al menos un medio de contacto (teléfono o correo).");
     }
@@ -81,6 +83,7 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
       tutorTelefono,
       tutorEmail,
       mascotaNombre,
+      especie: especieStr === "gato", // true: gato, false: perro
       notas,
     });
     setShowConfirmation(true);
@@ -208,6 +211,16 @@ export default function ReservarSlot({ params }: { params: { slotId: string } })
               className="w-full border rounded-xl p-3"
               disabled={sending}
             />
+            <div className="flex items-center gap-4">
+              <label className="inline-flex items-center gap-2">
+                <input type="radio" name="especie" value="perro" className="w-4 h-4" required disabled={sending} />
+                <span>Perro</span>
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input type="radio" name="especie" value="gato" className="w-4 h-4" required disabled={sending} />
+                <span>Gato</span>
+              </label>
+            </div>
             <textarea
               name="notas"
               placeholder="Notas adicionales (opcional) - Describe síntomas, comportamiento, etc."

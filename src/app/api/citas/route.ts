@@ -16,7 +16,7 @@ export async function GET() {
       .from("citas")
       .select(`
         id, estado, creado_en, inicio, fin,
-        tutor_nombre, tutor_telefono, tutor_email, mascota_nombre, notas,
+        tutor_nombre, tutor_telefono, tutor_email, mascota_nombre, especie, notas,
         servicio_id, horario_id,
         servicios:servicios(nombre, duracion_min),
         horarios:horarios(inicio, fin)
@@ -40,6 +40,7 @@ export async function POST(req: Request) {
       tutorTelefono?: string;
       tutorEmail?: string;
       mascotaNombre: string;
+      especie?: boolean;
       notas?: string;
     };
 
@@ -131,6 +132,7 @@ export async function POST(req: Request) {
           tutor_telefono: body.tutorTelefono ?? null,
           tutor_email: body.tutorEmail ?? null,
           mascota_nombre: body.mascotaNombre,
+          especie: typeof body.especie === 'boolean' ? body.especie : null,
           notas: body.notas ?? null,
           estado: "PENDIENTE",
           inicio: toLocalISOString(inicio),
@@ -239,6 +241,7 @@ export async function POST(req: Request) {
             tutor_telefono: body.tutorTelefono ?? null,
             tutor_email: body.tutorEmail ?? null,
             mascota_nombre: body.mascotaNombre,
+            especie: typeof body.especie === 'boolean' ? body.especie : null,
             notas: body.notas ?? null,
             estado: "PENDIENTE",
             inicio: toLocalISOString(inicio),

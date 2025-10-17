@@ -40,6 +40,7 @@ CREATE TABLE public.citas (
   tutor_telefono text,
   tutor_email text,
   mascota_nombre text NOT NULL,
+  especie boolean, -- true: Gato, false: Perro, null: no indicado
   notas text,
   estado text DEFAULT 'PENDIENTE'::text,
   creado_en timestamp with time zone DEFAULT now(),
