@@ -1,6 +1,38 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseClient";
 
+// Endpoint temporal para limpiar citas canceladas con datos inconsistentes
+export async function PUT() {
+  try {
+    const supa = supabaseServer();
+    
+    // Limpiar todas las citas canceladas que aún tienen horario_id
+    const { data, error } = await supa
+      .from("citas")
+      .update({ 
+        horario_id: null,
+        inicio: null,
+        fin: null
+      })
+      .eq("estado", "CANCELADA")
+      .not("horario_id", "is", null)
+      .select("id, tutor_nombre, mascota_nombre");
+    
+    if (error) throw error;
+    
+    console.log(`🧹 Limpieza completada: ${data?.length || 0} citas canceladas limpiadas`);
+    
+    return NextResponse.json({ 
+      ok: true, 
+      message: `Se limpiaron ${data?.length || 0} citas canceladas`,
+      cleaned: data?.length || 0
+    });
+  } catch (e: any) {
+    console.error("Error en limpieza:", e);
+    return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
+  }
+}
+
 export async function PATCH(req: Request) {
   try {
     const { id, action } = (await req.json()) as { id: string; action: "confirmar"|"atendida"|"cancelar" };
@@ -12,7 +44,7 @@ export async function PATCH(req: Request) {
       // Obtenemos el horario y el servicio para calcular cuántos slots liberar
       const { data: c, error: e1 } = await supa
         .from("citas")
-        .select("horario_id, servicio_id")
+        .select("horario_id, servicio_id, inicio, fin")
         .eq("id", id)
         .single();
       if (e1 || !c) throw new Error("Cita no encontrada");
@@ -52,13 +84,39 @@ export async function PATCH(req: Request) {
 
       if (slotsError) throw slotsError;
 
-      // Actualizar el estado de la cita
-      const { error: e2 } = await supa.from("citas").update({ estado: "CANCELADA" }).eq("id", id);
+      // Verificar que los slots encontrados son realmente consecutivos y pertenecen a esta cita
+      const slotsParaLiberar: string[] = [];
+      
+      if (slotsConsecutivos.length > 0) {
+        // Verificar que los slots son consecutivos
+        for (let i = 0; i < slotsConsecutivos.length - 1; i++) {
+          const currentEnd = new Date(slotsConsecutivos[i].fin);
+          const nextStart = new Date(slotsConsecutivos[i + 1].inicio);
+          const timeDiff = nextStart.getTime() - currentEnd.getTime();
+          
+          // Si no son consecutivos, solo liberar hasta aquí
+          if (Math.abs(timeDiff) > 60000) { // Más de 1 minuto de diferencia
+            break;
+          }
+        }
+        
+        // Solo liberar los slots que son realmente consecutivos
+        const slotsConsecutivosReales = slotsConsecutivos.slice(0, Math.min(requiredSlots, slotsConsecutivos.length));
+        slotsParaLiberar.push(...slotsConsecutivosReales.map(s => s.id));
+      }
+
+      // Actualizar el estado de la cita y limpiar la relación con el horario
+      const { error: e2 } = await supa
+        .from("citas")
+        .update({ 
+          estado: "CANCELADA",
+          horario_id: null  // Limpiar la relación para que no aparezcan datos en admin
+        })
+        .eq("id", id);
       if (e2) throw e2;
 
-      // Liberar todos los slots consecutivos que estén reservados
-      if (slotsConsecutivos.length > 0) {
-        const slotsParaLiberar = slotsConsecutivos.map(s => s.id);
+      // Liberar los slots identificados
+      if (slotsParaLiberar.length > 0) {
         console.log(`🔍 Debug - Liberando ${slotsParaLiberar.length} slots para cita cancelada ${id}:`, slotsParaLiberar);
         
         const { error: e3 } = await supa
@@ -66,6 +124,10 @@ export async function PATCH(req: Request) {
           .update({ reservado: false })
           .in("id", slotsParaLiberar);
         if (e3) throw e3;
+        
+        console.log(`✅ Debug - Slots liberados exitosamente para cita cancelada ${id}`);
+      } else {
+        console.log(`⚠️ Debug - No se encontraron slots consecutivos para liberar para cita ${id}`);
       }
 
       return NextResponse.json({ ok: true });

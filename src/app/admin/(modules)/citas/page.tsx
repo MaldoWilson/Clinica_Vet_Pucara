@@ -40,7 +40,13 @@ export default async function AdminCitasPage({ searchParams }: { searchParams: S
   }
 
   return (
-    <div className="px-4 py-12">
+    <div className="px-4 py-12 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Gestión de Citas</h1>
+          <p className="text-gray-600">Visualiza, filtra y gestiona las citas</p>
+        </div>
+      </div>
       <AdminCitasTable initialCitas={(data ?? []) as any} initialEstado={estado} />
     </div>
   );

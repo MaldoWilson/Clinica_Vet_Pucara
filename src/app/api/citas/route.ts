@@ -1,6 +1,36 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseClient";
 
+// Función helper para convertir fecha a string con zona horaria local
+function toLocalISOString(date: Date): string {
+  const offset = date.getTimezoneOffset();
+  const localTime = new Date(date.getTime() - (offset * 60000));
+  return localTime.toISOString();
+}
+
+export async function GET() {
+  try {
+    const supa = supabaseServer();
+
+    const { data, error } = await supa
+      .from("citas")
+      .select(`
+        id, estado, creado_en, inicio, fin,
+        tutor_nombre, tutor_telefono, tutor_email, mascota_nombre, notas,
+        servicio_id, horario_id,
+        servicios:servicios(nombre, duracion_min),
+        horarios:horarios(inicio, fin)
+      `)
+      .order("creado_en", { ascending: false });
+
+    if (error) throw error;
+
+    return NextResponse.json({ ok: true, citas: data });
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e.message ?? String(e) }, { status: 400 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json() as {
@@ -45,18 +75,69 @@ export async function POST(req: Request) {
       if (new Date(slot.inicio).getTime() < Date.now()) {
         throw new Error("No es posible reservar un horario en el pasado");
       }
-      if (slot.reservado) throw new Error("Este horario ya está reservado por otra cita");
+      if (slot.reservado) {
+        // Verificar si hay una cita activa para este horario
+        const { data: citaActiva, error: citaActivaError } = await supa
+          .from("citas")
+          .select("tutor_nombre, mascota_nombre")
+          .eq("horario_id", body.horarioId)
+          .neq("estado", "CANCELADA")
+          .single();
+        
+        if (citaActivaError && citaActivaError.code !== 'PGRST116') {
+          throw citaActivaError;
+        }
+        
+        if (citaActiva) {
+          throw new Error(`Este horario ya está reservado por ${citaActiva.tutor_nombre} (${citaActiva.mascota_nombre})`);
+        } else {
+          throw new Error("Este horario ya está reservado por otra cita");
+        }
+      }
 
-      // Usar la función original
-      const { data, error } = await supa.rpc("crear_cita_atomica", {
-        p_horario_id: body.horarioId,
-        p_servicio_id: body.servicioId,
-        p_tutor_nombre: body.tutorNombre,
-        p_tutor_telefono: body.tutorTelefono ?? null,
-        p_tutor_email: body.tutorEmail ?? null,
-        p_mascota_nombre: body.mascotaNombre,
-        p_notas: body.notas ?? null,
-      });
+      // Obtener información del horario para calcular inicio y fin
+      const { data: horarioData, error: horarioError } = await supa
+        .from("horarios")
+        .select("inicio")
+        .eq("id", body.horarioId)
+        .single();
+
+      if (horarioError) throw horarioError;
+
+      // Calcular inicio y fin de la cita
+      const inicio = new Date(horarioData.inicio);
+      const fin = new Date(inicio.getTime() + serviceDuration * 60000);
+
+      // Verificar que no hay conflictos de tiempo con otras citas ACTIVAS (no canceladas)
+      const { data: citasConflictivas, error: citasConflictivasError } = await supa
+        .from("citas")
+        .select("id, inicio, fin, mascota_nombre, estado")
+        .or(`and(inicio.lt.${toLocalISOString(fin)},fin.gt.${toLocalISOString(inicio)})`)
+        .neq("estado", "CANCELADA")  // Excluir citas canceladas
+        .limit(1);
+        
+      if (citasConflictivasError) throw citasConflictivasError;
+      if (citasConflictivas && citasConflictivas.length > 0) {
+        throw new Error(`Ya existe una cita (${citasConflictivas[0].mascota_nombre}) en ese horario`);
+      }
+
+      // Crear la cita directamente con inicio y fin calculados
+      const { data, error } = await supa
+        .from("citas")
+        .insert({
+          horario_id: body.horarioId,
+          servicio_id: body.servicioId,
+          tutor_nombre: body.tutorNombre,
+          tutor_telefono: body.tutorTelefono ?? null,
+          tutor_email: body.tutorEmail ?? null,
+          mascota_nombre: body.mascotaNombre,
+          notas: body.notas ?? null,
+          estado: "PENDIENTE",
+          inicio: toLocalISOString(inicio),
+          fin: toLocalISOString(fin)
+        })
+        .select("id")
+        .single();
 
       if (error) throw error;
       return NextResponse.json({ ok: true, citaId: data });
@@ -69,30 +150,35 @@ export async function POST(req: Request) {
 
     while (intentos < maxIntentos) {
       try {
-        // Verificar disponibilidad del slot principal
-        const { data: citaExistente, error: citaExistenteError } = await supa
+        // Verificar si ya existe una cita activa para este horario
+        const { data: citasExistentes, error: citasExistentesError } = await supa
           .from("citas")
-          .select("id")
+          .select("id, estado, tutor_nombre, mascota_nombre")
           .eq("horario_id", body.horarioId)
-          .single();
+          .neq("estado", "CANCELADA");
 
-        if (citaExistenteError && citaExistenteError.code !== 'PGRST116') {
-          throw citaExistenteError;
+        if (citasExistentesError) {
+          throw citasExistentesError;
         }
 
-        if (citaExistente) {
-          throw new Error("Este horario ya está reservado por otra cita");
+        if (citasExistentes && citasExistentes.length > 0) {
+          const citaExistente = citasExistentes[0];
+          throw new Error(`Este horario ya está reservado por ${citaExistente.tutor_nombre} (${citaExistente.mascota_nombre})`);
         }
 
         // Obtener el slot inicial
         const { data: slotInicial, error: slotError } = await supa
           .from("horarios")
-          .select("id, inicio, fin, veterinario_id")
+          .select("id, inicio, fin, veterinario_id, reservado")
           .eq("id", body.horarioId)
-          .eq("reservado", false)
           .single();
 
         if (slotError) throw slotError;
+
+        // Verificar que el slot esté disponible
+        if (slotInicial.reservado) {
+          throw new Error("Este horario ya está reservado");
+        }
 
         // Evitar slots en el pasado
         if (new Date(slotInicial.inicio).getTime() < Date.now()) {
@@ -126,19 +212,24 @@ export async function POST(req: Request) {
           }
         }
 
-        // Verificar que ninguno de los slots ya tenga una cita asociada
-        const slotIds = slotsConsecutivos.map(s => s.id);
+        // Calcular inicio y fin de la cita
+        const inicio = new Date(slotInicial.inicio);
+        const fin = new Date(inicio.getTime() + serviceDuration * 60000);
+        
+        // Verificar que no hay conflictos de tiempo con otras citas ACTIVAS (no canceladas)
         const { data: citasConflictivas, error: citasConflictivasError } = await supa
           .from("citas")
-          .select("id, horario_id")
-          .in("horario_id", slotIds)
+          .select("id, inicio, fin, mascota_nombre, estado")
+          .or(`and(inicio.lt.${toLocalISOString(fin)},fin.gt.${toLocalISOString(inicio)})`)
+          .neq("estado", "CANCELADA")  // Excluir citas canceladas
           .limit(1);
+          
         if (citasConflictivasError) throw citasConflictivasError;
         if (citasConflictivas && citasConflictivas.length > 0) {
-          throw new Error("Uno o más horarios ya están asociados a otra cita");
+          throw new Error(`Ya existe una cita (${citasConflictivas[0].mascota_nombre}) en ese horario`);
         }
 
-        // Crear la cita
+        // Crear la cita con inicio y fin calculados
         const { data: citaData, error: citaError } = await supa
           .from("citas")
           .insert({
@@ -149,7 +240,9 @@ export async function POST(req: Request) {
             tutor_email: body.tutorEmail ?? null,
             mascota_nombre: body.mascotaNombre,
             notas: body.notas ?? null,
-            estado: "PENDIENTE"
+            estado: "PENDIENTE",
+            inicio: toLocalISOString(inicio),
+            fin: toLocalISOString(fin)
           })
           .select("id")
           .single();

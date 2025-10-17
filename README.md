@@ -21,6 +21,13 @@ npm install xlsx
 npm install recharts
 ```
 
+```bash
+npm install xlsx
+npm install recharts
+npm install jspdf html2canvas
+npm install pdf-lib
+```
+
 2. Variables de entorno:
 - Crea el archivo `.env` y completa los valores.
 

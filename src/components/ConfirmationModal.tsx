@@ -1,5 +1,6 @@
 "use client";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface ConfirmationModalProps {
   confirmText?: string;
   cancelText?: string;
   isLoading?: boolean;
+  danger?: boolean;
 }
 
 export default function ConfirmationModal({
@@ -20,7 +22,8 @@ export default function ConfirmationModal({
   message,
   confirmText = "Confirmar",
   cancelText = "Cancelar",
-  isLoading = false
+  isLoading = false,
+  danger = false
 }: ConfirmationModalProps) {
   // Cerrar modal con tecla Escape
   useEffect(() => {
@@ -44,8 +47,8 @@ export default function ConfirmationModal({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  return createPortal(
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
@@ -55,8 +58,8 @@ export default function ConfirmationModal({
       {/* Modal */}
       <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 transform transition-all">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <div className={`px-6 py-4 border-b ${danger ? 'border-red-200' : 'border-gray-200'}`}>
+          <h3 className={`text-lg font-semibold ${danger ? 'text-red-700' : 'text-gray-900'}`}>{title}</h3>
         </div>
         
         {/* Content */}
@@ -76,7 +79,7 @@ export default function ConfirmationModal({
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+            className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center ${danger ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'}`}
           >
             {isLoading && (
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -88,6 +91,7 @@ export default function ConfirmationModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

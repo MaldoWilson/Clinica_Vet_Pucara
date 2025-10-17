@@ -29,7 +29,7 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
 
   const days = Array.from({ length: 14 }, (_, i) => addDays(startDay(new Date()), i));
 
-  useEffect(() => {
+  const loadData = () => {
     const qs = new URLSearchParams({
       from: startDay(day).toISOString(),
       to:   endDay(day).toISOString(),
@@ -69,6 +69,34 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
         setServicio(null);
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [day, servicioId]);
+
+  // Refrescar datos cuando se regresa de una reserva exitosa
+  useEffect(() => {
+    const handleFocus = () => {
+      // Refrescar datos cuando la ventana recupera el foco (usuario regresa de reserva)
+      loadData();
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      // Refrescar si se detecta un cambio en localStorage (reserva exitosa)
+      if (e.key === 'reserva_exitosa') {
+        loadData();
+        localStorage.removeItem('reserva_exitosa');
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [day, servicioId]);
 
   // Función para verificar si un slot puede acomodar la duración del servicio
@@ -168,7 +196,26 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {groups.map(({ vet, slots }) => {
-            const libres = slots.filter(s => !s.reservado);
+            const libres = slots.filter(s => {
+              // Un slot está libre si no está reservado Y no tiene citas activas
+              if (s.reservado) return false;
+              
+              // Verificar si tiene citas activas (no canceladas)
+              // Manejar tanto arrays como objetos individuales
+              let citasActivas = [];
+              
+              if (Array.isArray(s.citas)) {
+                citasActivas = s.citas.filter(cita => cita.estado !== "CANCELADA");
+              } else if (s.citas && typeof s.citas === 'object' && s.citas.id) {
+                // Si es un objeto individual, verificar si está activo
+                if (s.citas.estado !== "CANCELADA") {
+                  citasActivas = [s.citas];
+                }
+              }
+              
+              console.log(`🔍 Debug Slot ${s.id} - Citas activas:`, citasActivas);
+              return citasActivas.length === 0;
+            });
             const preview = slots.slice(0, 6);
             const resto   = slots.slice(6);
 
@@ -215,8 +262,42 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
                       <span className="text-white/70 text-xs block mt-1">para este día</span>
                     </div>
                   ) : (
-                    preview.map(s =>
-                      s.reservado ? (
+                    preview.map(s => {
+                      // Debug: Log para verificar el estado del slot
+                      console.log(`🔍 Debug Slot ${s.id} (${fmtHora(s.inicio)}):`, {
+                        reservado: s.reservado,
+                        citas: s.citas,
+                        citasType: typeof s.citas,
+                        citasIsArray: Array.isArray(s.citas),
+                        citasActivas: Array.isArray(s.citas) ? s.citas.filter(cita => cita.estado !== "CANCELADA") : []
+                      });
+                      
+                      // Verificar si el slot está bloqueado (reservado o tiene citas activas)
+                      let citasActivas = [];
+                      
+                      if (Array.isArray(s.citas)) {
+                        citasActivas = s.citas.filter(cita => cita.estado !== "CANCELADA");
+                      } else if (s.citas && typeof s.citas === 'object' && s.citas.id) {
+                        // Si es un objeto individual, verificar si está activo
+                        if (s.citas.estado !== "CANCELADA") {
+                          citasActivas = [s.citas];
+                        }
+                      }
+                      
+                      const isBlocked = s.reservado || citasActivas.length > 0;
+                      
+                      // Debug específico para el slot de 6:00 p.m.
+                      if (fmtHora(s.inicio) === "18:00") {
+                        console.log(`🔍 Debug Slot 6:00 p.m. - Bloqueado:`, {
+                          id: s.id,
+                          reservado: s.reservado,
+                          citas: s.citas,
+                          citasActivas: citasActivas,
+                          isBlocked: isBlocked
+                        });
+                      }
+                      
+                      return isBlocked ? (
                         <span key={s.id} className="w-full max-w-[120px] text-center rounded-full py-1 bg-indigo-400 text-white/80 text-sm border border-white/20" title="Hora reservada">
                           {fmtHora(s.inicio)}
                         </span>
@@ -224,8 +305,8 @@ export default function VetCardsDay({ servicioId }: { servicioId?: string } = {}
                         <Link key={s.id} href={servicioId ? `/reservas/servicio/${servicioId}/horario/${s.id}` : `/reservas/${s.id}`} className="w-full max-w-[120px] text-center rounded-full py-1 bg-white text-indigo-400 text-sm border border-transparent hover:bg-teal-50">
                           {fmtHora(s.inicio)}
                         </Link>
-                      )
-                    )
+                      );
+                    })
                   )}
                   <div className="mt-auto">
                     <div className="mt-3 text-[11px] bg-white/10 px-3 py-1 rounded-full">

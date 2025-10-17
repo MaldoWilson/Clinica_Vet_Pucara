@@ -89,6 +89,7 @@ export async function GET(req: Request) {
           id, 
           tutor_nombre, 
           servicio_id,
+          estado,
           servicios:servicio_id (
             id, 
             nombre,
@@ -101,11 +102,42 @@ export async function GET(req: Request) {
       .order("inicio", { ascending: true })
       .range(offset, offset + limit - 1);
 
-    if (onlyAvailable) q.eq("reservado", false).is("citas.id", null).gte("inicio", from);
+    if (onlyAvailable) {
+      q.eq("reservado", false).gte("inicio", from);
+      // Excluir slots que tienen citas activas (no canceladas)
+      q.is("citas.id", null);
+    }
     if (vetId) q.eq("veterinario_id", vetId);
 
     const { data, error } = await q;
     if (error) throw error;
+
+    // Debug: Log para verificar los datos que se están devolviendo
+    console.log("🔍 Debug API Horarios - Datos devueltos:", data?.slice(0, 5)?.map(s => ({
+      id: s.id,
+      inicio: s.inicio,
+      reservado: s.reservado,
+      citas: s.citas,
+      citasType: typeof s.citas,
+      citasIsArray: Array.isArray(s.citas)
+    })));
+    
+    // Buscar específicamente el slot de las 6:00 p.m. del día 8
+    const slot6pm = data?.find(s => {
+      const fecha = new Date(s.inicio);
+      return fecha.getHours() === 18 && fecha.getMinutes() === 0; // 6:00 p.m.
+    });
+    
+    if (slot6pm) {
+      console.log("🔍 Debug Slot 6:00 p.m. específico:", {
+        id: slot6pm.id,
+        inicio: slot6pm.inicio,
+        reservado: slot6pm.reservado,
+        citas: slot6pm.citas,
+        citasType: typeof slot6pm.citas,
+        citasIsArray: Array.isArray(slot6pm.citas)
+      });
+    }
 
     return NextResponse.json(
       {

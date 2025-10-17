@@ -12,11 +12,61 @@ type Props = {
 };
 
 export default function BlogCard({ blog }: Props) {
-  // Truncar el contenido para mostrar solo un resumen
-  const truncateContent = (content: string, maxLength: number = 150) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength) + "...";
-  };
+  // Render markdown simple para el resumen (mismo estilo que vista previa)
+  function escapeHtml(s: string) {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function applyInline(md: string) {
+    let out = md;
+    out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    out = out.replace(/_(.+?)_/g, "<em>$1</em>");
+    out = out.replace(/`([^`]+)`/g, "<code class=\"px-1 py-0.5 bg-gray-200 rounded\">$1</code>");
+    return out;
+  }
+
+  function renderMarkdown(md: string) {
+    const src = (md || "").slice(0, 600); // limitar fuente para resumen
+    const lines = src.split(/\r?\n/);
+    const html: string[] = [];
+    let inList = false;
+    for (const raw of lines) {
+      const h1 = raw.match(/^#\s+(.+)/);
+      const h2 = raw.match(/^##\s+(.+)/);
+      const h3 = raw.match(/^###\s+(.+)/);
+      if (/^\s*-\s+/.test(raw)) {
+        if (!inList) {
+          html.push('<ul class="list-disc pl-5 mb-2">');
+          inList = true;
+        }
+        const item = applyInline(escapeHtml(raw.replace(/^\s*-\s+/, "")));
+        html.push(`<li>${item}</li>`);
+        continue;
+      } else if (inList) {
+        html.push('</ul>');
+        inList = false;
+      }
+
+      if (h3) {
+        html.push(`<h3 class=\"text-base font-semibold mt-2\">${applyInline(escapeHtml(h3[1]))}</h3>`);
+      } else if (h2) {
+        html.push(`<h2 class=\"text-lg font-bold mt-2\">${applyInline(escapeHtml(h2[1]))}</h2>`);
+      } else if (h1) {
+        html.push(`<h1 class=\"text-xl font-bold mt-2\">${applyInline(escapeHtml(h1[1]))}</h1>`);
+      } else if (raw.trim() === "") {
+        html.push('<div class="h-2"></div>');
+      } else {
+        html.push(`<p class=\"mb-2 leading-relaxed\">${applyInline(escapeHtml(raw))}</p>`);
+      }
+    }
+    if (inList) html.push('</ul>');
+    return html.join("");
+  }
 
   // Formatear la fecha
   const formatDate = (dateString?: string) => {
@@ -47,9 +97,13 @@ export default function BlogCard({ blog }: Props) {
             {blog.titulo}
           </h5>
         </Link>
-        <p className="mb-3 font-normal text-gray-700 line-clamp-3">
-          {truncateContent(blog.contenido)}
-        </p>
+        <div className="mb-3 font-normal text-gray-700 relative max-h-28 overflow-hidden">
+          <div
+            className="text-sm"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(blog.contenido) }}
+          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white to-white/0" />
+        </div>
         {blog.created_at && (
           <p className="text-xs text-gray-500 font-medium">
             {formatDate(blog.created_at)}

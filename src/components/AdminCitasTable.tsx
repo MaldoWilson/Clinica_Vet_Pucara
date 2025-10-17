@@ -31,7 +31,8 @@ export default function AdminCitasTable({
   const [tutor, setTutor] = useState<string>("");
   const [fechaDesde, setFechaDesde] = useState<string>("");
   const [fechaHasta, setFechaHasta] = useState<string>("");
-  const [visibleCount, setVisibleCount] = useState<number>(20);
+  const [page, setPage] = useState<number>(1);
+  const pageSize = 20;
   const [pending, startTransition] = useTransition();
 
   const options = ["", "PENDIENTE", "CONFIRMADA", "ATENDIDA", "CANCELADA"];
@@ -47,22 +48,22 @@ export default function AdminCitasTable({
   const onChangeEstado = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setEstado(value);
-    setVisibleCount(20);
+    setPage(1);
   };
 
   const onChangeTutor = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTutor(e.target.value);
-    setVisibleCount(20);
+    setPage(1);
   };
 
   const onChangeDesde = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFechaDesde(e.target.value);
-    setVisibleCount(20);
+    setPage(1);
   };
 
   const onChangeHasta = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFechaHasta(e.target.value);
-    setVisibleCount(20);
+    setPage(1);
   };
 
   const limpiarFiltros = () => {
@@ -70,7 +71,7 @@ export default function AdminCitasTable({
     setTutor("");
     setFechaDesde("");
     setFechaHasta("");
-    setVisibleCount(20);
+    setPage(1);
   };
 
   const filteredCitas = useMemo(() => {
@@ -101,7 +102,11 @@ export default function AdminCitasTable({
     });
   }, [citas, estado, fechaDesde, fechaHasta, tutor]);
 
-  const visibleCitas = useMemo(() => filteredCitas.slice(0, visibleCount), [filteredCitas, visibleCount]);
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredCitas.length / pageSize)), [filteredCitas.length]);
+  const pageItems = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredCitas.slice(start, start + pageSize);
+  }, [filteredCitas, page]);
 
   const doAction = async (id: string, action: "confirmar" | "atendida" | "cancelar") => {
     console.log("🔍 Debug - Acción iniciada:", { id, action });
@@ -150,86 +155,108 @@ export default function AdminCitasTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">Estado:</label>
-          <select 
-            value={estado} 
-            onChange={onChangeEstado} 
-            className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            title="Seleccionar estado de cita para filtrar"
+      <div className="bg-white rounded-xl shadow p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="text-sm font-medium text-gray-700">Estado:</label>
+            <select 
+              value={estado} 
+              onChange={onChangeEstado} 
+              className="px-3 py-2 border rounded-lg"
+              title="Seleccionar estado de cita para filtrar"
+            >
+              {options.map((o) => (
+                <option key={o} value={o}>
+                  {o || "Todos"}
+                </option>
+              ))}
+            </select>
+
+            <label className="text-sm font-medium text-gray-700">Fecha:</label>
+            <input
+              type="date"
+              value={fechaDesde}
+              onChange={onChangeDesde}
+              className="px-3 py-2 border rounded-lg"
+              title="Fecha desde"
+            />
+            <span className="text-gray-500">—</span>
+            <input
+              type="date"
+              value={fechaHasta}
+              onChange={onChangeHasta}
+              className="px-3 py-2 border rounded-lg"
+              title="Fecha hasta"
+            />
+
+            <label className="text-sm font-medium text-gray-700">Tutor:</label>
+            <input
+              type="text"
+              value={tutor}
+              onChange={onChangeTutor}
+              placeholder="Nombre, teléfono o email"
+              className="px-3 py-2 border rounded-lg"
+            />
+
+            <button
+              className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 hover:bg-gray-200"
+              onClick={limpiarFiltros}
+              title="Limpiar filtros"
+            >
+              Limpiar
+            </button>
+            
+            <button
+              className="px-3 py-2 rounded-lg text-sm font-medium bg-red-100 hover:bg-red-200 text-red-700"
+              onClick={async () => {
+              if (confirm('¿Limpiar datos de citas canceladas? Esto limpiará los horarios de citas ya canceladas.')) {
+                try {
+                  const res = await fetch('/api/admin/citas', { method: 'PUT' });
+                  const data = await res.json();
+                  alert(data.message || 'Limpieza completada');
+                  window.location.reload();
+                } catch (err) {
+                  alert('Error: ' + err);
+                }
+              }
+            }}
+            title="Limpiar datos de citas canceladas"
           >
-            {options.map((o) => (
-              <option key={o} value={o}>
-                {o || "Todos"}
-              </option>
-            ))}
-          </select>
-
-          <label className="text-sm font-medium text-gray-700">Fecha:</label>
-          <input
-            type="date"
-            value={fechaDesde}
-            onChange={onChangeDesde}
-            className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            title="Fecha desde"
-          />
-          <span className="text-gray-500">—</span>
-          <input
-            type="date"
-            value={fechaHasta}
-            onChange={onChangeHasta}
-            className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            title="Fecha hasta"
-          />
-
-          <label className="text-sm font-medium text-gray-700">Tutor:</label>
-          <input
-            type="text"
-            value={tutor}
-            onChange={onChangeTutor}
-            placeholder="Nombre, teléfono o email"
-            className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-
-          <button
-            className="px-3 py-2 rounded-xl text-sm font-medium bg-gray-100 hover:bg-gray-200"
-            onClick={limpiarFiltros}
-            title="Limpiar filtros"
-          >
-            Limpiar
+            🧹 Limpiar Canceladas
           </button>
           {pending && <span className="text-sm text-neutral-500">Cargando…</span>}
-        </div>
-        <div className="text-sm text-gray-600">
-          <span className="font-medium">{filteredCitas.length}</span> cita{filteredCitas.length !== 1 ? 's' : ''} encontrada{filteredCitas.length !== 1 ? 's' : ''}
+          </div>
+          <div className="text-sm text-gray-600">
+            <span className="font-medium">{filteredCitas.length}</span> cita{filteredCitas.length !== 1 ? 's' : ''} encontrada{filteredCitas.length !== 1 ? 's' : ''}
+          </div>
         </div>
       </div>
 
       {!hayCitas ? (
-        <div className="border rounded-xl p-8 text-center text-gray-500">
+        <div className="bg-white rounded-xl shadow p-8 text-center text-gray-500">
           <div className="text-4xl mb-2">📅</div>
           <p className="text-lg font-medium">No hay citas para mostrar</p>
           <p className="text-sm">Las citas aparecerán aquí cuando los clientes las reserven</p>
         </div>
       ) : !hayFiltradas ? (
-        <div className="border rounded-xl p-8 text-center text-gray-500">
+        <div className="bg-white rounded-xl shadow p-8 text-center text-gray-500">
           <div className="text-4xl mb-2">🔎</div>
           <p className="text-lg font-medium">Sin resultados con los filtros actuales</p>
           <p className="text-sm mb-4">Ajusta los filtros o limpia para ver todas las citas</p>
           <button
-            className="inline-flex items-center gap-2 border rounded-xl px-4 py-2 bg-white hover:bg-gray-50"
+            className="inline-flex items-center gap-2 border rounded-lg px-4 py-2 bg-white hover:bg-gray-50"
             onClick={limpiarFiltros}
           >
             Limpiar filtros
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto border rounded-xl">
+        <div className="overflow-x-auto bg-white rounded-xl shadow">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-50 text-gray-700">
               <tr>
                 <th className="text-left p-3 font-semibold">📅 Fecha Creación</th>
+                <th className="text-left p-3 font-semibold">📆 Día de Servicio</th>
                 <th className="text-left p-3 font-semibold">👤 Tutor</th>
                 <th className="text-left p-3 font-semibold">🐾 Mascota</th>
                 <th className="text-left p-3 font-semibold">💊 Servicio</th>
@@ -239,7 +266,7 @@ export default function AdminCitasTable({
               </tr>
             </thead>
             <tbody>
-              {visibleCitas.map((c) => {
+              {pageItems.map((c) => {
                 const fechaCreacion = new Date(c.creado_en).toLocaleString("es-CL", { 
                   dateStyle: "medium",
                   timeStyle: "short"
@@ -248,6 +275,14 @@ export default function AdminCitasTable({
                 return (
                   <tr key={c.id} className="border-t hover:bg-gray-50">
                     <td className="p-3">{fechaCreacion}</td>
+                    <td className="p-3">
+                      {c.horarios ? (() => {
+                        const fechaServicio = new Date(c.horarios!.inicio);
+                        return fechaServicio.toLocaleDateString("es-CL", { 
+                          dateStyle: "medium"
+                        });
+                      })() : "-"}
+                    </td>
                     <td className="p-3">
                       <div>
                         <div className="font-medium">{c.tutor_nombre}</div>
@@ -325,13 +360,49 @@ export default function AdminCitasTable({
         </div>
       )}
 
-      {filteredCitas.length > visibleCitas.length && (
-        <div className="pt-4">
+      {filteredCitas.length > 0 && (
+        <div className="pt-4 flex items-center justify-center gap-2">
           <button
-            className="w-full border rounded-xl px-4 py-2 bg-white hover:bg-gray-50"
-            onClick={() => setVisibleCount((n) => n + 20)}
+            className="px-3 py-2 rounded border bg-white disabled:opacity-50"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
           >
-            Mostrar 20 más
+            Anterior
+          </button>
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }).slice(0, 7).map((_, i) => {
+              const idx = i + 1;
+              if (totalPages > 7 && idx > 5 && idx < totalPages) {
+                return null;
+              }
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setPage(idx)}
+                  className={`min-w-9 h-9 px-3 py-2 rounded border text-sm ${page === idx ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white hover:bg-gray-50'}`}
+                >
+                  {idx}
+                </button>
+              );
+            })}
+            {totalPages > 7 && (
+              <>
+                <span className="px-1">…</span>
+                <button
+                  onClick={() => setPage(totalPages)}
+                  className={`min-w-9 h-9 px-3 py-2 rounded border text-sm ${page === totalPages ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white hover:bg-gray-50'}`}
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+          </div>
+          <button
+            className="px-3 py-2 rounded border bg-white disabled:opacity-50"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+          >
+            Siguiente
           </button>
         </div>
       )}

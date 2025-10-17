@@ -1,4 +1,6 @@
 "use client";
+import Image from "next/image";
+import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -39,56 +41,79 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Clínica Pucará</h1>
-          <h2 className="text-xl font-semibold text-gray-700">Panel de Administración</h2>
-        </div>
-      </div>
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <h3 className="text-lg font-medium text-gray-900 mb-6 text-center">Iniciar Sesión</h3>
-          {errorFlag && (
-            <div className="mb-4 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md">
-              Tu cuenta no está autorizada para acceder al panel de administración.
-            </div>
-          )}
-          <form onSubmit={doLogin} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
-              <input
-                id="email"
-                type="email"
-                placeholder="tu@email.com"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
-              <input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                value={pass}
-                onChange={(e) => setPass(e.target.value)}
-                required
-              />
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Barra superior */}
+      <div className="w-full h-20 bg-gradient-to-r from-indigo-400 to-indigo-600 shadow-md" />
+
+      {/* Contenido centrado */}
+      <div className="flex flex-1 flex-col items-center justify-center px-4">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/logo.webp"
+              alt="Logo"
+              width={140}
+              height={140}
+              className="object-contain drop-shadow-lg"
+              priority
+              quality={100}
+            />
+          </div>
+          {/* Título */}
+          <h1 className="text-2xl font-bold text-center mb-2 text-gray-800">
+            Iniciar Sesión
+          </h1>
+          {/* Formulario */}
+          <form onSubmit={doLogin} className="space-y-4">
+            <input
+              type="email"
+              name="email"
+              placeholder="Correo electrónico"
+              className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              required
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Contraseña"
+              className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              required
+              autoComplete="current-password"
+              value={pass}
+              onChange={(e) => setPass(e.target.value)}
+            />
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="accent-indigo-400" />
+                Recordarme en este dispositivo
+              </label>
+              <Link
+                href="/recuperar"
+                className="text-indigo-400 hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
             </div>
             <button
               type="submit"
+              className="w-full py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
               disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Ingresando..." : "Ingresar"}
             </button>
           </form>
+          {/* Volver a la página principal */}
           <div className="mt-6 text-center">
-            <a href="/" className="text-sm text-blue-600 hover:text-blue-500">← Volver al sitio principal</a>
+            <Link
+              href="/"
+              className="text-sm text-indigo-400 hover:underline"
+            >
+              ← Volver a la página principal
+            </Link>
           </div>
         </div>
       </div>
