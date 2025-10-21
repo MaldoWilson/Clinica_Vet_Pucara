@@ -10,6 +10,7 @@ type Slot = {
   fin: string;
   reservado: boolean;
   veterinario?: Vet | null;
+  citas?: any[] | any;
 };
 
 const fmtHora = (iso: string) =>

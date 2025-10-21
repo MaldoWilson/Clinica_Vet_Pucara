@@ -169,12 +169,11 @@ export default function FlujoCajaPage() {
 
     try {
       const method = isEditing ? "PUT" : "POST";
-      // Remover el campo dia del formulario ya que se calcula automáticamente desde created_at
-      const { dia, ...dataToSend } = formData;
+      // El campo dia se calcula automáticamente desde created_at en el backend
       const res = await fetch("/api/flujo-caja", {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSend),
+        body: JSON.stringify(formData),
       });
 
       const json = await res.json();
@@ -751,7 +750,7 @@ export default function FlujoCajaPage() {
                     </label>
                     <input
                       type="text"
-                      value={formData.dia}
+                      value=""
                       readOnly
                       className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-md"
                       placeholder="Se calcula automáticamente"

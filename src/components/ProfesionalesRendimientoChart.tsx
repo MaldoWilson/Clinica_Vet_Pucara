@@ -316,7 +316,7 @@ export default function ProfesionalesRendimientoChart({ data }: ChartProps) {
               radius={[0, 4, 4, 0]}
               label={{ 
                 position: 'right', 
-                formatter: (value: number) => formatCurrency(value),
+                formatter: (value: any) => formatCurrency(Number(value)),
                 fontSize: 11,
                 fill: '#374151'
               }}
