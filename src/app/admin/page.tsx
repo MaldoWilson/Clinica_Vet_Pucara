@@ -78,7 +78,9 @@ const modules = [
     bg: "bg-rose-50",
     color: "text-rose-600",
     icon: (
-      <span className="text-lg leading-none">🐾</span>
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M8 6h8a2 2 0 012 2v10a2 2 0 01-2 2H8l-4-4V8a2 2 0 012-2h2z" />
+      </svg>
     ),
   },
   {
