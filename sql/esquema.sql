@@ -31,6 +31,15 @@ CREATE TABLE public.blogs (
   image_url text,
   CONSTRAINT blogs_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.certificados (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  id_consulta bigint NOT NULL,
+  nombre text,
+  datos json NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT certificados_pkey PRIMARY KEY (id),
+  CONSTRAINT certificados_id_consulta_fkey FOREIGN KEY (id_consulta) REFERENCES public.consultas(id)
+);
 CREATE TABLE public.citas (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   horario_id uuid UNIQUE,
@@ -44,6 +53,7 @@ CREATE TABLE public.citas (
   creado_en timestamp with time zone DEFAULT now(),
   inicio timestamp without time zone,
   fin timestamp without time zone,
+  especie boolean,
   CONSTRAINT citas_pkey PRIMARY KEY (id),
   CONSTRAINT citas_servicio_id_fkey FOREIGN KEY (servicio_id) REFERENCES public.servicios(id),
   CONSTRAINT citas_horario_id_fkey FOREIGN KEY (horario_id) REFERENCES public.horarios(id)
@@ -194,5 +204,9 @@ CREATE TABLE public.veterinarios (
   foto_url text,
   creado_en timestamp with time zone DEFAULT now(),
   descripcion text,
+  email text NOT NULL UNIQUE,
+  password text NOT NULL,
+  es_admin boolean NOT NULL DEFAULT false,
+  activo boolean NOT NULL DEFAULT true,
   CONSTRAINT veterinarios_pkey PRIMARY KEY (id)
 );

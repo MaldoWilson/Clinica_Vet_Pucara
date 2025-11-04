@@ -31,6 +31,8 @@ export default function CertificateModal({
   paciente,
   veterinarios,
   consulta,
+  idConsulta,
+  onCertificadoGuardado,
 }: {
   open: boolean;
   onClose: () => void;
@@ -38,6 +40,8 @@ export default function CertificateModal({
   paciente: PacienteCompact;
   veterinarios: Veterinario[];
   consulta?: { diagnostico?: string; tratamiento?: string; observaciones?: string; proximo_control?: string | null; peso?: string | null; alimentacion?: string | null } | null;
+  idConsulta?: string | null;
+  onCertificadoGuardado?: () => void;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -155,6 +159,83 @@ export default function CertificateModal({
     return base;
   }, [template, autoContext, manualValues, veterinarioId, veterinarios, examenesPrequirurgicos, consulta]);
 
+  // Función para guardar el certificado en la base de datos
+  async function guardarCertificado() {
+    if (!template || !idConsulta) return;
+    
+    try {
+      // Obtener todos los labels de los campos del template
+      const labels: Record<string, string> = {};
+      
+      // Procesar campos individuales
+      for (const f of template.fields) {
+        labels[f.key] = f.label;
+      }
+      
+      // Procesar campos de grupos
+      if (template.fieldGroups) {
+        for (const group of template.fieldGroups) {
+          for (const f of group.fields) {
+            labels[f.key] = f.label;
+          }
+        }
+      }
+      const veterinarioSeleccionado = veterinarios.find(v => String(v.id) === String(veterinarioId));
+      
+      const datosCertificado = {
+        template_id: template.id,
+        template_name: template.name,
+        paciente: {
+          id: paciente.id,
+          nombre: paciente.nombre,
+          especie: paciente.especie,
+          raza: paciente.raza || null,
+          sexo: paciente.sexo,
+          color: paciente.color || null,
+          fecha_nacimiento: paciente.fecha_nacimiento || null,
+        },
+        propietario: paciente.propietario ? {
+          nombre: paciente.propietario.nombre || null,
+          apellido: paciente.propietario.apellido || null,
+          rut: paciente.propietario.rut || null,
+          telefono: paciente.propietario.telefono || null,
+          direccion: paciente.propietario.direccion || null,
+          correo_electronico: paciente.propietario.correo_electronico || null,
+        } : null,
+        veterinario_id: veterinarioId || null,
+        veterinario_nombre: veterinarioSeleccionado?.nombre || null,
+        campos: fillValues,
+        labels: labels,
+      };
+
+      const response = await fetch("/api/certificados", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id_consulta: idConsulta,
+          nombre: template.name,
+          datos: datosCertificado,
+        }),
+      });
+
+      const json = await response.json();
+      if (!response.ok || !json.ok) {
+        console.error("Error al guardar certificado:", json.error);
+        // No mostramos error al usuario para no interrumpir el flujo
+      } else {
+        // Llamar callback si está disponible
+        if (onCertificadoGuardado) {
+          onCertificadoGuardado();
+        }
+      }
+    } catch (error) {
+      console.error("Error al guardar certificado:", error);
+      // No mostramos error al usuario para no interrumpir el flujo
+    }
+  }
+
   async function handleDownload() {
     if (!template || !templateMeta) return;
     
@@ -188,6 +269,9 @@ export default function CertificateModal({
       a.download = `${template.name.replace(/\s+/g, "_")}_${paciente.nombre}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+      
+      // Guardar certificado en la base de datos (asíncrono, no bloquea)
+      guardarCertificado().catch(console.error);
     } catch (e: any) {
       setError(e?.message || "Error generando PDF");
     } finally {
@@ -226,6 +310,9 @@ export default function CertificateModal({
       window.open(url, "_blank");
       // No revocar inmediatamente porque el visor puede necesitar acceso
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      
+      // Guardar certificado en la base de datos (asíncrono, no bloquea)
+      guardarCertificado().catch(console.error);
     } catch (e: any) {
       setError(e?.message || "Error abriendo PDF");
     } finally {
