@@ -187,8 +187,6 @@ export default function PacienteDetailPage() {
   const [confirmDelete, setConfirmDelete] = useState<null | { id: string }>(null);
   const consultaCardRef = useRef<HTMLDivElement>(null);
   const [certMenuOpen, setCertMenuOpen] = useState(false);
-  const certBtnRef = useRef<HTMLButtonElement>(null);
-  const certMenuRef = useRef<HTMLDivElement>(null);
   const [parvoOpen, setParvoOpen] = useState(false);
   const [parvoTexto, setParvoTexto] = useState("");
   const [savingParvo, setSavingParvo] = useState(false);
@@ -224,22 +222,14 @@ export default function PacienteDetailPage() {
     }
   }, [editConsulta]);
 
-  // Cerrar menú de Certificados al hacer clic fuera o con Escape
+  // Cerrar modal de Certificados al hacer clic fuera o con Escape
   useEffect(() => {
-    function handleDown(e: MouseEvent) {
-      if (!certMenuOpen) return;
-      const target = e.target as Node;
-      if (certMenuRef.current && !certMenuRef.current.contains(target) && certBtnRef.current && !certBtnRef.current.contains(target)) {
-        setCertMenuOpen(false);
-      }
-    }
+    if (!certMenuOpen) return;
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") setCertMenuOpen(false);
     }
-    document.addEventListener("mousedown", handleDown);
     document.addEventListener("keydown", handleKey);
     return () => {
-      document.removeEventListener("mousedown", handleDown);
       document.removeEventListener("keydown", handleKey);
     };
   }, [certMenuOpen]);
@@ -2330,44 +2320,18 @@ body * {
                     >
                       Crear receta
                     </button>
-                    <div className="relative">
-                      <button 
-                        ref={certBtnRef}
-                        aria-haspopup="menu"
-                        aria-expanded={certMenuOpen}
-                        onClick={() => (ultimaConsultaId ? setCertMenuOpen((v) => !v) : null)}
-                        disabled={!ultimaConsultaId}
-                        className={`px-5 ml-5 py-2 rounded-lg text-white shadow-sm ${
-                          ultimaConsultaId 
-                            ? 'bg-amber-400 hover:bg-amber-500' 
-                            : 'bg-gray-400 cursor-not-allowed'
-                        }`}
-                        title={!ultimaConsultaId ? 'Debes crear una consulta primero' : 'Crear certificados'}
-                      >
-                        Crear certificados
-                      </button>
-                      {certMenuOpen && (
-                        <div ref={certMenuRef} className="absolute left-0 mt-2 w-80 rounded-xl bg-white ring-1 ring-gray-200 shadow-lg z-20 overflow-hidden">
-                          <div className="px-3 py-2 text-xs text-gray-500 border-b bg-gray-50">Certificados disponibles</div>
-                          <ul className="max-h-96 overflow-y-auto py-2">
-                            {certs.length === 0 ? (
-                              <li className="px-4 py-2 text-sm text-gray-500">No hay certificados</li>
-                            ) : (
-                              certs.map((c) => (
-                                <li key={c.id}>
-                                  <button
-                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                    onClick={() => onSelectCert(c)}
-                                  >
-                                    {c.nombre_archivo}
-                                  </button>
-                                </li>
-                              ))
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+                    <button 
+                      onClick={() => (ultimaConsultaId ? setCertMenuOpen(true) : null)}
+                      disabled={!ultimaConsultaId}
+                      className={`px-5 ml-5 py-2 rounded-lg text-white shadow-sm ${
+                        ultimaConsultaId 
+                          ? 'bg-amber-400 hover:bg-amber-500' 
+                          : 'bg-gray-400 cursor-not-allowed'
+                      }`}
+                      title={!ultimaConsultaId ? 'Debes crear una consulta primero' : 'Crear certificados'}
+                    >
+                      Crear certificados
+                    </button>
 
                   </div>
                 </div>
@@ -2375,6 +2339,51 @@ body * {
             </div>
 
           </div>
+
+          {/* Modal de selección de certificados */}
+          {certMenuOpen && (
+            <div 
+              className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setCertMenuOpen(false);
+                }
+              }}
+            >
+              <div className="w-[90vw] max-w-md rounded-xl bg-white ring-1 ring-gray-200 shadow-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+                  <div className="text-sm font-semibold text-gray-700">Certificados disponibles</div>
+                  <button 
+                    onClick={() => setCertMenuOpen(false)} 
+                    className="p-2 rounded hover:bg-gray-100 transition-colors" 
+                    title="Cerrar"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="p-4">
+                  {certs.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-sm text-gray-500">
+                      No hay certificados disponibles
+                    </div>
+                  ) : (
+                    <ul className="space-y-2 max-h-96 overflow-y-auto">
+                      {certs.map((c) => (
+                        <li key={c.id}>
+                          <button
+                            className="w-full text-left px-4 py-3 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors border border-gray-200 hover:border-amber-400 hover:shadow-sm"
+                            onClick={() => onSelectCert(c)}
+                          >
+                            <div className="font-medium">{c.nombre_archivo}</div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Panel rápido: Certificado Parvovirus */}
           {parvoOpen && (
