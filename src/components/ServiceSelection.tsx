@@ -24,11 +24,6 @@ export default function ServiceSelection() {
       .finally(() => setLoading(false));
   }, []);
 
-  const formatPrice = (precio?: number) => {
-    if (!precio) return "Consultar precio";
-    return `$${precio.toLocaleString("es-CL")}`;
-  };
-
   const formatDuration = (duracion?: number) => {
     if (!duracion) return "";
     return `${duracion} min`;
@@ -87,16 +82,13 @@ export default function ServiceSelection() {
                   </p>
                 )}
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-lg font-bold text-indigo-600">
-                    {formatPrice(servicio.precio_clp)}
-                  </div>
-                  {servicio.duracion_min && (
+                {servicio.duracion_min && (
+                  <div className="flex items-center justify-end mb-4">
                     <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
                       {formatDuration(servicio.duracion_min)}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 <Link
                   href={`/reservas/servicio/${servicio.id}`}

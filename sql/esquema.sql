@@ -1,5 +1,4 @@
--- WARNING: This schema is for context only and is not meant to be run.
--- Table order and constraints may not be valid for execution.
+-- Este esquema, es solo un esquema de referencia, no esta conectado a la base de datos.
 
 CREATE TABLE public.antecedentes (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,

@@ -151,11 +151,6 @@ const encabezadoSlot = useMemo(() => {
     }
   };
 
-  const formatPrice = (precio?: number) => {
-    if (!precio) return "Consultar precio";
-    return `$${precio.toLocaleString("es-CL")}`;
-  };
-
   const formatDuration = (duracion?: number) => {
     if (!duracion) return "";
     return `${duracion} min`;
@@ -191,12 +186,11 @@ const encabezadoSlot = useMemo(() => {
                 <p className="text-sm text-indigo-700">{servicioSeleccionado.descripcion}</p>
               )}
             </div>
-            <div className="text-right">
-              <p className="font-bold text-indigo-600">{formatPrice(servicioSeleccionado.precio_clp)}</p>
-              {servicioSeleccionado.duracion_min && (
+            {servicioSeleccionado.duracion_min && (
+              <div className="text-right">
                 <p className="text-xs text-indigo-600">{formatDuration(servicioSeleccionado.duracion_min)}</p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -292,7 +286,6 @@ ${encabezadoSlot}
 
 ${servicioSeleccionado ? `Servicio: ${servicioSeleccionado.nombre}` : ''}
 ${servicioSeleccionado?.duracion_min ? `Duración: ${servicioSeleccionado.duracion_min} minutos` : ''}
-${servicioSeleccionado?.precio_clp ? `Precio: $${servicioSeleccionado.precio_clp.toLocaleString("es-CL")}` : ''}
 
 Una vez confirmada, recibirás un mensaje de confirmación.`}
         confirmText="Confirmar reserva"

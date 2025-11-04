@@ -31,11 +31,6 @@ export default function ServicioHorariosPage({ params }: { params: { servicioId:
       .finally(() => setLoading(false));
   }, [params.servicioId]);
 
-  const formatPrice = (precio?: number) => {
-    if (!precio) return "Consultar precio";
-    return `$${precio.toLocaleString("es-CL")}`;
-  };
-
   const formatDuration = (duracion?: number) => {
     if (!duracion) return "";
     return `${duracion} min`;
@@ -104,20 +99,15 @@ export default function ServicioHorariosPage({ params }: { params: { servicioId:
               </p>
             )}
 
-            <div className="flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center">
-                <span className="font-semibold text-indigo-600 text-lg">
-                  {formatPrice(servicio.precio_clp)}
-                </span>
-              </div>
-              {servicio.duracion_min && (
+            {servicio.duracion_min && (
+              <div className="flex flex-wrap gap-4 text-sm">
                 <div className="flex items-center">
                   <span className="text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
                     {formatDuration(servicio.duracion_min)}
                   </span>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
