@@ -2121,7 +2121,7 @@ body * {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
-                      <input
+                      <input placeholder="Peso (kg)"
                         className="w-full rounded-lg border border-gray-300 px-3 py-2"
                         value={editReceta.peso || ''}
                         onChange={(e) => setEditReceta({ ...editReceta, peso: e.target.value })}
@@ -2129,7 +2129,7 @@ body * {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Veterinario que emite la receta</label>
-                      <select
+                      <select 
                         className="w-full rounded-lg border border-gray-300 px-3 py-2"
                         value={editReceta.emitida_por || ''}
                         onChange={(e) => setEditReceta({ ...editReceta, emitida_por: e.target.value })}
@@ -2145,7 +2145,7 @@ body * {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Notas</label>
-                      <textarea
+                      <textarea placeholder="Notas"
                         className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2"
                         value={editReceta.notas || ''}
                         onChange={(e) => setEditReceta({ ...editReceta, notas: e.target.value })}
@@ -2158,7 +2158,7 @@ body * {
                       <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-2 mb-3 p-3 bg-gray-50 rounded-lg">
                         <div className="md:col-span-2">
                           <label className="block text-xs font-medium text-gray-600 mb-1">Nombre</label>
-                          <input 
+                          <input  placeholder="Nombre"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.nombre_medicamento || ''} 
                             onChange={(e) => {
@@ -2170,7 +2170,7 @@ body * {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Dosis</label>
-                          <input 
+                          <input placeholder="Dosis"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.dosis || ''} 
                             onChange={(e) => {
@@ -2182,7 +2182,7 @@ body * {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Vía</label>
-                          <input 
+                          <input placeholder="Vía"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.via || ''} 
                             onChange={(e) => {
@@ -2194,7 +2194,7 @@ body * {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Frecuencia</label>
-                          <input 
+                          <input placeholder="Frecuencia"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.frecuencia || ''} 
                             onChange={(e) => {
@@ -2206,7 +2206,7 @@ body * {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Duración</label>
-                          <input 
+                          <input placeholder="Duración"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.duracion || ''} 
                             onChange={(e) => {
@@ -2331,7 +2331,7 @@ body * {
                       Crear receta
                     </button>
                     <div className="relative">
-                      <button
+                      <button 
                         ref={certBtnRef}
                         aria-haspopup="menu"
                         aria-expanded={certMenuOpen}
