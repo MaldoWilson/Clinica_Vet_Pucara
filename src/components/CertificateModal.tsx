@@ -326,7 +326,7 @@ export default function CertificateModal({
   if (!open || !template || !templateMeta) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="w-[95vw] max-w-2xl max-h-[90vh] rounded-xl bg-white ring-1 ring-gray-200 shadow-2xl overflow-hidden flex flex-col">
         <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between flex-shrink-0">
           <div className="text-sm font-semibold text-gray-700">Ficha N° {paciente.id} · {templateMeta.nombre_archivo}</div>

@@ -2343,46 +2343,49 @@ body * {
           {/* Modal de selección de certificados */}
           {certMenuOpen && (
             <div 
-              className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm"
+              className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
               onClick={(e) => {
                 if (e.target === e.currentTarget) {
                   setCertMenuOpen(false);
                 }
               }}
             >
-              <div className="w-[90vw] max-w-md rounded-xl bg-white ring-1 ring-gray-200 shadow-2xl overflow-hidden">
-                <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
-                  <div className="text-sm font-semibold text-gray-700">Certificados disponibles</div>
-                  <button 
-                    onClick={() => setCertMenuOpen(false)} 
-                    className="p-2 rounded hover:bg-gray-100 transition-colors" 
-                    title="Cerrar"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="p-4">
-                  {certs.length === 0 ? (
-                    <div className="px-4 py-8 text-center text-sm text-gray-500">
-                      No hay certificados disponibles
-                    </div>
-                  ) : (
-                    <ul className="space-y-2 max-h-96 overflow-y-auto">
-                      {certs.map((c) => (
-                        <li key={c.id}>
-                          <button
-                            className="w-full text-left px-4 py-3 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors border border-gray-200 hover:border-amber-400 hover:shadow-sm"
-                            onClick={() => onSelectCert(c)}
-                          >
-                            <div className="font-medium">{c.nombre_archivo}</div>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                <div 
+                  className="w-[90vw] max-w-md rounded-xl bg-white ring-1 ring-gray-200 shadow-2xl overflow-hidden pointer-events-auto"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+                    <div className="text-sm font-semibold text-gray-700">Certificados disponibles</div>
+                    <button 
+                      onClick={() => setCertMenuOpen(false)} 
+                      className="p-2 rounded hover:bg-gray-100 transition-colors" 
+                      title="Cerrar"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="p-4">
+                    {certs.length === 0 ? (
+                      <div className="px-4 py-8 text-center text-sm text-gray-500">
+                        No hay certificados disponibles
+                      </div>
+                    ) : (
+                      <ul className="space-y-2 max-h-96 overflow-y-auto">
+                        {certs.map((c) => (
+                          <li key={c.id}>
+                            <button
+                              className="w-full text-left px-4 py-3 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors border border-gray-200 hover:border-amber-400 hover:shadow-sm"
+                              onClick={() => onSelectCert(c)}
+                            >
+                              <div className="font-medium">{c.nombre_archivo}</div>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
           )}
 
           {/* Panel rápido: Certificado Parvovirus */}
