@@ -2417,29 +2417,6 @@ body * {
             </div>
           )}
 
-          {/* Modal de certificados PDF */}
-          {certModalOpen && selectedCert && data && (
-            <CertificateModal
-              open={certModalOpen}
-              onClose={() => setCertModalOpen(false)}
-              templateMeta={{ id: selectedCert.id, nombre_archivo: selectedCert.nombre_archivo, url_archivo: selectedCert.url_archivo }}
-              paciente={pacienteForCert}
-              veterinarios={veterinarios.map(v => ({ id: String(v.id), nombre: v.nombre }))}
-              consulta={{
-                diagnostico: consultaForm.diagnostico,
-                tratamiento: consultaForm.tratamiento,
-                observaciones: consultaForm.observaciones,
-                proximo_control: consultaForm.proximo_control || undefined,
-              }}
-              idConsulta={ultimaConsultaId}
-              onCertificadoGuardado={() => {
-                if (tab === "historial") {
-                  loadCertificados();
-                }
-              }}
-            />
-          )}
-
           {/* Formulario receta */}
           {recetaOpen && (
             <div className="mt-16 rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6 relative w-full max-w-4xl mx-auto">
@@ -2586,6 +2563,29 @@ body * {
           )}
 
           </>)}
+
+          {/* Modal de certificados PDF */}
+          {certModalOpen && selectedCert && data && (
+            <CertificateModal
+              open={certModalOpen}
+              onClose={() => setCertModalOpen(false)}
+              templateMeta={{ id: selectedCert.id, nombre_archivo: selectedCert.nombre_archivo, url_archivo: selectedCert.url_archivo }}
+              paciente={pacienteForCert}
+              veterinarios={veterinarios.map(v => ({ id: String(v.id), nombre: v.nombre }))}
+              consulta={{
+                diagnostico: consultaForm.diagnostico,
+                tratamiento: consultaForm.tratamiento,
+                observaciones: consultaForm.observaciones,
+                proximo_control: consultaForm.proximo_control || undefined,
+              }}
+              idConsulta={ultimaConsultaId}
+              onCertificadoGuardado={() => {
+                if (tab === "historial") {
+                  loadCertificados();
+                }
+              }}
+            />
+          )}
 
           {tab === "antecedentes" && (
             <div className="grid grid-cols-1 gap-6">
