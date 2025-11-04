@@ -2234,7 +2234,7 @@ body * {
                         disabled={!ultimaConsultaId}
                         className={`px-5 ml-5 py-2 rounded-lg text-white shadow-sm ${
                           ultimaConsultaId 
-                            ? 'bg-purple-600 hover:bg-purple-700' 
+                            ? 'bg-amber-400 hover:bg-amber-500' 
                             : 'bg-gray-400 cursor-not-allowed'
                         }`}
                         title={!ultimaConsultaId ? 'Debes crear una consulta primero' : 'Crear certificados'}
