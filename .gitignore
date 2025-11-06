@@ -28,6 +28,7 @@ coverage/
 db/*.db
 db/*.sqlite
 db/*.sqlite-*
+sql/
 
 # Sistema operativo / editores
 .DS_Store
