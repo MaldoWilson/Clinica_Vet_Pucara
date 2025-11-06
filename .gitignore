@@ -29,7 +29,7 @@ db/*.db
 db/*.sqlite
 db/*.sqlite-*
 sql/
-
+esquema.sql
 # Sistema operativo / editores
 .DS_Store
 Thumbs.db
