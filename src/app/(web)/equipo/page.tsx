@@ -152,7 +152,7 @@ export default function EquipoPage() {
 
       <WhatsAppButton
         phone="569"
-        text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
+        text="Hola Vengo desde la web y quiero agendar una hora de emergencia para mi mascota"
         floating
       />
     </div>

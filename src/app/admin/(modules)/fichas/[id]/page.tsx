@@ -187,8 +187,6 @@ export default function PacienteDetailPage() {
   const [confirmDelete, setConfirmDelete] = useState<null | { id: string }>(null);
   const consultaCardRef = useRef<HTMLDivElement>(null);
   const [certMenuOpen, setCertMenuOpen] = useState(false);
-  const certBtnRef = useRef<HTMLButtonElement>(null);
-  const certMenuRef = useRef<HTMLDivElement>(null);
   const [parvoOpen, setParvoOpen] = useState(false);
   const [parvoTexto, setParvoTexto] = useState("");
   const [savingParvo, setSavingParvo] = useState(false);
@@ -224,22 +222,14 @@ export default function PacienteDetailPage() {
     }
   }, [editConsulta]);
 
-  // Cerrar menú de Certificados al hacer clic fuera o con Escape
+  // Cerrar modal de Certificados al hacer clic fuera o con Escape
   useEffect(() => {
-    function handleDown(e: MouseEvent) {
-      if (!certMenuOpen) return;
-      const target = e.target as Node;
-      if (certMenuRef.current && !certMenuRef.current.contains(target) && certBtnRef.current && !certBtnRef.current.contains(target)) {
-        setCertMenuOpen(false);
-      }
-    }
+    if (!certMenuOpen) return;
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") setCertMenuOpen(false);
     }
-    document.addEventListener("mousedown", handleDown);
     document.addEventListener("keydown", handleKey);
     return () => {
-      document.removeEventListener("mousedown", handleDown);
       document.removeEventListener("keydown", handleKey);
     };
   }, [certMenuOpen]);
@@ -2121,7 +2111,7 @@ body * {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
-                      <input
+                      <input placeholder="Peso (kg)"
                         className="w-full rounded-lg border border-gray-300 px-3 py-2"
                         value={editReceta.peso || ''}
                         onChange={(e) => setEditReceta({ ...editReceta, peso: e.target.value })}
@@ -2129,7 +2119,7 @@ body * {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Veterinario que emite la receta</label>
-                      <select
+                      <select 
                         className="w-full rounded-lg border border-gray-300 px-3 py-2"
                         value={editReceta.emitida_por || ''}
                         onChange={(e) => setEditReceta({ ...editReceta, emitida_por: e.target.value })}
@@ -2145,7 +2135,7 @@ body * {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Notas</label>
-                      <textarea
+                      <textarea placeholder="Notas"
                         className="w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2"
                         value={editReceta.notas || ''}
                         onChange={(e) => setEditReceta({ ...editReceta, notas: e.target.value })}
@@ -2158,7 +2148,7 @@ body * {
                       <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-2 mb-3 p-3 bg-gray-50 rounded-lg">
                         <div className="md:col-span-2">
                           <label className="block text-xs font-medium text-gray-600 mb-1">Nombre</label>
-                          <input 
+                          <input  placeholder="Nombre"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.nombre_medicamento || ''} 
                             onChange={(e) => {
@@ -2170,7 +2160,7 @@ body * {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Dosis</label>
-                          <input 
+                          <input placeholder="Dosis"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.dosis || ''} 
                             onChange={(e) => {
@@ -2182,7 +2172,7 @@ body * {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Vía</label>
-                          <input 
+                          <input placeholder="Vía"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.via || ''} 
                             onChange={(e) => {
@@ -2194,7 +2184,7 @@ body * {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Frecuencia</label>
-                          <input 
+                          <input placeholder="Frecuencia"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.frecuencia || ''} 
                             onChange={(e) => {
@@ -2206,7 +2196,7 @@ body * {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Duración</label>
-                          <input 
+                          <input placeholder="Duración"
                             className="w-full rounded border border-gray-300 px-2 py-1 text-sm" 
                             value={item.duracion || ''} 
                             onChange={(e) => {
@@ -2330,44 +2320,18 @@ body * {
                     >
                       Crear receta
                     </button>
-                    <div className="relative">
-                      <button
-                        ref={certBtnRef}
-                        aria-haspopup="menu"
-                        aria-expanded={certMenuOpen}
-                        onClick={() => (ultimaConsultaId ? setCertMenuOpen((v) => !v) : null)}
-                        disabled={!ultimaConsultaId}
-                        className={`px-5 ml-5 py-2 rounded-lg text-white shadow-sm ${
-                          ultimaConsultaId 
-                            ? 'bg-amber-400 hover:bg-amber-500' 
-                            : 'bg-gray-400 cursor-not-allowed'
-                        }`}
-                        title={!ultimaConsultaId ? 'Debes crear una consulta primero' : 'Crear certificados'}
-                      >
-                        Crear certificados
-                      </button>
-                      {certMenuOpen && (
-                        <div ref={certMenuRef} className="absolute left-0 mt-2 w-80 rounded-xl bg-white ring-1 ring-gray-200 shadow-lg z-20 overflow-hidden">
-                          <div className="px-3 py-2 text-xs text-gray-500 border-b bg-gray-50">Certificados disponibles</div>
-                          <ul className="max-h-96 overflow-y-auto py-2">
-                            {certs.length === 0 ? (
-                              <li className="px-4 py-2 text-sm text-gray-500">No hay certificados</li>
-                            ) : (
-                              certs.map((c) => (
-                                <li key={c.id}>
-                                  <button
-                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                    onClick={() => onSelectCert(c)}
-                                  >
-                                    {c.nombre_archivo}
-                                  </button>
-                                </li>
-                              ))
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+                    <button 
+                      onClick={() => (ultimaConsultaId ? setCertMenuOpen(true) : null)}
+                      disabled={!ultimaConsultaId}
+                      className={`px-5 ml-5 py-2 rounded-lg text-white shadow-sm ${
+                        ultimaConsultaId 
+                          ? 'bg-amber-400 hover:bg-amber-500' 
+                          : 'bg-gray-400 cursor-not-allowed'
+                      }`}
+                      title={!ultimaConsultaId ? 'Debes crear una consulta primero' : 'Crear certificados'}
+                    >
+                      Crear certificados
+                    </button>
 
                   </div>
                 </div>
@@ -2375,6 +2339,54 @@ body * {
             </div>
 
           </div>
+
+          {/* Modal de selección de certificados */}
+          {certMenuOpen && (
+            <div 
+              className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setCertMenuOpen(false);
+                }
+              }}
+            >
+                <div 
+                  className="w-[90vw] max-w-md rounded-xl bg-white ring-1 ring-gray-200 shadow-2xl overflow-hidden pointer-events-auto"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+                    <div className="text-sm font-semibold text-gray-700">Certificados disponibles</div>
+                    <button 
+                      onClick={() => setCertMenuOpen(false)} 
+                      className="p-2 rounded hover:bg-gray-100 transition-colors" 
+                      title="Cerrar"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="p-4">
+                    {certs.length === 0 ? (
+                      <div className="px-4 py-8 text-center text-sm text-gray-500">
+                        No hay certificados disponibles
+                      </div>
+                    ) : (
+                      <ul className="space-y-2 max-h-96 overflow-y-auto">
+                        {certs.map((c) => (
+                          <li key={c.id}>
+                            <button
+                              className="w-full text-left px-4 py-3 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors border border-gray-200 hover:border-amber-400 hover:shadow-sm"
+                              onClick={() => onSelectCert(c)}
+                            >
+                              <div className="font-medium">{c.nombre_archivo}</div>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </div>
+          )}
 
           {/* Panel rápido: Certificado Parvovirus */}
           {parvoOpen && (
@@ -2406,29 +2418,6 @@ body * {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Modal de certificados PDF */}
-          {certModalOpen && selectedCert && data && (
-            <CertificateModal
-              open={certModalOpen}
-              onClose={() => setCertModalOpen(false)}
-              templateMeta={{ id: selectedCert.id, nombre_archivo: selectedCert.nombre_archivo, url_archivo: selectedCert.url_archivo }}
-              paciente={pacienteForCert}
-              veterinarios={veterinarios.map(v => ({ id: String(v.id), nombre: v.nombre }))}
-              consulta={{
-                diagnostico: consultaForm.diagnostico,
-                tratamiento: consultaForm.tratamiento,
-                observaciones: consultaForm.observaciones,
-                proximo_control: consultaForm.proximo_control || undefined,
-              }}
-              idConsulta={ultimaConsultaId}
-              onCertificadoGuardado={() => {
-                if (tab === "historial") {
-                  loadCertificados();
-                }
-              }}
-            />
           )}
 
           {/* Formulario receta */}
@@ -2577,6 +2566,29 @@ body * {
           )}
 
           </>)}
+
+          {/* Modal de certificados PDF */}
+          {certModalOpen && selectedCert && data && (
+            <CertificateModal
+              open={certModalOpen}
+              onClose={() => setCertModalOpen(false)}
+              templateMeta={{ id: selectedCert.id, nombre_archivo: selectedCert.nombre_archivo, url_archivo: selectedCert.url_archivo }}
+              paciente={pacienteForCert}
+              veterinarios={veterinarios.map(v => ({ id: String(v.id), nombre: v.nombre }))}
+              consulta={{
+                diagnostico: consultaForm.diagnostico,
+                tratamiento: consultaForm.tratamiento,
+                observaciones: consultaForm.observaciones,
+                proximo_control: consultaForm.proximo_control || undefined,
+              }}
+              idConsulta={ultimaConsultaId}
+              onCertificadoGuardado={() => {
+                if (tab === "historial") {
+                  loadCertificados();
+                }
+              }}
+            />
+          )}
 
           {tab === "antecedentes" && (
             <div className="grid grid-cols-1 gap-6">

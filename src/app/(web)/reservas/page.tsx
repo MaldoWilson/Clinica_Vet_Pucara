@@ -7,7 +7,7 @@ export default function ReservasPage() {
       <ServiceSelection />
       <WhatsAppButton
         phone="569"   // Pongamos un numero para probar
-        text="¡Hola! Vengo desde la web y quiero agendar una hora de emergencia"
+        text="Hola Vengo desde la web y quiero agendar una hora de emergencia para mi mascota"
         floating // botón flotante abajo a la derecha
       />
     </>

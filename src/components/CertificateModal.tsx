@@ -272,6 +272,9 @@ export default function CertificateModal({
       
       // Guardar certificado en la base de datos (asíncrono, no bloquea)
       guardarCertificado().catch(console.error);
+      
+      // Cerrar el modal después de descargar exitosamente
+      onClose();
     } catch (e: any) {
       setError(e?.message || "Error generando PDF");
     } finally {
@@ -323,13 +326,13 @@ export default function CertificateModal({
   if (!open || !template || !templateMeta) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="w-[95vw] max-w-2xl rounded-xl bg-white ring-1 ring-gray-200 shadow-xl overflow-hidden">
-        <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="w-[95vw] max-w-2xl max-h-[90vh] rounded-xl bg-white ring-1 ring-gray-200 shadow-2xl overflow-hidden flex flex-col">
+        <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between flex-shrink-0">
           <div className="text-sm font-semibold text-gray-700">Ficha N° {paciente.id} · {templateMeta.nombre_archivo}</div>
-          <button onClick={onClose} className="p-2 rounded hover:bg-gray-100" title="Cerrar">✕</button>
+          <button onClick={onClose} className="p-2 rounded hover:bg-gray-100 transition-colors" title="Cerrar">✕</button>
         </div>
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 overflow-y-auto flex-1">
           {error && (
             <div className="text-sm text-red-600 bg-red-50 ring-1 ring-red-200 rounded p-2">{error}</div>
           )}
@@ -373,11 +376,11 @@ export default function CertificateModal({
                 return false;
               })
               .map((f) => (
-              <div key={f.key} className="grid grid-cols-3 items-center gap-3">
-                <label className="text-sm text-gray-700 col-span-1">{f.label}</label>
+              <div key={f.key} className="grid grid-cols-3 items-start gap-3 py-2">
+                <label className="text-sm text-gray-700 col-span-1 font-medium pt-2">{f.label}</label>
                 {f.type === "manual" && f.key === "Texbox4" ? (
                   <select
-                    className="col-span-2 rounded border-gray-300 text-sm"
+                    className="col-span-2 rounded-md border-gray-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     value={veterinarioId}
                     onChange={(e) => setVeterinarioId(e.target.value)}
                   >
@@ -391,9 +394,9 @@ export default function CertificateModal({
                     <button
                       type="button"
                       onClick={() => setExamenesPrequirurgicos("si")}
-                      className={`px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${
+                      className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
                         examenesPrequirurgicos === "si" 
-                          ? 'bg-green-600 text-white' 
+                          ? 'bg-green-600 text-white shadow-sm' 
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}
                     >
@@ -406,9 +409,9 @@ export default function CertificateModal({
                     <button
                       type="button"
                       onClick={() => setExamenesPrequirurgicos("no")}
-                      className={`px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${
+                      className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
                         examenesPrequirurgicos === "no" 
-                          ? 'bg-red-600 text-white' 
+                          ? 'bg-red-600 text-white shadow-sm' 
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}
                     >
@@ -419,7 +422,7 @@ export default function CertificateModal({
                 ) : f.type === "manual" ? (
                   f.key === "Texbox11" && template?.id === 6 ? (
                     <textarea
-                      className="col-span-2 rounded border-gray-300 text-sm min-h-[150px] resize-y"
+                      className="col-span-2 rounded-md border-gray-300 text-sm min-h-[150px] resize-y px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder={f.placeholder || ""}
                       value={manualValues[f.key] || ""}
                       onChange={(e) => setManualValues((m) => ({ ...m, [f.key]: e.target.value }))}
@@ -427,7 +430,7 @@ export default function CertificateModal({
                     />
                   ) : (
                     <input
-                      className="col-span-2 rounded border-gray-300 text-sm"
+                      className="col-span-2 rounded-md border-gray-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder={f.placeholder || ""}
                       value={manualValues[f.key] || ""}
                       onChange={(e) => setManualValues((m) => ({ ...m, [f.key]: e.target.value }))}
@@ -435,7 +438,7 @@ export default function CertificateModal({
                   )
                 ) : (
                   <input
-                    className="col-span-2 rounded border-gray-200 bg-gray-50 text-sm"
+                    className="col-span-2 rounded-md border-gray-200 bg-gray-50 text-sm px-3 py-2 cursor-not-allowed"
                     value={fillValues[f.key] || ""}
                     readOnly
                   />
@@ -445,30 +448,30 @@ export default function CertificateModal({
 
             {/* Grupos de campos */}
             {template.fieldGroups && showManualFields && template.fieldGroups.map((group) => (
-              <div key={group.id} className="border border-gray-200 rounded-lg">
+              <div key={group.id} className="border border-gray-200 rounded-lg overflow-hidden">
                 <button
                   onClick={() => toggleGroup(group.id)}
-                  className="w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 rounded-t-lg flex items-center justify-between"
+                  className="w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between"
                 >
                   <div>
                     <div className="font-medium text-gray-900">{group.name}</div>
                     {group.description && (
-                      <div className="text-sm text-gray-600">{group.description}</div>
+                      <div className="text-sm text-gray-600 mt-1">{group.description}</div>
                     )}
                   </div>
-                  <div className="text-gray-500">
+                  <div className="text-gray-500 text-lg">
                     {expandedGroups[group.id] ? '▼' : '▶'}
                   </div>
                 </button>
                 
                 {expandedGroups[group.id] && (
-                  <div className="p-4 space-y-3 bg-white">
+                  <div className="p-4 space-y-3 bg-white border-t border-gray-200">
                     {group.fields.map((f) => (
-                      <div key={f.key} className="grid grid-cols-3 items-center gap-3">
-                        <label className="text-sm text-gray-700 col-span-1">{f.label}</label>
+                      <div key={f.key} className="grid grid-cols-3 items-start gap-3 py-2">
+                        <label className="text-sm text-gray-700 col-span-1 font-medium pt-2">{f.label}</label>
                         {f.type === "manual" && f.key === "Texbox4" ? (
                           <select
-                            className="col-span-2 rounded border-gray-300 text-sm"
+                            className="col-span-2 rounded-md border-gray-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             value={veterinarioId}
                             onChange={(e) => setVeterinarioId(e.target.value)}
                           >
@@ -482,9 +485,9 @@ export default function CertificateModal({
                             <button
                               type="button"
                               onClick={() => setExamenesPrequirurgicos("si")}
-                              className={`px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${
+                              className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
                                 examenesPrequirurgicos === "si" 
-                                  ? 'bg-green-600 text-white' 
+                                  ? 'bg-green-600 text-white shadow-sm' 
                                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                               }`}
                             >
@@ -497,9 +500,9 @@ export default function CertificateModal({
                             <button
                               type="button"
                               onClick={() => setExamenesPrequirurgicos("no")}
-                              className={`px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${
+                              className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
                                 examenesPrequirurgicos === "no" 
-                                  ? 'bg-red-600 text-white' 
+                                  ? 'bg-red-600 text-white shadow-sm' 
                                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                               }`}
                             >
@@ -510,7 +513,7 @@ export default function CertificateModal({
                         ) : f.type === "manual" ? (
                           f.key === "Texbox11" && template?.id === 6 ? (
                             <textarea
-                              className="col-span-2 rounded border-gray-300 text-sm min-h-[150px] resize-y"
+                              className="col-span-2 rounded-md border-gray-300 text-sm min-h-[150px] resize-y px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                               placeholder={f.placeholder || ""}
                               value={manualValues[f.key] || ""}
                               onChange={(e) => setManualValues((m) => ({ ...m, [f.key]: e.target.value }))}
@@ -518,7 +521,7 @@ export default function CertificateModal({
                             />
                           ) : (
                             <input
-                              className="col-span-2 rounded border-gray-300 text-sm"
+                              className="col-span-2 rounded-md border-gray-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                               placeholder={f.placeholder || ""}
                               value={manualValues[f.key] || ""}
                               onChange={(e) => setManualValues((m) => ({ ...m, [f.key]: e.target.value }))}
@@ -526,7 +529,7 @@ export default function CertificateModal({
                           )
                         ) : (
                           <input
-                            className="col-span-2 rounded border-gray-200 bg-gray-50 text-sm"
+                            className="col-span-2 rounded-md border-gray-200 bg-gray-50 text-sm px-3 py-2 cursor-not-allowed"
                             value={fillValues[f.key] || ""}
                             readOnly
                           />
@@ -539,10 +542,10 @@ export default function CertificateModal({
             ))}
           </div>
         </div>
-        <div className="px-4 py-3 border-t bg-gray-50 flex items-center justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded border text-sm">Cancelar</button>
-          <button disabled={loading} onClick={handleOpenPrint} className="px-4 py-2 rounded bg-indigo-600 text-white text-sm disabled:opacity-60">Abrir para imprimir</button>
-          <button disabled={loading} onClick={handleDownload} className="px-4 py-2 rounded bg-green-600 text-white text-sm disabled:opacity-60">Rellenar y descargar</button>
+        <div className="px-4 py-3 border-t bg-gray-50 flex items-center justify-end gap-2 flex-shrink-0">
+          <button onClick={onClose} className="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-100 transition-colors">Cancelar</button>
+          <button disabled={loading} onClick={handleOpenPrint} className="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm disabled:opacity-60 hover:bg-indigo-700 transition-colors shadow-sm">Abrir para imprimir</button>
+          <button disabled={loading} onClick={handleDownload} className="px-4 py-2 rounded-md bg-green-600 text-white text-sm disabled:opacity-60 hover:bg-green-700 transition-colors shadow-sm">Rellenar y descargar</button>
         </div>
       </div>
     </div>
