@@ -46,6 +46,20 @@ const INDIGO = "#6366F1";
 const ROJO = "#EF4444";
 const GRIS = "#9CA3AF";
 
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  if (percent === 0) return null;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize="12">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
 const modules = [
   {
     title: "Flujo de Caja",
@@ -56,6 +70,18 @@ const modules = [
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3v18h18M7 13l3-3 4 4 5-6" />
+      </svg>
+    ),
+  },
+  {
+    title: "Registro de Vacunas",
+    href: "/admin/vacunas",
+    desc: "Dashboard y gestión",
+    bg: "bg-cyan-50",
+    color: "text-cyan-600",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 21l-4-4m4 4l4-4m-4 4v-6.09a2 2 0 01.586-1.414l4.914-4.914a2 2 0 012.828 0l1.414 1.414a2 2 0 010 2.828l-4.914 4.914A2 2 0 0110.09 15H4" />
       </svg>
     ),
   },
@@ -264,10 +290,19 @@ export default function AdminHome() {
   }, [citas]);
 
   const estadoCitasPie = useMemo(() => {
-    const total = Math.max(1, citas.length);
-    const pendientes = citas.filter((c) => c.estado === "PENDIENTE").length;
-    const aceptadas = citas.filter((c) => c.estado === "CONFIRMADA" || c.estado === "ATENDIDA").length;
-    const canceladas = citas.filter((c) => c.estado === "CANCELADA").length;
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    const citasDelMes = citas.filter(c => {
+      const fechaCita = new Date(c.creado_en);
+      return fechaCita >= startOfMonth && fechaCita <= endOfMonth;
+    });
+
+    const total = Math.max(1, citasDelMes.length);
+    const pendientes = citasDelMes.filter((c) => c.estado === "PENDIENTE").length;
+    const aceptadas = citasDelMes.filter((c) => c.estado === "CONFIRMADA" || c.estado === "ATENDIDA").length;
+    const canceladas = citasDelMes.filter((c) => c.estado === "CANCELADA").length;
     return [
       { name: "Pendientes", value: pendientes, color: GRIS },
       { name: "Aceptadas", value: aceptadas, color: INDIGO },
@@ -329,11 +364,11 @@ export default function AdminHome() {
           </div>
         </div>
         <div className="bg-white rounded-xl shadow p-5 border">
-          <p className="font-semibold text-gray-900 mb-2">Estado de Citas</p>
+          <p className="font-semibold text-gray-900 mb-2">Estado de Citas (Mes Actual)</p>
           <div className="h-64 grid place-items-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={estadoCitasPie} dataKey="value" nameKey="name" innerRadius={70} outerRadius={110}>
+                <Pie data={estadoCitasPie} dataKey="value" nameKey="name" innerRadius={70} outerRadius={110} labelLine={false} label={renderCustomizedLabel}>
                   {estadoCitasPie.map((s, i) => (
                     <Cell key={i} fill={s.color} />
                   ))}

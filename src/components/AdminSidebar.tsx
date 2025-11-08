@@ -71,6 +71,15 @@ export default function AdminSidebar() {
       ),
     },
     {
+      label: "Registro de Vacunas",
+      href: "/admin/vacunas",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 21l-4-4m4 4l4-4m-4 4v-6.09a2 2 0 01.586-1.414l4.914-4.914a2 2 0 012.828 0l1.414 1.414a2 2 0 010 2.828l-4.914 4.914A2 2 0 0110.09 15H4" />
+        </svg>
+      ),
+    },
+    {
       label: "Flujo de Caja",
       href: "/admin/flujo-caja",
       icon: (
