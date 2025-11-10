@@ -224,7 +224,7 @@ export default function PoliticasSeguridadPage() {
                 <li>Email: {process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contacto@clinicapucara.cl"}</li>
                 <li>Teléfono: {process.env.NEXT_PUBLIC_WHATSAPP_PHONE ? `+${process.env.NEXT_PUBLIC_WHATSAPP_PHONE.replace(/^(?!\+)/, "")}` : "+56 2 859 2840"}</li>
                 <li>Dirección: Esmeralda 97, San Bernardo, Región Metropolitana</li>
-                <li>Horario de atención: Lunes a Viernes 9:00 - 19:00, Sábados 9:00 - 14:00</li>
+                <li>Horario de atención: Lunes a Sábado 10:30 - 19:00, Domingos 11:00 - 18:00</li>
               </ul>
             </div>
 
