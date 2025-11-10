@@ -8,7 +8,16 @@ export const dynamic = 'force-dynamic'
 type VaccineRecord = {
   fecha_aplicacion: string
   nombre_vacuna: string
-  veterinarios: { nombre: string } | null
+  veterinarios: { nombre: string } | { nombre: string }[] | null
+}
+
+// Helper function to safely get veterinarian name
+function getVetName(veterinarios: { nombre: string } | { nombre: string }[] | null | undefined): string {
+  if (!veterinarios) return 'Desconocido'
+  if (Array.isArray(veterinarios)) {
+    return veterinarios[0]?.nombre ?? 'Desconocido'
+  }
+  return veterinarios.nombre ?? 'Desconocido'
 }
 
 export async function GET (request: Request) {
@@ -58,7 +67,7 @@ export async function GET (request: Request) {
 
   const totalMes = kpiRecords.length
   const vetCountsMes = kpiRecords.reduce((acc, rec) => {
-    const vetName = rec.veterinarios?.nombre || 'Desconocido'
+    const vetName = getVetName(rec.veterinarios)
     acc[vetName] = (acc[vetName] || 0) + 1
     return acc
   }, {} as Record<string, number>)
@@ -83,7 +92,7 @@ export async function GET (request: Request) {
 
   const performanceByMonth = records.reduce((acc, rec) => {
     const month = format(new Date(rec.fecha_aplicacion), 'yyyy-MM')
-    const vetName = rec.veterinarios?.nombre || 'Desconocido'
+    const vetName = getVetName(rec.veterinarios)
 
     if (!acc[month]) {
       acc[month] = { name: month }

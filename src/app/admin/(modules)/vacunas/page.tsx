@@ -11,8 +11,26 @@ import * as XLSX from 'xlsx'
 
 // Types
 type Vet = { id: string; nombre: string }
-type VaccineRecord = { id: number; nombre_vacuna: string; fecha_aplicacion: string; veterinarios: Vet }
+type VaccineRecord = { id: number; nombre_vacuna: string; fecha_aplicacion: string; veterinarios: Vet | Vet[] | null }
 type FormData = { id?: number; veterinario_id: string; nombre_vacuna: string; fecha_aplicacion: string }
+
+// Helper function to safely get veterinarian name
+function getVetName(veterinarios: Vet | Vet[] | null | undefined): string {
+  if (!veterinarios) return 'N/A'
+  if (Array.isArray(veterinarios)) {
+    return veterinarios[0]?.nombre ?? 'N/A'
+  }
+  return veterinarios.nombre ?? 'N/A'
+}
+
+// Helper function to safely get veterinarian ID
+function getVetId(veterinarios: Vet | Vet[] | null | undefined): string {
+  if (!veterinarios) return ''
+  if (Array.isArray(veterinarios)) {
+    return veterinarios[0]?.id ?? ''
+  }
+  return veterinarios.id ?? ''
+}
 
 // Stats Types from API
 type KpiData = { totalMes: number; vetDestacado: string; vacunaComun: string }
@@ -109,7 +127,7 @@ export default function VacunasPage () {
   const handleEdit = (record: VaccineRecord) => {
     setFormData({
       id: record.id,
-      veterinario_id: record.veterinarios.id,
+      veterinario_id: getVetId(record.veterinarios),
       nombre_vacuna: record.nombre_vacuna,
       fecha_aplicacion: record.fecha_aplicacion
     })
@@ -175,7 +193,7 @@ export default function VacunasPage () {
 
     // --- Create Summary Data ---
     const totalsByVet = tableData.reduce((acc, rec) => {
-      const vetName = rec.veterinarios?.nombre || 'N/A'
+      const vetName = getVetName(rec.veterinarios)
       acc[vetName] = (acc[vetName] || 0) + 1
       return acc
     }, {} as Record<string, number>)
@@ -215,7 +233,7 @@ export default function VacunasPage () {
         formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`
       }
       ws_data.push([
-        rec.veterinarios?.nombre || 'N/A',
+        getVetName(rec.veterinarios),
         rec.nombre_vacuna,
         formattedDate
       ])
@@ -242,7 +260,7 @@ export default function VacunasPage () {
 
     // --- Create Summary Data ---
     const totalsByVet = tableData.reduce((acc, rec) => {
-      const vetName = rec.veterinarios?.nombre || 'N/A'
+      const vetName = getVetName(rec.veterinarios)
       acc[vetName] = (acc[vetName] || 0) + 1
       return acc
     }, {} as Record<string, number>)
@@ -296,7 +314,7 @@ export default function VacunasPage () {
                   const formattedDate = rec.fecha_aplicacion ? rec.fecha_aplicacion.split('-').reverse().join('-') : ''
                   return `
                     <tr>
-                      <td>${rec.veterinarios?.nombre || 'N/A'}</td>
+                      <td>${getVetName(rec.veterinarios)}</td>
                       <td>${rec.nombre_vacuna}</td>
                       <td>${formattedDate}</td>
                     </tr>
@@ -369,7 +387,7 @@ export default function VacunasPage () {
                   ? (<tr><td colSpan={4} className="p-8 text-center text-gray-500">No hay registros para el mes seleccionado.</td></tr>)
                   : (displayedRecords.map((rec) => (
                       <tr key={rec.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-4 text-sm font-medium text-gray-900">{rec.veterinarios?.nombre || 'N/A'}</td>
+                        <td className="px-4 py-4 text-sm font-medium text-gray-900">{getVetName(rec.veterinarios)}</td>
                         <td className="px-4 py-4 text-sm text-gray-700">{rec.nombre_vacuna}</td>
                         <td className="px-4 py-4 text-sm text-gray-600">
                           {rec.fecha_aplicacion ? rec.fecha_aplicacion.split('-').reverse().join('-') : ''}

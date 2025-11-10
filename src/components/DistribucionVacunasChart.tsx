@@ -59,7 +59,10 @@ export default function DistribucionVacunasChart ({ data }: ChartProps) {
             cx="50%"
             cy="50%"
             labelLine={true}
-            label={(entry) => `${(entry.percent * 100).toFixed(0)}%`}
+            label={(props: any) => {
+              const percent = props.percent as number | undefined
+              return percent ? `${(percent * 100).toFixed(0)}%` : ''
+            }}
             outerRadius={120}
             fill="#8884d8"
             dataKey="value"
