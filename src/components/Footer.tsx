@@ -128,6 +128,16 @@ export default function Footer() {
                       Servicios
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/terminos-condiciones" className="hover:text-indigo-300 transition-colors block py-1">
+                      Términos y Condiciones
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/politicas-seguridad" className="hover:text-indigo-300 transition-colors block py-1">
+                      Políticas de Seguridad
+                    </Link>
+                  </li>
                 </ul>
               </div>
 
