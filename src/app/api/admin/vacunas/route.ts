@@ -35,7 +35,9 @@ export async function GET () {
     const { fecha_aplicacion, veterinarios } = vacuna
     if (!veterinarios) return acc // Skip if vet info is missing
 
-    const vetName = veterinarios.nombre
+    const vetName = Array.isArray(veterinarios)
+      ? (veterinarios[0]?.nombre ?? 'Desconocido')
+      : ((veterinarios as { nombre?: string })?.nombre ?? 'Desconocido')
     const month = new Date(fecha_aplicacion).toISOString().slice(0, 7) // Format YYYY-MM
 
     if (!acc[month]) {
