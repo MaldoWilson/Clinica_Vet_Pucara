@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AdminEditableTable from "@/components/AdminEditableTable";
 
 export default function ProductosForm() {
@@ -33,6 +33,20 @@ export default function ProductosForm() {
     updated_at?: string;
   }>>([]);
   const [loadingList, setLoadingList] = useState(false);
+
+  const mainImageInputRef = useRef<HTMLInputElement | null>(null);
+  const extraInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const clearFileInputs = () => {
+    if (mainImageInputRef.current) {
+      mainImageInputRef.current.value = "";
+    }
+    extraInputRefs.current.forEach((input) => {
+      if (input) {
+        input.value = "";
+      }
+    });
+  };
   const [selectedEstados, setSelectedEstados] = useState<string[]>([]); // "Agotados" | "Disponibles"
   const [selectedCategorias, setSelectedCategorias] = useState<string[]>([]); // "Alimentos" | "Medicamentos" | "Accesorios"
   const [search, setSearch] = useState("");
@@ -174,6 +188,7 @@ export default function ProductosForm() {
       setImagePreview(null);
       setExtraFiles([null, null, null]);
       setExtraPreviews([null, null, null]);
+      clearFileInputs();
       fetchProductos();
     } catch (err: any) {
       setError(err.message || "Error inesperado");
@@ -196,6 +211,7 @@ export default function ProductosForm() {
     imagenes?: string[];
     updated_at?: string;
   }) {
+    clearFileInputs();
     setEditing(producto);
     setNombre(producto.nombre);
     setDescripcion(producto.descripcion);
@@ -285,6 +301,7 @@ export default function ProductosForm() {
       setImagePreview(null);
       setExtraFiles([null, null, null]);
       setExtraPreviews([null, null, null]);
+      clearFileInputs();
       fetchProductos();
     } catch (err: any) {
       setError(err.message || "Error inesperado");
@@ -406,6 +423,7 @@ export default function ProductosForm() {
                 <label className="block text-sm font-medium text-gray-700">Imagen Principal</label>
                 <div className="flex items-center gap-3 flex-wrap">
                   <input 
+                    ref={mainImageInputRef}
                     aria-label="Subir imagen principal del producto" 
                     className="block w-full sm:w-auto px-3 py-2 border rounded-md"
                     type="file"
@@ -449,6 +467,9 @@ export default function ProductosForm() {
                   {[0,1,2].map((idx) => (
                     <div key={idx} className="flex items-center gap-3 flex-wrap">
                       <input 
+                        ref={(el) => {
+                          extraInputRefs.current[idx] = el;
+                        }}
                         className="block w-full sm:w-auto px-3 py-2 border rounded-md"
                         type="file"
                         accept="image/*"
@@ -461,7 +482,7 @@ export default function ProductosForm() {
                           });
                           setExtraPreviews((prev) => {
                             const next = [...prev];
-                            next[idx] = file ? URL.createObjectURL(file) : prev[idx];
+                            next[idx] = file ? URL.createObjectURL(file) : null;
                             return next;
                           });
                         }}
@@ -506,6 +527,7 @@ export default function ProductosForm() {
                   setImagePreview(null);
                   setExtraFiles([null, null, null]);
                   setExtraPreviews([null, null, null]);
+                  clearFileInputs();
                 }}
               >
                 Cancelar

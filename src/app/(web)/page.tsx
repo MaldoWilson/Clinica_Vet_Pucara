@@ -7,6 +7,7 @@ import WhatsAppButton from "@/components/whatsapp";
 import ImageCarousel from "@/components/ImageCarousel";
 import Image from "next/image";
 import pageBanner from "@/app/img/fondo2.webp";
+import ContactSection from "@/components/ContactSection";
 
 
 export default async function Home() {
@@ -34,6 +35,13 @@ export default async function Home() {
       
       <LatestProducts />
       <LatestBlogs />
+      <ContactSection
+        withBackground
+        backgroundMode="section"
+        minHeightClass="min-h-[680px]"
+        showFloatingButton={false}
+        anchorId="contacto"
+      />
       
 
 

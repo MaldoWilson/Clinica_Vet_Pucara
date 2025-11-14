@@ -32,6 +32,7 @@ type Mascota = {
   fecha_nacimiento?: string | null;
   numero_microchip?: string | null;
   esterilizado?: boolean | null;
+  imagen_url?: string | null;
   propietario_id: string;
   created_at: string;
   propietario: Owner | null;
@@ -143,6 +144,7 @@ export default function PacienteDetailPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [editAnte, setEditAnte] = useState(false);
   const [savingAnte, setSavingAnte] = useState(false);
   const [ante, setAnte] = useState<Antecedentes>(null);
@@ -175,6 +177,7 @@ export default function PacienteDetailPage() {
     proximo_control: null,
     observaciones: "",
   });
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
   const [recetaOpen, setRecetaOpen] = useState(false);
   const [savingReceta, setSavingReceta] = useState(false);
@@ -205,6 +208,38 @@ export default function PacienteDetailPage() {
 
   function addRecetaItem() {
     setRecetaForm((f) => ({ ...f, items: [...f.items, { nombre_medicamento: "", dosis: "", via: "", frecuencia: "", duracion: "", instrucciones: "" }] }));
+  }
+
+  async function handlePhotoUpload(file: File | null) {
+    if (!file || !data?.mascotas_id) return;
+    setUploadingImage(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("mascotaId", String(data.mascotas_id));
+      const res = await fetch("/api/mascotas/upload", { method: "POST", body: fd });
+      const json = await res.json();
+      if (!res.ok || json?.error) throw new Error(json?.error || "No se pudo subir la imagen");
+      setData((prev) => (prev ? { ...prev, imagen_url: json.imagen_url || null } : prev));
+      setSuccess("Imagen actualizada");
+    } catch (e: any) {
+      setError(e?.message || "Error inesperado");
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function onPickPhoto() {
+    if (uploadingImage) return;
+    fileInputRef.current?.click();
+  }
+
+  function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] || null;
+    handlePhotoUpload(file);
   }
   function removeRecetaItem(idx: number) {
     setRecetaForm((f) => ({ ...f, items: f.items.filter((_, i) => i !== idx) }));
@@ -1877,6 +1912,8 @@ body * {
     return <PacienteDetailSkeleton />;
   }
 
+  const photoSrc = data.imagen_url || (data.especie ? "/gato.webp" : "/perro.webp");
+
   return (
     <div className="max-w-7xl mx-auto">
       {/* Encabezado */}
@@ -1885,17 +1922,33 @@ body * {
         <div className="absolute -inset-1 opacity-0 group-hover:opacity-5 pointer-events-none" />
         <div className="relative p-6">
         <div className="flex items-start gap-4">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-50 to-white ring-1 ring-indigo-100 overflow-hidden flex items-center justify-center shadow-sm">
-            <Image
-              src={data.especie ? "/gato.webp" : "/perro.webp"}
-              alt={data.especie ? "Gato" : "Perro"}
-              width={160}
-              height={160}
-              className="w-full h-full object-cover object-center"
-              priority
-              quality={100}
-            />
-          </div>
+            <div className="relative group w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-50 to-white ring-1 ring-indigo-100 overflow-hidden flex items-center justify-center shadow-sm">
+              <Image
+                src={photoSrc}
+                alt={data.nombre || "Mascota"}
+                width={160}
+                height={160}
+                className="w-full h-full object-cover object-center"
+                priority
+                quality={100}
+                unoptimized
+              />
+              <button
+                type="button"
+                onClick={onPickPhoto}
+                disabled={uploadingImage}
+                className="absolute inset-0 flex items-center justify-center bg-indigo-600/80 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition disabled:opacity-80"
+              >
+                {uploadingImage ? "Subiendo..." : "Editar foto"}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={onPhotoChange}
+              />
+            </div>
           <div className="flex-1">
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">{data.nombre}</h1>

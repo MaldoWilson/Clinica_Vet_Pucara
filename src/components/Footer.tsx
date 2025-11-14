@@ -173,16 +173,16 @@ export default function Footer() {
                   </li>
                   <li>
                     <Link href="/equipo" className="hover:text-indigo-300 transition-colors block py-1">
-                      Nuestro equipo
+                      Quienes somos
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="hover:text-indigo-300 transition-colors block py-1">
+                    <Link href="/#contacto" className="hover:text-indigo-300 transition-colors block py-1">
                       Contacto
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contacto#mapa" className="hover:text-indigo-300 transition-colors block py-1">
+                    <Link href="/#contacto" className="hover:text-indigo-300 transition-colors block py-1">
                       Ubicación
                     </Link>
                   </li>

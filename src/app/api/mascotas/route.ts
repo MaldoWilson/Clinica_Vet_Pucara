@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     if (id) {
       const { data: m, error: mErr } = await supa
         .from("mascotas")
-        .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, propietario_id, created_at")
+        .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, imagen_url, propietario_id, created_at")
         .eq("mascotas_id", id)
         .single();
       if (mErr) return NextResponse.json({ ok: false, error: "Mascota no encontrada" }, { status: 404 });
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     // Nota: Si hay muchas filas, en el futuro se puede paginar y/o usar RPC/materialized view.
     let query = supa
       .from("mascotas")
-      .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, propietario_id, created_at")
+      .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, imagen_url, propietario_id, created_at")
       .order("created_at", { ascending: false });
     
     // Aplicar filtro de especie si se proporciona
@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supa
       .from("mascotas")
       .insert(insertObj)
-      .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, propietario_id, created_at")
+      .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, imagen_url, propietario_id, created_at")
       .single();
 
     if (error) throw error;
@@ -205,6 +205,7 @@ export async function PUT(req: NextRequest) {
     if (typeof body.fecha_nacimiento === "string") updates.fecha_nacimiento = body.fecha_nacimiento;
     if (typeof body.numero_microchip === "string") updates.numero_microchip = body.numero_microchip.trim();
     if (typeof body.esterilizado === "boolean") updates.esterilizado = body.esterilizado;
+    if (typeof body.imagen_url === "string") updates.imagen_url = body.imagen_url.trim();
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ ok: false, error: "Sin cambios" }, { status: 400 });
@@ -215,7 +216,7 @@ export async function PUT(req: NextRequest) {
       .from("mascotas")
       .update(updates)
       .eq("mascotas_id", mascotas_id)
-      .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, propietario_id, created_at")
+      .select("mascotas_id, nombre, especie, raza, sexo, color, fecha_nacimiento, numero_microchip, esterilizado, imagen_url, propietario_id, created_at")
       .single();
     if (error) throw error;
     return NextResponse.json({ ok: true, data });
