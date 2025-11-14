@@ -245,6 +245,7 @@ export default function ProductoDetailPage() {
                   {producto.stock > 0 ? `Stock: ${producto.stock}` : 'Sin stock'}
                 </span>
               </div>
+              <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-2.5 py-0.5 rounded-md mb-4 inline-block">Compra solo en tienda física.</span>
             </div>
 
             <div className="space-y-4">
@@ -305,6 +306,7 @@ export default function ProductoDetailPage() {
 
             {/* Información adicional */}
             <div className="text-sm text-gray-500 space-y-1">
+              <p>Compra solo en tienda física.</p>
               {producto.created_at && (
                 <p>Agregado: {formatDate(producto.created_at)}</p>
               )}
