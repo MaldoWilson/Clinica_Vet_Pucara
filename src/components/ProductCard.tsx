@@ -8,7 +8,7 @@ type Props = {
     descripcion: string; 
     precio: number;
     sku: string;
-    categoria?: string;
+    categorias: { nombre: string } | null;
     stock: number;
     imagen_principal?: string | null;
     created_at?: string;
@@ -65,9 +65,9 @@ export default function ProductCard({ producto }: Props) {
             SKU: {producto.sku}
           </span>
         </div>
-        {producto.categoria && (
+        {producto.categorias?.nombre && (
           <p className="text-xs text-gray-500 font-medium mb-1">
-            {producto.categoria}
+            {producto.categorias.nombre}
           </p>
         )}
         <div className="flex items-center justify-between">

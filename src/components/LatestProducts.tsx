@@ -10,7 +10,7 @@ type Producto = {
   descripcion: string;
   precio: number;
   sku: string;
-  categoria?: string;
+  categorias: { nombre: string } | null;
   stock: number;
   imagen_principal?: string | null;
   created_at?: string;

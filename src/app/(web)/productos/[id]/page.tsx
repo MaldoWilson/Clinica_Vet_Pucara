@@ -10,7 +10,7 @@ type Producto = {
   descripcion: string;
   precio: number;
   sku: string;
-  categoria?: string;
+  categorias: { nombre: string } | null;
   stock: number;
   imagen_principal?: string | null;
   imagenes?: string[];
@@ -255,10 +255,10 @@ export default function ProductoDetailPage() {
                 </p>
               </div>
 
-              {producto.categoria && (
+              {producto.categorias?.nombre && (
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">Categoría</h3>
-                  <p className="text-gray-600">{producto.categoria}</p>
+                  <p className="text-gray-600">{producto.categorias.nombre}</p>
                 </div>
               )}
 

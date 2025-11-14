@@ -10,8 +10,12 @@ export async function GET(request: NextRequest) {
     // Obtener productos: si all=true, traer todos; de lo contrario, solo públicos
     let query = supabase
       .from('productos')
-      .select('id, created_at, nombre, descripcion, precio, sku, categoria, stock, imagen_principal, imagenes, updated_at')
+      .select('*, categorias(id, nombre)')
       .order('created_at', { ascending: false });
+
+    if (!all) {
+      query = query.eq('es_publico', true);
+    }
 
     const { data: productos, error } = await query;
 
@@ -40,8 +44,9 @@ export async function POST(request: NextRequest) {
     const descripcion: string = (body?.descripcion || "").toString();
     const precio: number = Number(body?.precio || 0);
     const sku: string = (body?.sku || "").toString();
-    const categoria: string = (body?.categoria || "").toString();
+    const categoria_id: number | null = body?.categoria_id ? Number(body.categoria_id) : null;
     const stock: number = Number(body?.stock || 0);
+    const es_publico: boolean = !!body?.publico;
     const imagen_principal: string | null = body?.imagen_principal ? String(body.imagen_principal) : null;
     const imagenes: string[] = Array.isArray(body?.imagenes) ? body.imagenes : [];
 
@@ -61,12 +66,13 @@ export async function POST(request: NextRequest) {
         descripcion, 
         precio, 
         sku, 
-        categoria, 
+        categoria_id, 
         stock, 
+        es_publico,
         imagen_principal, 
         imagenes 
       }])
-      .select('id, created_at, nombre, descripcion, precio, sku, categoria, stock, imagen_principal, imagenes, updated_at')
+      .select('*, categorias(id, nombre)')
       .single();
 
     if (error) {
@@ -98,17 +104,19 @@ export async function PUT(request: NextRequest) {
     if (typeof body?.descripcion === 'string') updates.descripcion = body.descripcion;
     if (typeof body?.precio === 'number') updates.precio = body.precio;
     if (typeof body?.sku === 'string') updates.sku = body.sku;
-    if (typeof body?.categoria === 'string') updates.categoria = body.categoria;
+    if (typeof body?.categoria_id === 'number') updates.categoria_id = body.categoria_id;
     if (typeof body?.stock === 'number') updates.stock = body.stock;
+    if (typeof body?.publico === 'boolean') updates.es_publico = body.publico;
     if (typeof body?.imagen_principal !== 'undefined') updates.imagen_principal = body.imagen_principal ? String(body.imagen_principal) : null;
     if (Array.isArray(body?.imagenes)) updates.imagenes = body.imagenes;
+    updates.updated_at = new Date().toISOString();
 
     const supabase = supabaseServer();
     const { data, error } = await supabase
       .from('productos')
       .update(updates)
       .eq('id', id)
-      .select('id, created_at, nombre, descripcion, precio, sku, categoria, stock, imagen_principal, imagenes, updated_at')
+      .select('*, categorias(id, nombre)')
       .single();
 
     if (error) {

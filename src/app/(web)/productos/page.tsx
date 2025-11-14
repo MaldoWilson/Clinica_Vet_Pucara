@@ -6,13 +6,18 @@ import WhatsAppButton from "@/components/whatsapp";
 import Image from "next/image";
 import productosBanner from "@/app/img/productos.webp";
 
+type Categoria = {
+  id: number;
+  nombre: string;
+};
+
 type Producto = {
   id: string;
   nombre: string;
   descripcion: string;
   precio: number;
   sku: string;
-  categoria?: string;
+  categorias: Categoria | null;
   stock: number;
   imagen_principal?: string | null;
   created_at?: string;
@@ -24,25 +29,29 @@ export default function ProductosPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Categoria[]>([]);
 
   useEffect(() => {
-    const fetchProductos = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/productos');
-        if (!response.ok) {
+        const [productosResponse, categoriasResponse] = await Promise.all([
+          fetch('/api/productos'),
+          fetch('/api/categorias')
+        ]);
+
+        if (!productosResponse.ok) {
           throw new Error('Error al cargar los productos');
         }
-        const data = await response.json();
-        setProductos(data.productos || []);
+        if (!categoriasResponse.ok) {
+          throw new Error('Error al cargar las categorías');
+        }
+
+        const productosData = await productosResponse.json();
+        const categoriasData = await categoriasResponse.json();
+
+        setProductos(productosData.productos || []);
+        setCategories(categoriasData.categorias || []);
         
-        // Extraer categorías únicas
-        const uniqueCategories = [...new Set(
-          data.productos
-            .map((p: Producto) => p.categoria)
-            .filter((cat: string) => cat && cat.trim() !== "")
-        )] as string[];
-        setCategories(uniqueCategories);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
       } finally {
@@ -50,7 +59,7 @@ export default function ProductosPage() {
       }
     };
 
-    fetchProductos();
+    fetchData();
   }, []);
 
   // Filtrar productos
@@ -58,13 +67,12 @@ export default function ProductosPage() {
     const matchesSearch = producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          producto.sku.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || producto.categoria === selectedCategory;
+    const matchesCategory = !selectedCategory || producto.categorias?.nombre === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   const HeaderSection = () => (
     <section className="relative h-72 md:h-[260px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
-      {/* Imagen de fondo */}
       <div className="absolute inset-0 -z-20">
         <Image
           src={productosBanner}
@@ -75,13 +83,9 @@ export default function ProductosPage() {
           className="object-cover"
         />
       </div>
-
-      {/* Contenido vacío para mantener el alto */}
       <div className="relative z-10 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" />
       </div>
-
-      {/* Efecto ondulado inferior */}
       <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] -z-10 rotate-180 pointer-events-none">
         <svg
           className="relative block w-[140%] md:w-[100%] h-[200px] text-white"
@@ -140,21 +144,18 @@ export default function ProductosPage() {
       <HeaderSection />
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="container mx-auto px-4 max-w-7xl">
-          {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
               <span className="text-gray-800">Nuestros </span>
               <span className="text-indigo-400">Productos</span>
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Descubre nuestra amplia gama de productos veterinarios de alta calidad para el cuidado de tus mascotas.
+              Descubre nuestra amplia gama de productos veterinarios de alta calidad para el cuidado de tus mascotas. <span className="text-indigo-500">Compra solo disponible en tienda física.</span>
             </p>
             <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-4"></div>
           </div>
 
-          {/* Filtros */}
           <div className="mb-8 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between md:gap-4">
-            {/* Búsqueda */}
             <div className="flex-1">
               <input
                 type="text"
@@ -165,7 +166,6 @@ export default function ProductosPage() {
               />
             </div>
 
-            {/* Filtro por categoría */}
             <div className="md:w-64">
               <select
                 value={selectedCategory}
@@ -175,15 +175,14 @@ export default function ProductosPage() {
               >
                 <option value="">Todas las categorías</option>
                 {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
+                  <option key={category.id} value={category.nombre}>
+                    {category.nombre}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Contador de resultados */}
           <div className="mb-6">
             <p className="text-gray-600">
               {filteredProductos.length === productos.length 
@@ -193,7 +192,6 @@ export default function ProductosPage() {
             </p>
           </div>
 
-          {/* Grid de productos */}
           {filteredProductos.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-gray-400 mb-4">
@@ -228,7 +226,6 @@ export default function ProductosPage() {
             </div>
           )}
 
-          {/* Volver al inicio */}
           <div className="text-center mt-12">
             <a
               href="/"

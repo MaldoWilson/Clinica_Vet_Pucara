@@ -3,12 +3,33 @@
 import { useEffect, useRef, useState } from "react";
 import AdminEditableTable from "@/components/AdminEditableTable";
 
+// Define new types
+type Categoria = {
+  id: number;
+  nombre: string;
+};
+
+type Producto = {
+  id: string;
+  created_at: string;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  sku: string;
+  stock: number;
+  es_publico?: boolean;
+  imagen_principal?: string | null;
+  imagenes?: string[];
+  updated_at?: string;
+  categorias: Categoria | null;
+};
+
 export default function ProductosForm() {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [precio, setPrecio] = useState("");
   const [sku, setSku] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [categoriaId, setCategoriaId] = useState(""); // Changed from categoria
   const [stock, setStock] = useState("");
   const [publico, setPublico] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -18,52 +39,25 @@ export default function ProductosForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [productos, setProductos] = useState<Array<{ 
-    id: string; 
-    created_at: string; 
-    nombre: string; 
-    descripcion: string; 
-    precio: number; 
-    sku: string; 
-    categoria: string; 
-    stock: number; 
-    publico?: boolean;
-    imagen_principal?: string | null;
-    imagenes?: string[];
-    updated_at?: string;
-  }>>([]);
+  
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]); // New state for categories
   const [loadingList, setLoadingList] = useState(false);
 
   const mainImageInputRef = useRef<HTMLInputElement | null>(null);
   const extraInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const clearFileInputs = () => {
-    if (mainImageInputRef.current) {
-      mainImageInputRef.current.value = "";
-    }
+    if (mainImageInputRef.current) mainImageInputRef.current.value = "";
     extraInputRefs.current.forEach((input) => {
-      if (input) {
-        input.value = "";
-      }
+      if (input) input.value = "";
     });
   };
-  const [selectedEstados, setSelectedEstados] = useState<string[]>([]); // "Agotados" | "Disponibles"
-  const [selectedCategorias, setSelectedCategorias] = useState<string[]>([]); // "Alimentos" | "Medicamentos" | "Accesorios"
+
+  const [selectedEstados, setSelectedEstados] = useState<string[]>([]);
+  const [selectedCategorias, setSelectedCategorias] = useState<string[]>([]);
   const [search, setSearch] = useState("");
-  const [editing, setEditing] = useState<null | { 
-    id: string; 
-    created_at: string; 
-    nombre: string; 
-    descripcion: string; 
-    precio: number; 
-    sku: string; 
-    categoria: string; 
-    stock: number; 
-    publico?: boolean;
-    imagen_principal?: string | null;
-    imagenes?: string[];
-    updated_at?: string;
-  }>(null);
+  const [editing, setEditing] = useState<null | Producto>(null);
 
   async function fetchProductos() {
     setLoadingList(true);
@@ -73,14 +67,29 @@ export default function ProductosForm() {
       if (!res.ok) throw new Error(data?.error || "Error al obtener productos");
       setProductos(data.productos || []);
     } catch (err: any) {
-      // mostramos en la UI del listado mínimo
+      // Handle error silently in UI
     } finally {
       setLoadingList(false);
     }
   }
 
+  async function fetchCategorias() {
+    try {
+      const res = await fetch("/api/categorias");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Error al obtener categorías");
+      setCategorias(data.categorias || []);
+    } catch (err: any) {
+      // Handle error
+    }
+  }
+
+  useEffect(() => {
+    fetchProductos();
+    fetchCategorias();
+  }, []);
+
   async function handleUploadImage(productoId: string, file: File) {
-    // 1) Subir imagen
     const fd = new FormData();
     fd.append("file", file);
     const up = await fetch("/api/productos/upload", { method: "POST", body: fd });
@@ -88,7 +97,6 @@ export default function ProductosForm() {
     if (!up.ok || upJson.error) throw new Error(upJson.error || "Error al subir imagen");
     const imagen_principal: string | null = upJson.image_url || null;
 
-    // 2) Actualizar producto con nueva imagen_principal
     const res = await fetch("/api/productos", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -97,13 +105,8 @@ export default function ProductosForm() {
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error || "Error al actualizar imagen del producto");
 
-    // 3) Refrescar listado
     await fetchProductos();
   }
-
-  useEffect(() => {
-    fetchProductos();
-  }, []);
 
   async function handleAdjustStock(id: string, currentStock: number, delta: number) {
     const next = Math.max(0, (currentStock || 0) + delta);
@@ -115,9 +118,25 @@ export default function ProductosForm() {
       });
       await fetchProductos();
     } catch (err) {
-      // silencio en UI, el recargado mostrará estado actual
+      // silent fail
     }
   }
+
+  const resetForm = () => {
+    setNombre("");
+    setDescripcion("");
+    setPrecio("");
+    setSku("");
+    setCategoriaId("");
+    setStock("");
+    setPublico(false);
+    setImageFile(null);
+    setImagePreview(null);
+    setExtraFiles([null, null, null]);
+    setExtraPreviews([null, null, null]);
+    clearFileInputs();
+    setEditing(null);
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -127,14 +146,13 @@ export default function ProductosForm() {
     const precioNum = parseFloat(precio);
     const stockNum = parseInt(stock);
     
-    if (!nombre.trim() || !descripcion.trim() || !sku.trim() || precioNum <= 0 || stockNum < 0) {
-      setError("Nombre, descripción, SKU, precio y stock son obligatorios");
+    if (!nombre.trim() || !descripcion.trim() || !sku.trim() || !categoriaId || precioNum <= 0 || stockNum < 0) {
+      setError("Todos los campos marcados con * y la categoría son obligatorios");
       return;
     }
     
     setLoading(true);
     try {
-      // 1) Si hay imagen, primero la subimos para obtener la URL pública
       let imagen_principal: string | null = null;
       if (imageFile) {
         const fd = new FormData();
@@ -145,7 +163,6 @@ export default function ProductosForm() {
         imagen_principal = upJson.image_url || null;
       }
 
-      // (crear) Subir hasta 3 imágenes adicionales
       const imagenes: string[] = [];
       for (const file of extraFiles) {
         if (!file) continue;
@@ -157,8 +174,6 @@ export default function ProductosForm() {
         if (upJson.image_url) imagenes.push(upJson.image_url);
       }
 
-      
-
       const res = await fetch("/api/productos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -167,7 +182,7 @@ export default function ProductosForm() {
           descripcion, 
           precio: precioNum, 
           sku, 
-          categoria, 
+          categoria_id: parseInt(categoriaId), 
           stock: stockNum, 
           publico,
           imagen_principal, 
@@ -177,18 +192,7 @@ export default function ProductosForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Error al crear el producto");
       setSuccess("Producto creado correctamente");
-      setNombre("");
-      setDescripcion("");
-      setPrecio("");
-      setSku("");
-      setCategoria("");
-      setStock("");
-      setPublico(false);
-      setImageFile(null);
-      setImagePreview(null);
-      setExtraFiles([null, null, null]);
-      setExtraPreviews([null, null, null]);
-      clearFileInputs();
+      resetForm();
       fetchProductos();
     } catch (err: any) {
       setError(err.message || "Error inesperado");
@@ -197,29 +201,16 @@ export default function ProductosForm() {
     }
   }
 
-  async function handleEdit(producto: { 
-    id: string; 
-    created_at: string; 
-    nombre: string; 
-    descripcion: string; 
-    precio: number; 
-    sku: string; 
-    categoria: string; 
-    stock: number; 
-    publico?: boolean;
-    imagen_principal?: string | null;
-    imagenes?: string[];
-    updated_at?: string;
-  }) {
+  function handleEdit(producto: Producto) {
     clearFileInputs();
     setEditing(producto);
     setNombre(producto.nombre);
     setDescripcion(producto.descripcion);
     setPrecio(producto.precio.toString());
     setSku(producto.sku);
-    setCategoria(producto.categoria || "");
+    setCategoriaId(producto.categorias?.id.toString() || "");
     setStock(producto.stock.toString());
-    setPublico(producto.publico || false);
+    setPublico(producto.es_publico || false);
     setImageFile(null);
     setImagePreview(producto.imagen_principal || null);
     const prevs = [null, null, null] as Array<string | null>;
@@ -238,8 +229,8 @@ export default function ProductosForm() {
     const precioNum = parseFloat(precio);
     const stockNum = parseInt(stock);
     
-    if (!nombre.trim() || !descripcion.trim() || !sku.trim() || precioNum <= 0 || stockNum < 0) {
-      setError("Nombre, descripción, SKU, precio y stock son obligatorios");
+    if (!nombre.trim() || !descripcion.trim() || !sku.trim() || !categoriaId || precioNum <= 0 || stockNum < 0) {
+      setError("Todos los campos marcados con * y la categoría son obligatorios");
       return;
     }
     
@@ -255,7 +246,6 @@ export default function ProductosForm() {
         imagen_principal = upJson.image_url || null;
       }
 
-      // (editar) Subir nuevas adicionales si se cargaron; si no, mantener existentes
       let imagenesUpdate: string[] | undefined = (editing.imagenes || []).slice(0, 3);
       if (extraFiles.some((f) => !!f)) {
         imagenesUpdate = [];
@@ -279,7 +269,7 @@ export default function ProductosForm() {
           descripcion, 
           precio: precioNum, 
           sku, 
-          categoria, 
+          categoria_id: parseInt(categoriaId), 
           stock: stockNum, 
           publico,
           imagen_principal, 
@@ -289,19 +279,7 @@ export default function ProductosForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Error al actualizar el producto");
       setSuccess("Producto actualizado");
-      setEditing(null);
-      setNombre("");
-      setDescripcion("");
-      setPrecio("");
-      setSku("");
-      setCategoria("");
-      setStock("");
-      setPublico(false);
-      setImageFile(null);
-      setImagePreview(null);
-      setExtraFiles([null, null, null]);
-      setExtraPreviews([null, null, null]);
-      clearFileInputs();
+      resetForm();
       fetchProductos();
     } catch (err: any) {
       setError(err.message || "Error inesperado");
@@ -324,7 +302,7 @@ export default function ProductosForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Error al eliminar");
       setSuccess("Producto eliminado");
-      if (editing?.id === id) setEditing(null);
+      if (editing?.id === id) resetForm();
       fetchProductos();
     } catch (err: any) {
       setError(err.message || "Error inesperado");
@@ -333,9 +311,19 @@ export default function ProductosForm() {
     }
   }
 
+  const filteredProductos = productos.filter((p) => {
+    const estadoOk = selectedEstados.length === 0 || selectedEstados.some((s) => (
+      (s === 'Agotados' && (p.stock || 0) === 0) ||
+      (s === 'Disponibles' && (p.stock || 0) > 0)
+    ));
+    const categoriaOk = selectedCategorias.length === 0 || selectedCategorias.includes(p.categorias?.nombre || '')
+    const q = search.trim().toLowerCase();
+    const searchOk = q.length === 0 || (p.nombre || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q);
+    return estadoOk && categoriaOk && searchOk;
+  });
+
   return (
     <div className="space-y-6">
-      {/* Formulario principal: estilo tarjetas Stock */}
       <div className="bg-white rounded-xl shadow p-5">
         <h2 className="text-xl font-bold mb-4">{editing ? "Editar Producto" : "Crear un Producto"}</h2>
         <form onSubmit={editing ? (e) => { e.preventDefault(); handleUpdate(); } : handleSubmit} className="space-y-6">
@@ -344,33 +332,16 @@ export default function ProductosForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre *</label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border rounded-md"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  placeholder="Ej: Alimento Premium para Perros"
-                />
+                <input type="text" className="w-full px-3 py-2 border rounded-md" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Alimento Premium para Perros" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">SKU *</label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border rounded-md"
-                  value={sku}
-                  onChange={(e) => setSku(e.target.value)}
-                  placeholder="Ej: ALI-PER-001"
-                />
+                <input type="text" className="w-full px-3 py-2 border rounded-md" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="Ej: ALI-PER-001" />
               </div>
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700">Descripción *</label>
-              <textarea
-                className="w-full px-3 py-2 border rounded-md min-h-[120px]"
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                placeholder="Describe el producto..."
-              />
+              <textarea className="w-full px-3 py-2 border rounded-md min-h-[120px]" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Describe el producto..." />
             </div>
           </div>
 
@@ -379,85 +350,44 @@ export default function ProductosForm() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Precio (CLP) *</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="w-full px-3 py-2 border rounded-md"
-                  value={precio}
-                  onChange={(e) => setPrecio(e.target.value)}
-                  placeholder="0"
-                />
+                <input type="number" min="0" step="0.01" className="w-full px-3 py-2 border rounded-md" value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="0" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Stock *</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="w-full px-3 py-2 border rounded-md"
-                  value={stock}
-                  onChange={(e) => setStock(e.target.value)}
-                  placeholder="0"
-                />
+                <input type="number" min="0" className="w-full px-3 py-2 border rounded-md" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="0" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Categoría</label>
-                <select
-                  className="w-full px-3 py-2 border rounded-md"
-                  value={categoria}
-                  onChange={(e) => setCategoria(e.target.value)}
-                >
+                <label className="block text-sm font-medium text-gray-700">Categoría *</label>
+                <select className="w-full px-3 py-2 border rounded-md" value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
                   <option value="">Selecciona categoría</option>
-                  <option value="Alimentos">Alimentos</option>
-                  <option value="Medicamentos">Medicamentos</option>
-                  <option value="Accesorios">Accesorios</option>
+                  {categorias.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                  ))}
                 </select>
               </div>
             </div>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Imágenes del Producto</h3>
+            <h3 className="text-xs font-semibold tracking-wide text-indigo-600">Imágenes y Visibilidad</h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Imagen Principal</label>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <input 
-                    ref={mainImageInputRef}
-                    aria-label="Subir imagen principal del producto" 
-                    className="block w-full sm:w-auto px-3 py-2 border rounded-md"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
+                  <input ref={mainImageInputRef} aria-label="Subir imagen principal del producto" className="block w-full sm:w-auto px-3 py-2 border rounded-md" type="file" accept="image/*" onChange={(e) => {
                       const file = e.target.files?.[0] || null;
                       setImageFile(file);
                       setImagePreview(file ? URL.createObjectURL(file) : null);
-                    }}
-                  />
-                  {imagePreview && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />
-                  )}
+                    }} />
+                  {imagePreview && <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, PNG, WEBP. Máx 4MB.</p>
+                <p className="text-xs text-gray-500 mt-1">Formatos: JPG, PNG, WEBP. Máx 4MB.</p>
 
                 <div className="mt-8">
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Público</label>
-                      <button
-                        type="button"
-                        aria-pressed={publico}
-                        onClick={() => setPublico(!publico)}
-                        className={`relative inline-flex items-center h-8 rounded-full w-14 transition-colors ${publico ? 'bg-emerald-600' : 'bg-gray-300'}`}
-                        title="Marcar si el producto es público"
-                      >
-                        <span
-                          className={`inline-block w-7 h-7 transform bg-white rounded-full shadow transition-transform ${publico ? 'translate-x-6' : 'translate-x-1'}`}
-                        />
-                      </button>
-                    </div>
-                  </div>
+                  <label className="block text-sm font-medium mb-1">Público</label>
+                  <button type="button" aria-pressed={publico} onClick={() => setPublico(!publico)} className={`relative inline-flex items-center h-8 rounded-full w-14 transition-colors ${publico ? 'bg-emerald-600' : 'bg-gray-300'}`} title="Marcar si el producto es público">
+                    <span className={`inline-block w-7 h-7 transform bg-white rounded-full shadow transition-transform ${publico ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
                 </div>
               </div>
 
@@ -466,31 +396,12 @@ export default function ProductosForm() {
                 <div className="grid grid-cols-1 gap-3 mt-1">
                   {[0,1,2].map((idx) => (
                     <div key={idx} className="flex items-center gap-3 flex-wrap">
-                      <input 
-                        ref={(el) => {
-                          extraInputRefs.current[idx] = el;
-                        }}
-                        className="block w-full sm:w-auto px-3 py-2 border rounded-md"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
+                      <input ref={(el) => { extraInputRefs.current[idx] = el; }} className="block w-full sm:w-auto px-3 py-2 border rounded-md" type="file" accept="image/*" onChange={(e) => {
                           const file = e.target.files?.[0] || null;
-                          setExtraFiles((prev) => {
-                            const next = [...prev];
-                            next[idx] = file;
-                            return next;
-                          });
-                          setExtraPreviews((prev) => {
-                            const next = [...prev];
-                            next[idx] = file ? URL.createObjectURL(file) : null;
-                            return next;
-                          });
-                        }}
-                      />
-                      {(extraPreviews[idx]) && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={extraPreviews[idx] as string} alt={`extra-${idx+1}`} className="w-16 h-16 object-cover rounded border shrink-0" />
-                      )}
+                          setExtraFiles((prev) => { const next = [...prev]; next[idx] = file; return next; });
+                          setExtraPreviews((prev) => { const next = [...prev]; next[idx] = file ? URL.createObjectURL(file) : null; return next; });
+                        }} />
+                      {(extraPreviews[idx]) && <img src={extraPreviews[idx] as string} alt={`extra-${idx+1}`} className="w-16 h-16 object-cover rounded border shrink-0" />}
                     </div>
                   ))}
                 </div>
@@ -503,195 +414,71 @@ export default function ProductosForm() {
           {success && <p className="text-sm text-green-600">{success}</p>}
 
           <div className="flex items-center gap-2 pt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className={`px-5 py-2 rounded-md ${loading ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700'}`}
-            >
+            <button type="submit" disabled={loading} className={`px-5 py-2 rounded-md ${loading ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700'}`}>
               {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar Producto" : "Guardar Producto")}
             </button>
-            {editing && (
-              <button 
-                type="button" 
-                className="px-4 py-2 rounded-md border" 
-                onClick={() => {
-                  setEditing(null);
-                  setNombre("");
-                  setDescripcion("");
-                  setPrecio("");
-                  setSku("");
-                  setCategoria("");
-                  setStock("");
-                  setPublico(false);
-                  setImageFile(null);
-                  setImagePreview(null);
-                  setExtraFiles([null, null, null]);
-                  setExtraPreviews([null, null, null]);
-                  clearFileInputs();
-                }}
-              >
-                Cancelar
-              </button>
-            )}
+            {editing && <button type="button" className="px-4 py-2 rounded-md border" onClick={resetForm}>Cancelar</button>}
           </div>
         </form>
       </div>
 
-      {/* Listado de productos con filtros al estilo Stock */}
       <div className="bg-white rounded-xl shadow p-5">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex flex-wrap items-center gap-3">
             <label className="text-sm font-medium text-gray-700">Filtrar:</label>
             <div className="flex flex-wrap gap-2">
-              {[
-                { key: 'Agotados', label: 'Agotados' },
-                { key: 'Disponibles', label: 'Disponibles' },
-              ].map(({ key, label }) => {
+              {[{ key: 'Agotados', label: 'Agotados' }, { key: 'Disponibles', label: 'Disponibles' }].map(({ key, label }) => {
                 const active = selectedEstados.includes(key);
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
-                    onClick={() => {
-                      setSelectedEstados((prev) => prev.includes(key) ? prev.filter((v) => v !== key) : [...prev, key]);
-                    }}
-                    title={`Filtro ${label}`}
-                  >
-                    {label}
-                  </button>
-                );
+                return <button key={key} type="button" className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`} onClick={() => setSelectedEstados(prev => prev.includes(key) ? prev.filter(v => v !== key) : [...prev, key])} title={`Filtro ${label}`}>{label}</button>;
               })}
-              {[
-                { key: 'Alimentos', label: 'Alimentos' },
-                { key: 'Medicamentos', label: 'Medicamentos' },
-                { key: 'Accesorios', label: 'Accesorios' },
-              ].map(({ key, label }) => {
-                const active = selectedCategorias.includes(key);
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
-                    onClick={() => {
-                      setSelectedCategorias((prev) => prev.includes(key) ? prev.filter((v) => v !== key) : [...prev, key]);
-                    }}
-                    title={`Filtro ${label}`}
-                  >
-                    {label}
-                  </button>
-                );
+              {categorias.map(({ nombre }) => {
+                const active = selectedCategorias.includes(nombre);
+                return <button key={nombre} type="button" className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`} onClick={() => setSelectedCategorias(prev => prev.includes(nombre) ? prev.filter(v => v !== nombre) : [...prev, nombre])} title={`Filtro ${nombre}`}>{nombre}</button>;
               })}
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-64 px-3 py-2 border rounded-lg"
-              placeholder="Buscar por nombre o SKU"
-            />
-            <div className="text-sm text-gray-600">
-              <span className="font-medium">{
-                (() => {
-                  const filtered = productos.filter((p) => {
-                    const estadoOk = selectedEstados.length === 0 || selectedEstados.some((s) => (
-                      (s === 'Agotados' && (p.stock || 0) === 0) ||
-                      (s === 'Disponibles' && (p.stock || 0) > 0)
-                    ));
-                    const categoriaOk = selectedCategorias.length === 0 || selectedCategorias.includes(p.categoria || '')
-                    const q = search.trim().toLowerCase();
-                    const searchOk = q.length === 0 || (p.nombre || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q);
-                    return estadoOk && categoriaOk && searchOk;
-                  });
-                  return filtered.length;
-                })()
-              }</span> ítem(s)
-            </div>
+            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} className="w-64 px-3 py-2 border rounded-lg" placeholder="Buscar por nombre o SKU" />
+            <div className="text-sm text-gray-600"><span className="font-medium">{filteredProductos.length}</span> ítem(s)</div>
           </div>
         </div>
 
-        {(() => {
-          const filtered = productos.filter((p) => {
-            const estadoOk = selectedEstados.length === 0 || selectedEstados.some((s) => (
-              (s === 'Agotados' && (p.stock || 0) === 0) ||
-              (s === 'Disponibles' && (p.stock || 0) > 0)
-            ));
-            const categoriaOk = selectedCategorias.length === 0 || selectedCategorias.includes(p.categoria || '')
-            const q = search.trim().toLowerCase();
-            const searchOk = q.length === 0 || (p.nombre || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q);
-            return estadoOk && categoriaOk && searchOk;
-          });
-          return (
-            <AdminEditableTable
-              items={filtered}
-              loading={loadingList}
-              emptyText="Sin productos aún."
-              onEdit={(p) => handleEdit(p)}
-              onDelete={(id) => handleDelete(id)}
-              columns={[
-                { key: "imagen", header: "Imagen", className: "w-[140px]", render: (p) => (
-                  <div className="flex">
-                    <div className="flex flex-col items-center w-16">
-                      {p.imagen_principal ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.imagen_principal} alt={p.nombre} className="w-14 h-14 object-cover rounded" />
-                      ) : (
-                        <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>
-                      )}
-                      <label className="mt-1 text-xs text-blue-600 cursor-pointer">
-                        Subir
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            try {
-                              await handleUploadImage(p.id, file);
-                            } catch (err: any) {
-                              alert(err.message || "Error subiendo imagen");
-                            } finally {
-                              e.currentTarget.value = "";
-                            }
-                          }}
-                        />
-                      </label>
-                    </div>
-                  </div>
-                ) },
-                { key: "nombre", header: "Nombre", render: (p) => p.nombre },
-                { key: "sku", header: "SKU", render: (p) => p.sku },
-                { key: "precio", header: "Precio", render: (p) => `$${p.precio.toLocaleString()}` },
-                { key: "stock", header: "Stock", render: (p) => p.stock },
-                { key: "categoria", header: "Categoría", render: (p) => p.categoria || "-" },
-                { key: "fecha", header: "Creado", render: (p) => new Date(p.created_at).toLocaleString() },
-                { key: "ajuste", header: "", render: (p) => (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="px-2 py-1 rounded border"
-                      title="Restar 1 del stock"
-                      onClick={() => handleAdjustStock(p.id, p.stock, -1)}
-                    >
-                      −
-                    </button>
-                    <button
-                      type="button"
-                      className="px-2 py-1 rounded border"
-                      title="Sumar 1 al stock"
-                      onClick={() => handleAdjustStock(p.id, p.stock, 1)}
-                    >
-                      +
-                    </button>
-                  </div>
-                ) },
-              ]}
-            />
-          );
-        })()}
+        <AdminEditableTable
+          items={filteredProductos}
+          loading={loadingList}
+          emptyText="Sin productos aún."
+          onEdit={(p) => handleEdit(p as Producto)}
+          onDelete={(id) => handleDelete(id)}
+          columns={[
+            { key: "imagen", header: "Imagen", className: "w-[140px]", render: (p: Producto) => (
+              <div className="flex flex-col items-center w-16">
+                {p.imagen_principal ? <img src={p.imagen_principal} alt={p.nombre} className="w-14 h-14 object-cover rounded" /> : <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>}
+                <label className="mt-1 text-xs text-blue-600 cursor-pointer">
+                  Subir
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try { await handleUploadImage(p.id, file); }
+                    catch (err: any) { alert(err.message || "Error subiendo imagen"); }
+                    finally { e.currentTarget.value = ""; }
+                  }} />
+                </label>
+              </div>
+            ) },
+            { key: "nombre", header: "Nombre", render: (p: Producto) => p.nombre },
+            { key: "sku", header: "SKU", render: (p: Producto) => p.sku },
+            { key: "precio", header: "Precio", render: (p: Producto) => `$${p.precio.toLocaleString()}` },
+            { key: "stock", header: "Stock", render: (p: Producto) => p.stock },
+            { key: "categoria", header: "Categoría", render: (p: Producto) => p.categorias?.nombre || "-" },
+            { key: "fecha", header: "Creado", render: (p: Producto) => new Date(p.created_at).toLocaleString() },
+            { key: "ajuste", header: "", render: (p: Producto) => (
+              <div className="flex items-center gap-2">
+                <button type="button" className="px-2 py-1 rounded border" title="Restar 1 del stock" onClick={() => handleAdjustStock(p.id, p.stock, -1)}>−</button>
+                <button type="button" className="px-2 py-1 rounded border" title="Sumar 1 al stock" onClick={() => handleAdjustStock(p.id, p.stock, 1)}>+</button>
+              </div>
+            ) },
+          ]}
+        />
       </div>
     </div>
   );
