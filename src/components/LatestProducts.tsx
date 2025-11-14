@@ -43,7 +43,7 @@ export default function LatestProducts() {
 
   if (loading) {
     return (
-      <section className="py-16 bg-white">
+      <section className="py-8 bg-white">
         <div className="mx-auto max-w-screen-2xl px-6">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
             Productos

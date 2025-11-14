@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseClient";
-import Image from "next/image";
 import { useState, useEffect } from "react";
 
 export default function Navbar() {
@@ -27,11 +26,12 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Inicio" },
-    { href: "/reservas", label: "Reservas" },
+    { href: "/equipo", label: "Quienes somos" },
     { href: "/servicios", label: "Servicios" },
-    { href: "/productos", label: "Productos" },
-    { href: "/equipo", label: "Equipo" },
-    { href: "/contacto", label: "Contacto" }
+    { href: "/reservas", label: "Reservas" },
+    { href: "/productos", label: "Productos en tienda" },
+    { href: "/blog", label: "Blogs" },
+    
   ];
 
   const isActive = (href: string) => pathname === href;
@@ -47,27 +47,9 @@ export default function Navbar() {
       )}
       
       <header className="fixed top-0 left-0 right-0 z-50">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between bg-white rounded-full px-6 py-3 shadow-lg">
-          {/* Logo */}
-          <Link 
-            href="/" 
-            className="flex items-center gap-3 group transition-transform duration-200 hover:scale-105"
-          >
-            <div className="relative">
-              <Image
-                src="/logo.webp" 
-                alt="Clínica Pucará"
-                width={48}
-                height={48}
-                priority
-                className="transition-transform duration-200 group-hover:rotate-6"
-              />
-            </div>
-            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-500 to-indigo-400 bg-clip-text text-transparent">
-              Veterinaria Pucará
-            </span>
-          </Link>
+        <nav className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-center bg-white rounded-full px-6 py-3 shadow-lg">
+   
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-2">

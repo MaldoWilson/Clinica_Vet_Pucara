@@ -50,11 +50,14 @@ export default function Footer() {
                 </div>
               </Link>
               
-              {/* Información de contacto */}
+              {/* Información de contacto  iconos https://emojitool.com/*/}
               <div className="text-center lg:text-left space-y-1 sm:space-y-2 text-sm sm:text-base text-slate-300">
-                <p>📍 Esmeralda 97, San Bernardo, Región Metropolitana</p>
-                <p>📞 {WHATSAPP_PHONE ? `+${WHATSAPP_PHONE.replace(/^(?!\+)/, "")}` : "+56 2 859 2840"}</p>
-                <p>✉️ {CONTACT_EMAIL}</p>
+              <Link href="https://www.google.com/maps/place/Esmeralda+97,+8071269+San+Bernardo,+Regi%C3%B3n+Metropolitana/@-33.5988668,-70.7005737,19z/data=!4m15!1m8!3m7!1s0x9662d944194edecb:0xeb6ef5e24a4ec7b8!2sEsmeralda+97,+8071269+San+Bernardo,+Regi%C3%B3n+Metropolitana!3b1!8m2!3d-33.5990456!4d-70.7001928!16s%2Fg%2F11knj7sxlf!3m5!1s0x9662d944194edecb:0xeb6ef5e24a4ec7b8!8m2!3d-33.5990456!4d-70.7001928!16s%2Fg%2F11knj7sxlf?entry=ttu&g_ep=EgoyMDI1MTExMi4wIKXMDSoASAFQAw%3D%3D" className="hover:text-indigo-300 transition-colors block py-1">
+              🗺️ Esmeralda 97, San Bernardo, Región Metropolitana
+                    </Link>
+                  <p>☎️ {WHATSAPP_PHONE ? `+${WHATSAPP_PHONE.replace(/^(?!\+)/, "")}` : "+56 2 859 2840"}</p>
+                  <p>✉️ {CONTACT_EMAIL}</p>
+            
               </div>
             </div>
 
