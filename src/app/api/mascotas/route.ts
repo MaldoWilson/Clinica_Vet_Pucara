@@ -233,6 +233,48 @@ export async function DELETE(req: NextRequest) {
     if (!mascotas_id) return NextResponse.json({ ok: false, error: "mascotas_id requerido" }, { status: 400 });
 
     const supa = supabaseServer();
+
+    // Primero eliminar recetas relacionadas con las consultas de esta mascota
+    const { data: consultas } = await supa
+      .from("consultas")
+      .select("id")
+      .eq("mascota_id", mascotas_id);
+    
+    if (consultas && consultas.length > 0) {
+      const consultaIds = consultas.map(c => c.id);
+      
+      // Eliminar items de recetas relacionados
+      await supa
+        .from("receta_items")
+        .delete()
+        .in("receta_id", consultaIds);
+      
+      // Eliminar recetas relacionadas
+      await supa
+        .from("recetas")
+        .delete()
+        .in("consulta_id", consultaIds);
+      
+      // Eliminar certificados relacionados
+      await supa
+        .from("certificados")
+        .delete()
+        .in("id_consulta", consultaIds);
+      
+      // Eliminar consultas de la mascota
+      await supa
+        .from("consultas")
+        .delete()
+        .eq("mascota_id", mascotas_id);
+    }
+
+    // Eliminar antecedentes de la mascota
+    await supa
+      .from("antecedentes")
+      .delete()
+      .eq("mascota_id", mascotas_id);
+
+    // Finalmente eliminar la mascota
     const { error } = await supa
       .from("mascotas")
       .delete()
