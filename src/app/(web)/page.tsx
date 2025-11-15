@@ -28,7 +28,7 @@ export default async function Home() {
         ]}
         aspectRatio="aspect-[5/2] sm:aspect-[5/2] lg:aspect-[5/2]"
         intervalMs={4000}
-        className="rounded-none shadow-none"
+        className="rounded-none shadow-none mt-4"
       />
       
 

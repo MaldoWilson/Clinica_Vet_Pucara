@@ -12,10 +12,11 @@ type Props = {
     stock: number;
     imagen_principal?: string | null;
     created_at?: string;
-  } 
+  };
+  showPurchaseLocation?: boolean;
 };
 
-export default function ProductCard({ producto }: Props) {
+export default function ProductCard({ producto, showPurchaseLocation = false }: Props) {
   // Truncar la descripción para mostrar solo un resumen
   const truncateContent = (content: string, maxLength: number = 120) => {
     if (content.length <= maxLength) return content;
@@ -65,7 +66,9 @@ export default function ProductCard({ producto }: Props) {
             SKU: {producto.sku}
           </span>
         </div>
-        <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-2.5 py-0.5 rounded-md mb-2 inline-block">Compra solo en tienda física.</span>
+        {showPurchaseLocation && (
+          <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-2.5 py-0.5 rounded-md mb-2 inline-block">Compra solo en tienda física.</span>
+        )}
         {producto.categorias?.nombre && (
           <p className="text-xs text-gray-500 font-medium mb-1">
             {producto.categorias.nombre}

@@ -48,11 +48,32 @@ export default function Navbar() {
       
       <header className="fixed top-0 left-0 right-0 z-50">
         <nav className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-center bg-white rounded-full px-6 py-3 shadow-lg">
-   
+        <div className="flex items-center justify-between bg-white rounded-full px-6 py-3 shadow-lg">
+          {/* Mobile menu button and title (visible on mobile, hidden on desktop) */}
+          <div className="flex items-center md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-full text-gray-600 hover:text-teal-600 hover:bg-gray-100 transition-colors"
+              aria-label="Toggle menu"
+            >
+              <svg
+                className={`w-6 h-6 transition-transform duration-200 ${isMenuOpen ? 'rotate-90' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {isMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+            <span className="ml-3 text-lg font-semibold text-gray-800">Veterinaria Pucará</span>
+          </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-2">
+          {/* Desktop Navigation (hidden on mobile, visible and centered on desktop) */}
+          <div className="hidden md:flex flex-grow justify-center items-center space-x-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -84,26 +105,8 @@ export default function Navbar() {
               </div>
             )}
           </div>
-
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-full text-gray-600 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-            aria-label="Toggle menu"
-          >
-            <svg
-              className={`w-6 h-6 transition-transform duration-200 ${isMenuOpen ? 'rotate-90' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
+          {/* This empty div balances the justify-between on desktop, pushing the centered nav to the middle */}
+          <div className="hidden md:flex w-[48px]"></div>
         </div>
 
         {/* Mobile Navigation */}
