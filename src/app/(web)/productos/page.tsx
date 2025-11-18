@@ -72,8 +72,8 @@ export default function ProductosPage() {
   });
 
   const HeaderSection = () => (
-    <section className="relative h-72 md:h-[260px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
-      <div className="absolute inset-0 -z-20">
+    <section className="relative h-72 md:h-[260px] flex items-center overflow-hidden -mt-16 lg:-mt-18 z-10">
+      <div className="absolute inset-0 z-0">
         <Image
           src={productosBanner}
           alt="Productos"
@@ -86,7 +86,7 @@ export default function ProductosPage() {
       <div className="relative z-10 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" />
       </div>
-      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] -z-10 rotate-180 pointer-events-none">
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] z-0 rotate-180 pointer-events-none">
         <svg
           className="relative block w-[140%] md:w-[100%] h-[200px] text-white"
           fill="currentColor"
@@ -105,7 +105,7 @@ export default function ProductosPage() {
     return (
       <>
         <HeaderSection />
-        <div className="min-h-screen bg-gray-50 py-16">
+        <div className="min-h-screen bg-white py-16">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="animate-pulse">
               <div className="bg-gray-200 h-8 w-1/3 mb-8 rounded"></div>
@@ -127,7 +127,7 @@ export default function ProductosPage() {
     return (
       <>
         <HeaderSection />
-        <div className="min-h-screen bg-gray-50 py-16">
+        <div className="min-h-screen bg-white py-16">
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="text-center">
               <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
@@ -142,7 +142,7 @@ export default function ProductosPage() {
   return (
     <>
       <HeaderSection />
-      <div className="min-h-screen bg-gray-50 py-16">
+      <div className="min-h-screen bg-white py-16">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-8 sm:mb-12 px-4">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">

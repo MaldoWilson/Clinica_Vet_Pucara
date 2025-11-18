@@ -45,9 +45,9 @@ export default function EquipoPage() {
   }, []);
 
   const HeaderSection = () => (
-    <section className="relative h-96 md:h-[250px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
+    <section className="relative h-96 md:h-[250px] flex items-center overflow-hidden -mt-16 lg:-mt-18 z-10">
       {/* Background Image */}
-      <div className="absolute inset-0 -z-20">
+      <div className="absolute inset-0 z-0">
         <Image
           src={equipoBanner}
           alt="Equipo veterinario"
@@ -66,7 +66,7 @@ export default function EquipoPage() {
       </div>
 
       {/* Curved Bottom Effect */}
-      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] -z-10 rotate-180 pointer-events-none">
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] z-0 rotate-180 pointer-events-none">
         <svg
           className="relative block w-[140%] md:w-[100%] h-[200px] text-white"
           fill="currentColor"
@@ -85,7 +85,7 @@ export default function EquipoPage() {
     return (
       <>
         <HeaderSection />
-        <div className="min-h-screen bg-gray-50 py-16">
+        <div className="min-h-screen bg-white py-16">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="animate-pulse">
               <div className="bg-gray-200 h-8 w-1/3 mb-8 rounded mx-auto"></div>
@@ -107,7 +107,7 @@ export default function EquipoPage() {
     return (
       <>
         <HeaderSection />
-        <div className="min-h-screen bg-gray-50 py-16">
+        <div className="min-h-screen bg-white py-16">
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="text-center">
               <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>

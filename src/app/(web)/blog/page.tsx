@@ -37,9 +37,9 @@ export default function BlogPage() {
   }, []);
 
   const HeaderSection = () => (
-    <section className="relative h-72 md:h-[260px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
+    <section className="relative h-72 md:h-[260px] flex items-center overflow-hidden -mt-16 lg:-mt-18 z-10">
       {/* Imagen de fondo */}
-      <div className="absolute inset-0 -z-20">
+      <div className="absolute inset-0 z-0">
         <Image
           src={blogBanner}
           alt="Blog Veterinario"
@@ -56,7 +56,7 @@ export default function BlogPage() {
       </div>
 
       {/* Efecto ondulado inferior */}
-      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] -z-10 rotate-180 pointer-events-none">
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] z-0 rotate-180 pointer-events-none">
         <svg
           className="relative block w-[140%] md:w-[100%] h-[200px] text-white"
           fill="currentColor"
@@ -75,7 +75,7 @@ export default function BlogPage() {
     return (
       <>
         <HeaderSection />
-        <div className="min-h-screen bg-gray-50 py-16">
+        <div className="min-h-screen bg-white py-16">
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-center mb-12">
               <span className="text-gray-800">Blog </span>
@@ -99,7 +99,7 @@ export default function BlogPage() {
     return (
       <>
         <HeaderSection />
-        <div className="min-h-screen bg-gray-50 py-16">
+        <div className="min-h-screen bg-white py-16">
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-center mb-12">
               <span className="text-gray-800">Blog </span>
@@ -119,7 +119,7 @@ export default function BlogPage() {
     return (
       <>
         <HeaderSection />
-        <div className="min-h-screen bg-gray-50 py-16">
+        <div className="min-h-screen bg-white py-16">
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-center mb-12">
               <span className="text-gray-800">Blog </span>

@@ -96,7 +96,7 @@ export default function ContactSection({
     <div id={anchorId} className={wrapperClasses}>
       {withBackground && (
         <div
-          className={`${backgroundPositionClass} -z-10 bg-cover bg-center contacto-bg`}
+          className={`${backgroundPositionClass} z-0 bg-cover bg-center contacto-bg`}
           style={{ "--contacto-bg": `url(${contactoBg.src})` } as CSSProperties}
         />
       )}

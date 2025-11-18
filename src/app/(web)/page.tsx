@@ -18,7 +18,7 @@ export default async function Home() {
     .limit(6);
 
   return (
-    <div>
+    <div className="bg-white">
       <ImageCarousel
         images={[
           { src: "/1.png", alt: "Clinica Vet Pucara 1", href: "/productos" },

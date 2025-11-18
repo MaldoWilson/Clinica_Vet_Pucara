@@ -114,7 +114,7 @@ export default function BlogDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16">
+      <div className="min-h-screen bg-white py-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="animate-pulse">
             <div className="bg-gray-200 h-8 w-3/4 mb-4 rounded"></div>
@@ -132,7 +132,7 @@ export default function BlogDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16">
+      <div className="min-h-screen bg-white py-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
@@ -164,7 +164,7 @@ export default function BlogDetailPage() {
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16">
+      <div className="min-h-screen bg-white py-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">Blog no encontrado</h1>
@@ -195,7 +195,7 @@ export default function BlogDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
+    <div className="min-h-screen bg-white py-16">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Navegación */}
         <div className="mb-8">

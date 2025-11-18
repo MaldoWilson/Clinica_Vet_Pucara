@@ -39,7 +39,7 @@ export default function LatestBlogs() {
 
   if (loading) {
     return (
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="mx-auto max-w-screen-2xl px-6">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
             Blogs
@@ -59,7 +59,7 @@ export default function LatestBlogs() {
 
   if (error) {
     return (
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="mx-auto max-w-screen-2xl px-6">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
             Blogs
@@ -74,7 +74,7 @@ export default function LatestBlogs() {
 
   if (blogs.length === 0) {
     return (
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="mx-auto max-w-screen-2xl px-6">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
             Blogs
