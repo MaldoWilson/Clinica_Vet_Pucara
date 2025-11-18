@@ -57,14 +57,14 @@ export default function EquipoPage() {
           className="object-cover"
         />
       </div>
-      
+
       {/* Content - solo fondo */}
       <div className="relative z-10 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           {/* Solo el fondo, sin tarjeta de contenido */}
         </div>
       </div>
-      
+
       {/* Curved Bottom Effect */}
       <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] -z-10 rotate-180 pointer-events-none">
         <svg
@@ -125,12 +125,16 @@ export default function EquipoPage() {
 
       {/* Equipo Grid */}
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <h2 className="text-4xl font-bold text-center mb-12">
-          <span className="text-gray-800">Nuestro </span>
-          <span className="text-indigo-400">Equipo</span>
+        <h2 className="text-4xl font-bold text-center mb-6">
+          <span className="text-gray-800">Quienes </span>
+          <span className="text-indigo-400">Somos</span>
           <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
         </h2>
-        
+
+        <p className="text-gray-600 text-center max-w-3xl mx-auto mb-12 text-lg leading-relaxed px-4">
+          En Clínica Veterinaria Pucará, nuestro equipo está conformado por profesionales apasionados y comprometidos con la salud y el bienestar de tus mascotas. Combinamos experiencia, tecnología avanzada y un trato cercano para brindar una atención integral, asegurando que cada paciente reciba el cuidado y el cariño que merece en cada visita.
+        </p>
+
         {vets.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-gray-400 mb-4">

@@ -14,18 +14,18 @@ export default function MisionVisionPage() {
       <section className="relative h-72 md:h-[260px] flex items-center overflow-hidden -mt-16 lg:-mt-18">
         {/* Imagen de fondo */}
         <div className="absolute inset-0 -z-20">
-        <Image
-          src={misionBanner}
-          alt="Misión y Visión"
-          fill
-          priority
-          quality={95}
-          sizes="100vw"
-          className="object-cover"
-        />
+          <Image
+            src={misionBanner}
+            alt="Misión y Visión"
+            fill
+            priority
+            quality={95}
+            sizes="100vw"
+            className="object-cover"
+          />
         </div>
 
-        
+
 
         {/* Contenido vacío para mantener el alto */}
         <div className="relative z-10 w-full">
@@ -65,38 +65,38 @@ export default function MisionVisionPage() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            <span className="text-gray-800">Misión </span>
-            <span className="text-indigo-400">y Visión</span>
-            <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
-          </h1>
-          <p className="mt-3 text-slate-600">
-            Nuestro compromiso con el bienestar y la salud integral de tus mascotas.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="rounded-2xl border border-slate-200 bg-white/70 backdrop-blur p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold text-indigo-400">Misión</h2>
-            <p className="mt-3 text-slate-700 leading-relaxed">
-              En Clínica Veterinaria Pucará brindamos servicios de salud animal con dedicación, experiencia y calidez. A través de nuestra
-              plataforma web ofrecemos una gestión ágil y sencilla que permite a los clientes agendar citas,
-              recibir recordatorios, acceder a certificados y mantenerse informados. Nuestro compromiso es mejorar
-              la calidad de vida de las mascotas y optimizar el tiempo de sus dueños mediante herramientas digitales
-              confiables y accesibles.
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              <span className="text-gray-800">Misión </span>
+              <span className="text-indigo-400">y Visión</span>
+              <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
+            </h1>
+            <p className="mt-3 text-slate-600">
+              Nuestro compromiso con el bienestar y la salud integral de tus mascotas.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white/70 backdrop-blur p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold text-indigo-400">Visión</h2>
-            <p className="mt-3 text-slate-700 leading-relaxed">
-              Ser la clínica veterinaria de referencia en la región, reconocida por su atención integral, humana
-              y profesional hacia las mascotas y sus familias, incorporando innovación tecnológica que facilite la
-              gestión, la comunicación y el cuidado oportuno de cada paciente.
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="rounded-2xl border border-slate-200 bg-white/70 backdrop-blur p-6 shadow-sm">
+              <h2 className="text-2xl font-semibold text-indigo-400">Misión</h2>
+              <p className="mt-3 text-slate-700 leading-relaxed">
+                En Clínica Veterinaria Pucará brindamos servicios de salud animal con dedicación, experiencia y calidez. A través de nuestra
+                plataforma web ofrecemos una gestión ágil y sencilla que permite a los clientes agendar citas,
+                recibir recordatorios, acceder a certificados y mantenerse informados. Nuestro compromiso es mejorar
+                la calidad de vida de las mascotas y optimizar el tiempo de sus dueños mediante herramientas digitales
+                confiables y accesibles.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white/70 backdrop-blur p-6 shadow-sm">
+              <h2 className="text-2xl font-semibold text-indigo-400">Visión</h2>
+              <p className="mt-3 text-slate-700 leading-relaxed">
+                Ser la clínica veterinaria de referencia en la región, reconocida por su atención integral, humana
+                y profesional hacia las mascotas y sus familias, incorporando innovación tecnológica que facilite la
+                gestión, la comunicación y el cuidado oportuno de cada paciente.
+              </p>
+            </div>
           </div>
-        </div>
         </div>
       </section>
     </>
