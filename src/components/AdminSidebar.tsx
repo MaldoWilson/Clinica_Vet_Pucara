@@ -13,6 +13,7 @@ export default function AdminSidebar() {
   const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [showLogout, setShowLogout] = useState<boolean>(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -139,32 +140,57 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="w-64 md:w-72 md:h-screen bg-white border-r border-gray-200 flex flex-col md:sticky md:top-0">
-      <div className="px-4 py-5 border-b">
-        <Link href="/admin" className="flex items-center gap-2">
-          <div className="relative h-8 w-8 rounded-full overflow-hidden bg-white">
+    <aside className={`${isCollapsed ? 'w-20' : 'w-64 md:w-72'} transition-all duration-300 h-screen bg-white border-r border-gray-200 flex flex-col sticky top-0`}>
+      <div className={`px-4 py-5 border-b flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+        {!isCollapsed && (
+          <Link href="/admin" className="flex items-center gap-2 overflow-hidden">
+            <div className="relative h-8 w-8 rounded-full overflow-hidden bg-white shrink-0">
+              <Image src="/logo.webp" alt="Veterinaria Pucará" width={32} height={32} className="h-full w-full object-cover" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-base font-semibold text-gray-900 truncate">Clínica Pucará</p>
+              <p className="text-xs text-gray-500 truncate">Gestión</p>
+            </div>
+          </Link>
+        )}
+        {isCollapsed && (
+          <div className="relative h-8 w-8 rounded-full overflow-hidden bg-white shrink-0 mb-2">
             <Image src="/logo.webp" alt="Veterinaria Pucará" width={32} height={32} className="h-full w-full object-cover" />
           </div>
-          <div>
-            <p className="text-base font-semibold text-gray-900">Veterinaria Pucará</p>
-            <p className="text-xs text-gray-500">Gestión Veterinaria</p>
-          </div>
-        </Link>
+        )}
+
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={`p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors ${isCollapsed ? 'mb-auto' : ''}`}
+          title={isCollapsed ? "Expandir" : "Contraer"}
+        >
+          {isCollapsed ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
+          )}
+        </button>
       </div>
 
-      <nav className="flex-1 min-h-0 p-4 space-y-4 overflow-y-auto">
+      <nav className="flex-1 min-h-0 p-3 overflow-y-auto overflow-x-hidden space-y-6">
         {/* Mascota */}
         <div>
-          <p className="px-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Mascota</p>
+          <div className="h-6 mb-2 flex items-center px-4">
+            {!isCollapsed ? (
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Mascota</p>
+            ) : (
+              <div className="w-full h-px bg-gray-300" />
+            )}
+          </div>
           {mascotaItems.map((item) => {
             const active = !item.disabled && pathname?.startsWith(item.href);
-            const common = `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium`;
+            const common = `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors ${isCollapsed ? 'justify-center' : ''}`;
             if (item.disabled) {
               return (
-                <div key={item.label} className={`${common} text-gray-500 bg-gray-100 cursor-not-allowed`} title="Próximamente">
+                <div key={item.label} className={`${common} text-gray-500 bg-gray-100 cursor-not-allowed`} title={isCollapsed ? item.label : "Próximamente"}>
                   {item.icon}
-                  <span>{item.label}</span>
-                  <span className="ml-auto text-[10px] uppercase rounded-full bg-gray-300 text-gray-700 px-2 py-0.5">Pronto</span>
+                  {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
+                  {!isCollapsed && <span className="ml-auto text-[10px] uppercase rounded-full bg-gray-300 text-gray-700 px-2 py-0.5">Pronto</span>}
                 </div>
               );
             }
@@ -172,10 +198,11 @@ export default function AdminSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${common} transition-colors ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+                className={`${common} ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+                title={isCollapsed ? item.label : ""}
               >
                 {item.icon}
-                <span>{item.label}</span>
+                {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
               </Link>
             );
           })}
@@ -183,16 +210,22 @@ export default function AdminSidebar() {
 
         {/* Gestión */}
         <div>
-          <p className="px-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Gestión</p>
+          <div className="h-6 mb-2 flex items-center px-4">
+            {!isCollapsed ? (
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Gestión</p>
+            ) : (
+              <div className="w-full h-px bg-gray-300" />
+            )}
+          </div>
           {gestionItems.map((item) => {
             const active = !item.disabled && pathname?.startsWith(item.href);
-            const common = `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium`;
+            const common = `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors ${isCollapsed ? 'justify-center' : ''}`;
             if (item.disabled) {
               return (
-                <div key={item.label} className={`${common} text-gray-500 bg-gray-100 cursor-not-allowed`} title="Próximamente">
+                <div key={item.label} className={`${common} text-gray-500 bg-gray-100 cursor-not-allowed`} title={isCollapsed ? item.label : "Próximamente"}>
                   {item.icon}
-                  <span>{item.label}</span>
-                  <span className="ml-auto text-[10px] uppercase rounded-full bg-gray-300 text-gray-700 px-2 py-0.5">Pronto</span>
+                  {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
+                  {!isCollapsed && <span className="ml-auto text-[10px] uppercase rounded-full bg-gray-300 text-gray-700 px-2 py-0.5">Pronto</span>}
                 </div>
               );
             }
@@ -200,10 +233,11 @@ export default function AdminSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${common} transition-colors ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+                className={`${common} ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+                title={isCollapsed ? item.label : ""}
               >
                 {item.icon}
-                <span>{item.label}</span>
+                {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
               </Link>
             );
           })}
@@ -211,40 +245,52 @@ export default function AdminSidebar() {
 
         {/* Contenido */}
         <div>
-          <p className="px-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Contenido</p>
+          <div className="h-6 mb-2 flex items-center px-4">
+            {!isCollapsed ? (
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Contenido</p>
+            ) : (
+              <div className="w-full h-px bg-gray-300" />
+            )}
+          </div>
           {contenidoItems.map((item) => {
             const active = !item.disabled && pathname?.startsWith(item.href);
-            const common = `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium`;
+            const common = `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors ${isCollapsed ? 'justify-center' : ''}`;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${common} transition-colors ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+                className={`${common} ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+                title={isCollapsed ? item.label : ""}
               >
                 {item.icon}
-                <span>{item.label}</span>
+                {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
               </Link>
             );
           })}
         </div>
       </nav>
 
-      <div className="p-4 border-t mt-auto">
+      <div className="p-3 border-t mt-auto">
         <button
           onClick={() => setShowLogout((v) => !v)}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors"
+          className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
           aria-expanded={showLogout}
+          title={isCollapsed ? email : ""}
         >
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-400 text-white flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-400 text-white flex items-center justify-center shrink-0">
             N
           </div>
-          <div className="text-left">
-            <p className="text-sm font-semibold text-gray-900">Veterinario</p>
-            <p className="text-xs text-gray-500 truncate">{email || "Admin"}</p>
-          </div>
-          <svg className={`ml-auto w-4 h-4 text-gray-500 transition-transform ${showLogout ? "rotate-180" : "rotate-0"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          {!isCollapsed && (
+            <>
+              <div className="text-left min-w-0">
+                <p className="text-sm font-semibold text-gray-900 truncate">Veterinario</p>
+                <p className="text-xs text-gray-500 truncate">{email || "Admin"}</p>
+              </div>
+              <svg className={`ml-auto w-4 h-4 text-gray-500 transition-transform ${showLogout ? "rotate-180" : "rotate-0"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </>
+          )}
         </button>
 
         <div className={`overflow-hidden transition-all ${showLogout ? "max-h-20 mt-2" : "max-h-0"}`}>
@@ -253,9 +299,9 @@ export default function AdminSidebar() {
               await supabaseBrowser().auth.signOut();
               router.push("/admin/login");
             }}
-            className="w-full px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100"
+            className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 ${isCollapsed ? 'text-xs px-2' : ''}`}
           >
-            Cerrar sesión
+            {isCollapsed ? "Salir" : "Cerrar sesión"}
           </button>
         </div>
       </div>
