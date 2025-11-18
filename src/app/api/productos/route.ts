@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const sku: string = (body?.sku || "").toString();
     const categoria_id: number | null = body?.categoria_id ? Number(body.categoria_id) : null;
     const stock: number = Number(body?.stock || 0);
-    const es_publico: boolean = !!body?.publico;
+    const es_publico: boolean = body?.es_publico !== undefined ? !!body.es_publico : !!body?.publico;
     const imagen_principal: string | null = body?.imagen_principal ? String(body.imagen_principal) : null;
     const imagenes: string[] = Array.isArray(body?.imagenes) ? body.imagenes : [];
 
@@ -122,6 +122,7 @@ export async function PUT(request: NextRequest) {
     if (typeof body?.categoria_id === 'number') updates.categoria_id = body.categoria_id;
     if (typeof body?.stock === 'number') updates.stock = body.stock;
     if (typeof body?.publico === 'boolean') updates.es_publico = body.publico;
+    if (typeof body?.es_publico === 'boolean') updates.es_publico = body.es_publico;
     if (typeof body?.imagen_principal !== 'undefined') updates.imagen_principal = body.imagen_principal ? String(body.imagen_principal) : null;
     if (Array.isArray(body?.imagenes)) updates.imagenes = body.imagenes;
 
