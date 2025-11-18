@@ -1,11 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type CarouselImage = {
   src: string;
   alt?: string;
+  href?: string; // URL opcional para redirección al hacer clic
 };
 
 type ImageCarouselProps = {
@@ -67,13 +69,9 @@ export default function ImageCarousel({
       }
     >
       <div className={`${aspectRatio} relative bg-transparent`}>
-        {safeImages.map((img, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              index === currentIndex ? "opacity-100" : "opacity-0"
-            }`}
-          >
+        {safeImages.map((img, index) => {
+          const isVisible = index === currentIndex;
+          const imageContent = (
             <Image
               src={img.src}
               alt={img.alt ?? `slide-${index + 1}`}
@@ -85,8 +83,32 @@ export default function ImageCarousel({
               (max-width: 1536px) 100vw,
               1536px"
             />
-          </div>
-        ))}
+          );
+
+          return (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                isVisible ? "opacity-100 z-0" : "opacity-0 z-[-1]"
+              }`}
+            >
+              {img.href && isVisible ? (
+                <Link 
+                  href={img.href} 
+                  className="block w-full h-full cursor-pointer"
+                  onClick={(e) => {
+                    // Prevenir que el clic se propague a otros elementos
+                    e.stopPropagation();
+                  }}
+                >
+                  {imageContent}
+                </Link>
+              ) : (
+                <div className="w-full h-full">{imageContent}</div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <button

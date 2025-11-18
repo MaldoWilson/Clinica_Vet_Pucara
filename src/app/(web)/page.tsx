@@ -21,18 +21,15 @@ export default async function Home() {
     <div>
       <ImageCarousel
         images={[
-          { src: "/1.png", alt: "Clinica Vet Pucara" },
-          { src: "/2.png", alt: "Clinica Vet Pucara" },
-         
-          
+          { src: "/1.png", alt: "Clinica Vet Pucara 1", href: "/productos" },
+          { src: "/2.png", alt: "Clinica Vet Pucara 2", href: "/servicios" },
+          { src: "/3.png", alt: "Clinica Vet Pucara 3", href: "/blog" },
         ]}
         aspectRatio="aspect-[5/2] sm:aspect-[5/2] lg:aspect-[5/2]"
         intervalMs={4000}
         className="rounded-none shadow-none mt-4"
       />
-      
 
-      
       <LatestProducts />
       <LatestBlogs />
       <ContactSection
@@ -42,14 +39,11 @@ export default async function Home() {
         showFloatingButton={false}
         anchorId="contacto"
       />
-      
-
-
       <WhatsAppButton
         text="Hola Vengo desde la web y quiero agendar una hora de emergencia para mi mascota"
         floating // botón flotante abajo a la derecha
       />
     </div>
-    
+
   );
 }
