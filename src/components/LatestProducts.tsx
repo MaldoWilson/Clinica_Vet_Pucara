@@ -48,7 +48,7 @@ export default function LatestProducts() {
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
             Productos
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="bg-gray-200 rounded-2xl h-64"></div>
@@ -93,19 +93,19 @@ export default function LatestProducts() {
   return (
     <section className="py-16 bg-white w-full">
       <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              <span className="text-gray-800">Nuestros </span>
-              <span className="text-indigo-400">Productos</span>
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Descubre nuestra amplia gama de productos veterinarios de alta calidad para el cuidado de tus mascotas. <span className="text-indigo-500">Compra solo disponible en tienda física.</span>
-            </p>
-            <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-4"></div>
-          </div>
-        
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-800 mb-4">
+            <span className="text-gray-800">Nuestros </span>
+            <span className="text-indigo-400">Productos</span>
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Descubre nuestra amplia gama de productos veterinarios de alta calidad para el cuidado de tus mascotas. <span className="text-indigo-500">Compra solo disponible en tienda física.</span>
+          </p>
+          <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-4"></div>
+        </div>
+
         {/* Grid 4x2 para productos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-8">
           {productos.map((producto) => (
             <ProductCard key={producto.id} producto={producto} />
           ))}
@@ -113,7 +113,7 @@ export default function LatestProducts() {
 
         <div className="text-center">
           <Link
-            href="/productos" 
+            href="/productos"
             className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300"
           >
             Ver Más Productos

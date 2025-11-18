@@ -1,11 +1,11 @@
 import Link from "next/link";
 
 // Componente para mostrar las cartas de productos
-type Props = { 
-  producto: { 
-    id: string; 
-    nombre: string; 
-    descripcion: string; 
+type Props = {
+  producto: {
+    id: string;
+    nombre: string;
+    descripcion: string;
     precio: number;
     sku: string;
     categorias: { nombre: string } | null;
@@ -62,9 +62,7 @@ export default function ProductCard({ producto, showPurchaseLocation = false }: 
           <span className="text-2xl font-bold text-indigo-600">
             {formatPrice(producto.precio)}
           </span>
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-            SKU: {producto.sku}
-          </span>
+
         </div>
         {showPurchaseLocation && (
           <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-2.5 py-0.5 rounded-md mb-2 inline-block">Compra solo en tienda física.</span>
