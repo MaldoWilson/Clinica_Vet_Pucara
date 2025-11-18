@@ -110,15 +110,6 @@ export default function AdminSidebar() {
       ),
     },
     {
-      label: "Productos",
-      href: "/admin/productos",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V7a2 2 0 00-2-2h-3l-2-2-2 2H8a2 2 0 00-2 2v6m14 0v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4m16 0H4" />
-        </svg>
-      ),
-    },
-    {
       label: "Servicios",
       href: "/admin/servicios",
       icon: (
@@ -166,27 +157,27 @@ export default function AdminSidebar() {
         <div>
           <p className="px-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Mascota</p>
           {mascotaItems.map((item) => {
-          const active = !item.disabled && pathname?.startsWith(item.href);
-          const common = `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium`;
-          if (item.disabled) {
-            return (
+            const active = !item.disabled && pathname?.startsWith(item.href);
+            const common = `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium`;
+            if (item.disabled) {
+              return (
                 <div key={item.label} className={`${common} text-gray-500 bg-gray-100 cursor-not-allowed`} title="Próximamente">
+                  {item.icon}
+                  <span>{item.label}</span>
+                  <span className="ml-auto text-[10px] uppercase rounded-full bg-gray-300 text-gray-700 px-2 py-0.5">Pronto</span>
+                </div>
+              );
+            }
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${common} transition-colors ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+              >
                 {item.icon}
                 <span>{item.label}</span>
-                  <span className="ml-auto text-[10px] uppercase rounded-full bg-gray-300 text-gray-700 px-2 py-0.5">Pronto</span>
-              </div>
+              </Link>
             );
-          }
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`${common} transition-colors ${active ? "bg-indigo-500 text-white" : "text-gray-700 hover:bg-gray-50"}`}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </Link>
-          );
           })}
         </div>
 

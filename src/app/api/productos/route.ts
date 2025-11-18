@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
     const supabase = supabaseServer();
     const { searchParams } = new URL(request.url);
     const all = searchParams.get('all') === 'true';
+    const tipo = searchParams.get('tipo'); // Filter by product type
 
     // Obtener productos: si all=true, traer todos; de lo contrario, solo públicos
     let query = supabase
@@ -15,6 +16,10 @@ export async function GET(request: NextRequest) {
 
     if (!all) {
       query = query.eq('es_publico', true);
+    }
+
+    if (tipo) {
+      query = query.eq('tipo_producto', tipo);
     }
 
     const { data: productos, error } = await query;
@@ -50,9 +55,15 @@ export async function POST(request: NextRequest) {
     const imagen_principal: string | null = body?.imagen_principal ? String(body.imagen_principal) : null;
     const imagenes: string[] = Array.isArray(body?.imagenes) ? body.imagenes : [];
 
-    if (!nombre.trim() || !descripcion.trim() || !sku.trim() || precio <= 0 || stock < 0) {
+    // New fields
+    const stock_min: number = Number(body?.stock_min || 5);
+    const unidad: string = (body?.unidad || "unidad").toString();
+    const tipo_producto: string = (body?.tipo_producto || "VENTA_GENERAL").toString();
+    const controlar_lotes: boolean = !!body?.controlar_lotes;
+
+    if (!nombre.trim() || !sku.trim() || precio < 0 || stock < 0) {
       return NextResponse.json(
-        { error: 'Nombre, descripción, SKU, precio y stock son obligatorios' },
+        { error: 'Nombre, SKU, precio y stock son obligatorios y deben ser válidos' },
         { status: 400 }
       );
     }
@@ -61,16 +72,20 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('productos')
-      .insert([{ 
-        nombre, 
-        descripcion, 
-        precio, 
-        sku, 
-        categoria_id, 
-        stock, 
+      .insert([{
+        nombre,
+        descripcion,
+        precio,
+        sku,
+        categoria_id,
+        stock,
         es_publico,
-        imagen_principal, 
-        imagenes 
+        imagen_principal,
+        imagenes,
+        stock_min,
+        unidad,
+        tipo_producto,
+        controlar_lotes
       }])
       .select('*, categorias(id, nombre)')
       .single();
@@ -109,6 +124,13 @@ export async function PUT(request: NextRequest) {
     if (typeof body?.publico === 'boolean') updates.es_publico = body.publico;
     if (typeof body?.imagen_principal !== 'undefined') updates.imagen_principal = body.imagen_principal ? String(body.imagen_principal) : null;
     if (Array.isArray(body?.imagenes)) updates.imagenes = body.imagenes;
+
+    // New fields updates
+    if (typeof body?.stock_min === 'number') updates.stock_min = body.stock_min;
+    if (typeof body?.unidad === 'string') updates.unidad = body.unidad;
+    if (typeof body?.tipo_producto === 'string') updates.tipo_producto = body.tipo_producto;
+    if (typeof body?.controlar_lotes === 'boolean') updates.controlar_lotes = body.controlar_lotes;
+
     updates.updated_at = new Date().toISOString();
 
     const supabase = supabaseServer();

@@ -2,67 +2,60 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
+  ResponsiveContainer,
 } from "recharts";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import AdminEditableTable from "@/components/AdminEditableTable";
 import * as XLSX from "xlsx";
 
-type StockItem = {
+// --- Types ---
+type Categoria = { id: number; nombre: string };
+
+type Producto = {
   id: string;
   nombre: string;
-  categoria: string;
-  cantidad: number | null;
+  descripcion: string;
+  precio: number;
+  sku: string;
+  stock: number;
   stock_min: number;
   unidad: string;
-  precio: number;
-  estado: string; // OK | BAJO | CRITICO
+  tipo_producto: string; // 'VENTA_GENERAL', 'VACUNA', 'MEDICAMENTO', 'INSUMO_INTERNO'
+  controlar_lotes: boolean;
+  es_publico: boolean;
+  imagen_principal?: string | null;
+  imagenes?: string[];
   created_at: string;
+  categorias: Categoria | null;
+  categoria_id?: number;
 };
 
-type FormData = {
-  id?: string;
-  nombre: string;
-  categoria: string;
+type Movimiento = {
+  id: number;
+  producto_id: string;
+  tipo_movimiento: string;
   cantidad: number;
-  stock_min: number;
-  unidad: string;
-  precio: number;
+  fecha: string;
+  observacion?: string;
+  productos?: { nombre: string; sku: string };
+  inventario_lotes?: { numero_lote: string };
 };
 
-const CATEGORIAS = [
-  "Medicamentos",
-  "Vacunas",
-  "Alimentos",
-  "Higiene",
-  "Material Médico",
+// --- Constants ---
+const TIPOS_PRODUCTO = [
+  { value: "VENTA_GENERAL", label: "Venta General" },
+  { value: "VACUNA", label: "Vacuna" },
+  { value: "MEDICAMENTO", label: "Medicamento" },
+  { value: "INSUMO_INTERNO", label: "Insumo Interno" },
 ];
 
-const COLORES = [
-  "#4F46E5",
-  "#06B6D4",
-  "#10B981",
-  "#F59E0B",
-  "#EF4444",
-  "#7C3AED",
-  "#0EA5E9",
-  "#84CC16",
-];
+const COLORES = ["#4F46E5", "#06B6D4", "#10B981", "#F59E0B", "#EF4444", "#7C3AED"];
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    minimumFractionDigits: 0,
-  }).format(value || 0);
+  return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", minimumFractionDigits: 0 }).format(value || 0);
 }
 
 function getStatus(cantidad: number, stockMin: number): "OK" | "BAJO" | "CRITICO" {
@@ -75,661 +68,489 @@ function getStatus(cantidad: number, stockMin: number): "OK" | "BAJO" | "CRITICO
 }
 
 export default function StockPage() {
-  const [items, setItems] = useState<StockItem[]>([]);
+  // --- State ---
+  const [activeTab, setActiveTab] = useState<"INVENTARIO" | "HISTORIAL">("INVENTARIO");
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMovs, setLoadingMovs] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // búsqueda
-  const [query, setQuery] = useState("");
-  const [categoriaFiltro, setCategoriaFiltro] = useState<string>("");
-  const [estadoFiltro, setEstadoFiltro] = useState<string>("");
+  // Filters
+  const [search, setSearch] = useState("");
+  const [filterCategoria, setFilterCategoria] = useState("");
+  const [filterTipo, setFilterTipo] = useState("");
+  const [filterEstado, setFilterEstado] = useState("");
 
-  // modal
+  // Modal / Form
   const [showModal, setShowModal] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [form, setForm] = useState<FormData>({
-    nombre: "",
-    categoria: "",
-    cantidad: 0,
-    stock_min: 0,
-    unidad: "",
-    precio: 0,
-  });
-  // Filtro de mes para gráfico de uso por producto (sintético)
-  const getCurrentMonthString = () => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  };
-  const [usageMonth, setUsageMonth] = useState<string>(getCurrentMonthString());
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<Partial<Producto>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Extra images state
+  const [extraFiles, setExtraFiles] = useState<Array<File | null>>([null, null, null]);
+  const [extraPreviews, setExtraPreviews] = useState<Array<string | null>>([null, null, null]);
+
+  // Delete
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const cargar = async () => {
+  // --- Fetch Data ---
+  const fetchData = async () => {
     setLoading(true);
-    setError(null);
     try {
-      const res = await fetch("/api/stock", { cache: "no-store" });
-      const j = await res.json();
-      if (!res.ok || !j.ok) throw new Error(j.error || "Error al cargar");
-      const data: StockItem[] = (j.data || []).map((r: any) => ({
-        ...r,
-        cantidad: r.cantidad ?? 0,
-      }));
-      setItems(data);
+      const [resProd, resCat] = await Promise.all([
+        fetch("/api/productos?all=true"),
+        fetch("/api/categorias")
+      ]);
+      const jsonProd = await resProd.json();
+      const jsonCat = await resCat.json();
+
+      if (jsonProd.productos) setProductos(jsonProd.productos);
+      if (jsonCat.categorias) setCategorias(jsonCat.categorias);
     } catch (e: any) {
-      setError(e.message || "Error al cargar");
-      setItems([]);
+      setError(e.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchMovimientos = async () => {
+    setLoadingMovs(true);
+    try {
+      const res = await fetch("/api/movimientos?limit=100");
+      const json = await res.json();
+      if (json.data) setMovimientos(json.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingMovs(false);
+    }
+  };
+
   useEffect(() => {
-    cargar();
+    fetchData();
   }, []);
 
-  const filtrados = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return items.filter((i) => {
-      if (q && !(i.nombre.toLowerCase().includes(q) || i.categoria.toLowerCase().includes(q))) return false;
-      if (categoriaFiltro && i.categoria !== categoriaFiltro) return false;
-      const st = getStatus(Number(i.cantidad || 0), i.stock_min);
-      if (estadoFiltro && st !== estadoFiltro) return false;
-      return true;
+  useEffect(() => {
+    if (activeTab === "HISTORIAL") fetchMovimientos();
+  }, [activeTab]);
+
+  // --- Computed ---
+  const filteredProductos = useMemo(() => {
+    return productos.filter(p => {
+      const matchSearch = !search || p.nombre.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
+      const matchCat = !filterCategoria || p.categorias?.nombre === filterCategoria;
+      const matchTipo = !filterTipo || p.tipo_producto === filterTipo;
+      const status = getStatus(p.stock, p.stock_min);
+      const matchEstado = !filterEstado || status === filterEstado;
+      return matchSearch && matchCat && matchTipo && matchEstado;
     });
-  }, [items, query, categoriaFiltro, estadoFiltro]);
+  }, [productos, search, filterCategoria, filterTipo, filterEstado]);
 
-  // KPIs
-  const totalProductos = useMemo(() => items.length, [items]);
-  const valorTotal = useMemo(
-    () => items.reduce((acc, it) => acc + (Number(it.cantidad || 0) * Number(it.precio || 0)), 0),
-    [items]
-  );
-  const bajoTotal = useMemo(
-    () => items.filter((i) => getStatus(Number(i.cantidad || 0), i.stock_min) !== "OK").length,
-    [items]
-  );
+  const stats = useMemo(() => {
+    const total = productos.length;
+    const valor = productos.reduce((acc, p) => acc + (p.stock * p.precio), 0);
+    const bajos = productos.filter(p => getStatus(p.stock, p.stock_min) !== "OK").length;
 
-  // Movimientos del mes (usamos productos creados este mes como aproximación)
-  const ahora = new Date();
-  const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-  const finMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59, 999);
-  const movimientosMes = useMemo(
-    () =>
-      items.filter((i) => {
-        const d = new Date(i.created_at);
-        return d >= inicioMes && d <= finMes;
-      }).length,
-    [items]
-  );
-  const prevInicio = new Date(ahora.getFullYear(), ahora.getMonth() - 1, 1);
-  const prevFin = new Date(ahora.getFullYear(), ahora.getMonth(), 0, 23, 59, 59, 999);
-  const movimientosPrev = useMemo(
-    () =>
-      items.filter((i) => {
-        const d = new Date(i.created_at);
-        return d >= prevInicio && d <= prevFin;
-      }).length,
-    [items]
-  );
-  const variacion = movimientosPrev === 0
-    ? movimientosMes > 0 ? 100 : 0
-    : Math.round(((movimientosMes - movimientosPrev) / movimientosPrev) * 100);
-
-  // Gráfico: productos creados por mes (últimos 6 meses)
-  const graficoMovimientos = useMemo(() => {
-    const points: { mes: string; cantidad: number }[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
-      const mStart = new Date(d.getFullYear(), d.getMonth(), 1);
-      const mEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
-      const label = d.toLocaleDateString("es-CL", { month: "short" });
-      const count = items.filter((it) => {
-        const cd = new Date(it.created_at);
-        return cd >= mStart && cd <= mEnd;
-      }).length;
-      points.push({ mes: label, cantidad: count });
-    }
-    return points;
-  }, [items]);
-
-  // Pie: distribución por categoría
-  const distribucionCategoria = useMemo(() => {
-    const map = new Map<string, number>();
-    items.forEach((i) => {
-      map.set(i.categoria, (map.get(i.categoria) || 0) + 1);
+    // Distribution by Type
+    const distMap = new Map<string, number>();
+    productos.forEach(p => {
+      const t = p.tipo_producto || "OTRO";
+      distMap.set(t, (distMap.get(t) || 0) + 1);
     });
-    const total = items.length || 1;
-    return Array.from(map.entries()).map(([categoria, num], idx) => ({
-      categoria,
-      valor: num,
-      porcentaje: (num / total) * 100,
-      color: COLORES[idx % COLORES.length],
+    const distData = Array.from(distMap.entries()).map(([name, value], i) => ({
+      name, value, color: COLORES[i % COLORES.length]
     }));
-  }, [items]);
 
-  const bajos = useMemo(() => {
-    return items
-      .filter((i) => getStatus(Number(i.cantidad || 0), i.stock_min) !== "OK")
-      .sort((a, b) => Number(a.cantidad || 0) - Number(b.cantidad || 0));
-  }, [items]);
+    return { total, valor, bajos, distData };
+  }, [productos]);
 
-  // Gráfico: Uso por producto (mensual) — datos sintéticos sin persistencia
-  function seededRandom(key: string) {
-    // xmur3 + mulberry32 para PRNG determinístico por clave
-    function xmur3(str: string) {
-      let h = 1779033703 ^ str.length;
-      for (let i = 0; i < str.length; i++) {
-        h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-        h = (h << 13) | (h >>> 19);
-      }
-      return function () {
-        h = Math.imul(h ^ (h >>> 16), 2246822507);
-        h = Math.imul(h ^ (h >>> 13), 3266489909);
-        return (h ^= h >>> 16) >>> 0;
-      };
-    }
-    function mulberry32(a: number) {
-      return function () {
-        a |= 0; a = (a + 0x6D2B79F5) | 0;
-        let t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      };
-    }
-    const seed = xmur3(key)();
-    const rnd = mulberry32(seed);
-    return rnd();
-  }
-
-  const usageData = useMemo(() => {
-    const dataset = items.map((it) => {
-      const r = seededRandom(`${it.id}-${usageMonth}`);
-      const base = Math.max(4, Math.round((it.stock_min || 8) * 1.6));
-      // uso sintético en rango [20% .. 180%] del base, pero entero y >=0
-      const uso = Math.max(0, Math.round(base * (0.2 + r * 1.6)));
-      return { nombre: it.nombre, uso };
-    });
-    return dataset.sort((a, b) => b.uso - a.uso).slice(0, 12);
-  }, [items, usageMonth]);
-
-  // acciones
-  const abrirNuevo = () => {
-    setForm({ nombre: "", categoria: "", cantidad: 0, stock_min: 0, unidad: "", precio: 0 });
-    setIsEditing(false);
-    setShowModal(true);
-  };
-
-  const abrirEditar = (it: StockItem) => {
-    setForm({
-      id: it.id,
-      nombre: it.nombre,
-      categoria: it.categoria,
-      cantidad: Number(it.cantidad || 0),
-      stock_min: Number(it.stock_min || 0),
-      unidad: it.unidad,
-      precio: Number(it.precio || 0),
-    });
-    setIsEditing(true);
-    setShowModal(true);
-  };
-
-  const guardar = async (e: React.FormEvent) => {
+  // --- Handlers ---
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nombre.trim() || !form.categoria.trim() || !form.unidad.trim()) {
-      alert("Nombre, categoría y unidad son obligatorios");
-      return;
-    }
     setSaving(true);
     try {
-      const estado = getStatus(form.cantidad, form.stock_min);
+      let imagen_principal = form.imagen_principal;
+
+      // Upload main image
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append("file", imageFile);
+        const upRes = await fetch("/api/productos/upload", { method: "POST", body: fd });
+        const upJson = await upRes.json();
+        if (upJson.image_url) imagen_principal = upJson.image_url;
+      }
+
+      // Upload extra images
+      // Start with existing images (limit to 3)
+      const currentImages = (form.imagenes || []).slice(0, 3);
+      const newImages: string[] = [];
+
+      for (let i = 0; i < 3; i++) {
+        const file = extraFiles[i];
+        if (file) {
+          const fd = new FormData();
+          fd.append("file", file);
+          const upRes = await fetch("/api/productos/upload", { method: "POST", body: fd });
+          const upJson = await upRes.json();
+          if (upJson.image_url) newImages[i] = upJson.image_url;
+        } else {
+          // Keep existing if available and not replaced (though UI shows preview)
+          // If preview is there but no file, it means it's an existing image
+          if (extraPreviews[i] && !file) {
+            newImages[i] = extraPreviews[i]!;
+          }
+        }
+      }
+      // Filter out nulls/undefined
+      const imagenes = newImages.filter(Boolean);
+
+      const body = { ...form, imagen_principal, imagenes };
       const method = isEditing ? "PUT" : "POST";
-      const body: any = { ...form, estado };
-      const res = await fetch("/api/stock", {
+      const res = await fetch("/api/productos", {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
       });
-      const j = await res.json();
-      if (!res.ok || !j.ok) throw new Error(j.error || "Error al guardar");
+
+      if (!res.ok) throw new Error("Error al guardar");
+
       setShowModal(false);
-      await cargar();
+      fetchData();
     } catch (e: any) {
-      alert(e.message || "Error al guardar");
+      alert(e.message);
     } finally {
       setSaving(false);
     }
   };
 
-  // Eliminar
-  const confirmarEliminar = (id: string) => {
-    setDeleteId(id);
-    setShowDeleteModal(true);
-  };
-
-  const eliminar = async () => {
+  const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const res = await fetch("/api/stock", {
+      await fetch("/api/productos", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: deleteId }),
+        body: JSON.stringify({ id: deleteId })
       });
-      const j = await res.json();
-      if (!res.ok || !j.ok) throw new Error(j.error || "Error al eliminar");
-      setItems((prev) => prev.filter((p) => p.id !== deleteId));
-    } catch (e: any) {
-      alert(e.message || "Error al eliminar");
-    } finally {
       setShowDeleteModal(false);
-      setDeleteId(null);
+      fetchData();
+    } catch (e) {
+      alert("Error al eliminar");
     }
   };
 
-  // Exportar a Excel
-  const exportarExcel = () => {
-    const data = filtrados.map((it) => ({
-      Nombre: it.nombre,
-      "Categoría": it.categoria,
-      Cantidad: Number(it.cantidad || 0),
-      "Stock Mínimo": it.stock_min,
-      Unidad: it.unidad,
-      "Precio Unitario": Number(it.precio || 0),
-      Estado: getStatus(Number(it.cantidad || 0), it.stock_min),
-      "Valor Total": Number(it.cantidad || 0) * Number(it.precio || 0),
-      "Creado el": new Date(it.created_at).toLocaleDateString("es-CL"),
-    }));
-    const sheet = XLSX.utils.json_to_sheet(data);
-    sheet["!cols"] = [
-      { wch: 28 }, { wch: 18 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 14 }, { wch: 12 }
-    ];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, sheet, "Inventario");
-    XLSX.writeFile(wb, `inventario_${new Date().toISOString().slice(0,10)}.xlsx`);
+  const openNew = () => {
+    setForm({
+      nombre: "", sku: "", descripcion: "", precio: 0, stock: 0, stock_min: 5, unidad: "unidad",
+      tipo_producto: "VENTA_GENERAL", controlar_lotes: false, es_publico: true, imagenes: []
+    });
+    setImageFile(null);
+    setImagePreview(null);
+    setExtraFiles([null, null, null]);
+    setExtraPreviews([null, null, null]);
+    setIsEditing(false);
+    setShowModal(true);
   };
 
-  const badge = (status: "OK" | "BAJO" | "CRITICO") => (
-    <span
-      className={`px-2 py-1 rounded-full text-xs font-medium ${
-        status === "OK"
-          ? "bg-green-100 text-green-800"
-          : status === "BAJO"
-          ? "bg-gray-100 text-gray-700"
-          : "bg-red-100 text-red-700"
-      }`}
-    >
-      {status === "OK" ? "OK" : status === "BAJO" ? "Bajo" : "Crítico"}
-    </span>
-  );
+  const openEdit = (p: Producto) => {
+    setForm({ ...p });
+    setImagePreview(p.imagen_principal || null);
+    setImageFile(null);
 
+    // Setup extra images
+    const prevs = [null, null, null] as Array<string | null>;
+    (p.imagenes || []).slice(0, 3).forEach((url, idx) => {
+      prevs[idx] = url;
+    });
+    setExtraPreviews(prevs);
+    setExtraFiles([null, null, null]);
+
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const exportExcel = () => {
+    const data = filteredProductos.map(p => ({
+      Nombre: p.nombre,
+      SKU: p.sku,
+      Categoria: p.categorias?.nombre,
+      Tipo: p.tipo_producto,
+      Stock: p.stock,
+      Minimo: p.stock_min,
+      Unidad: p.unidad,
+      Precio: p.precio,
+      Estado: getStatus(p.stock, p.stock_min)
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+    XLSX.writeFile(wb, "Inventario.xlsx");
+  };
+
+  // --- Render ---
   return (
     <div className="space-y-6 px-4 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Gestión de Stock</h1>
-          <p className="text-gray-600">Administra el inventario de productos y medicamentos</p>
+          <p className="text-gray-600">Control integral de inventario, productos y vacunas</p>
         </div>
-        <button
-          onClick={abrirNuevo}
-          className="px-5 py-3 rounded-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700"
-        >
-          + Agregar Producto
-        </button>
+        <div className="flex gap-2">
+          <button onClick={exportExcel} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Exportar Excel</button>
+          <button onClick={openNew} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">+ Nuevo Producto</button>
+        </div>
       </div>
 
-      {/* KPIs */}
+      {/* Dashboard Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow p-5">
-          <p className="text-sm text-gray-600">Total Productos</p>
-          <p className="text-3xl font-bold mt-2">{totalProductos}</p>
-          <p className="text-xs text-gray-500 mt-1">En inventario</p>
+        <div className="bg-white p-5 rounded-xl shadow">
+          <p className="text-sm text-gray-500">Total Items</p>
+          <p className="text-3xl font-bold">{stats.total}</p>
         </div>
-        <div className="bg-white rounded-xl shadow p-5">
-          <p className="text-sm text-gray-600">Valor Total</p>
-          <p className="text-3xl font-bold mt-2">{formatCurrency(valorTotal)}</p>
-          <p className="text-xs text-gray-500 mt-1">Valor del inventario</p>
+        <div className="bg-white p-5 rounded-xl shadow">
+          <p className="text-sm text-gray-500">Valor Inventario</p>
+          <p className="text-3xl font-bold">{formatCurrency(stats.valor)}</p>
         </div>
-        <div className="bg-white rounded-xl shadow p-5">
-          <p className="text-sm text-gray-600">Stock Bajo</p>
-          <p className="text-3xl font-bold mt-2">{bajoTotal}</p>
-          <p className="text-xs text-red-600 mt-1">Requieren reposición</p>
+        <div className="bg-white p-5 rounded-xl shadow">
+          <p className="text-sm text-gray-500">Alertas Stock</p>
+          <p className={`text-3xl font-bold ${stats.bajos > 0 ? 'text-red-600' : 'text-green-600'}`}>{stats.bajos}</p>
         </div>
-        <div className="bg-white rounded-xl shadow p-5">
-          <p className="text-sm text-gray-600">Movimientos del Mes</p>
-          <p className="text-3xl font-bold mt-2">{movimientosMes}</p>
-          <p className={`text-xs mt-1 ${variacion >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-            {variacion >= 0 ? "+" : ""}{variacion}% vs mes anterior
-          </p>
-        </div>
-      </div>
-
-      {/* Grids con gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Distribución por Categoría */}
-        <div className="bg-white rounded-xl shadow p-5">
-          <p className="font-semibold text-gray-900 mb-2">Distribución por Categoría</p>
-          {distribucionCategoria.length === 0 ? (
-            <div className="text-gray-500 text-sm">Sin datos</div>
-          ) : (
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={distribucionCategoria} dataKey="valor" nameKey="categoria" outerRadius={100} label>
-                    {distribucionCategoria.map((d, idx) => (
-                      <Cell key={d.categoria} fill={d.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v: any) => String(v)} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
-
-        {/* Movimientos por mes */}
-        <div className="bg-white rounded-xl shadow p-5">
-          <p className="font-semibold text-gray-900 mb-2">Movimientos de Stock</p>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={graficoMovimientos} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="mes" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="cantidad" fill="#111827" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* Uso por producto (mensual, datos simulados) */}
-      <div className="bg-white rounded-xl shadow p-5 border">
-        <div className="flex items-center justify-between mb-2">
-          <p className="font-semibold text-gray-900">Uso por Producto (mensual)</p>
-          <div className="flex items-center gap-2">
-            <input
-              type="month"
-              value={usageMonth}
-              onChange={(e) => setUsageMonth(e.target.value)}
-              className="px-3 py-2 border rounded-md"
-              title="Seleccionar mes"
-            />
-          </div>
-        </div>
-        {usageData.length === 0 ? (
-          <div className="text-sm text-gray-500">Sin datos</div>
-        ) : (
-          <div className="h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={usageData} layout="vertical" margin={{ top: 10, right: 20, left: 20, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis type="number" tickFormatter={(v) => `${v}`} />
-                <YAxis dataKey="nombre" type="category" width={120} tick={{ fontSize: 12 }} />
-                <Tooltip labelStyle={{ fontWeight: 600 }} formatter={(v: any) => [`${v} usos`, "Uso"]} />
-                <Bar dataKey="uso" fill="#6366F1" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </div>
-
-      {/* Alertas */}
-      <div className="bg-red-50 border border-red-200 rounded-xl">
-        <div className="px-5 py-3 border-b border-red-200 font-semibold text-red-800">Alertas de Stock Bajo</div>
-        {bajos.length === 0 ? (
-          <div className="px-5 py-4 text-sm text-red-700">No hay productos con stock bajo.</div>
-        ) : (
-          <div className="divide-y divide-red-100">
-            {bajos.map((b) => {
-              const st = getStatus(Number(b.cantidad || 0), b.stock_min);
-              return (
-                <div key={b.id} className="px-5 py-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">{b.nombre}</p>
-                    <p className="text-xs text-gray-500">{b.categoria}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-semibold text-gray-900">{Number(b.cantidad || 0)} {b.unidad}</div>
-                    <div className="text-xs text-gray-500">Min: {b.stock_min}</div>
-                  </div>
-                  <div className="ml-3">{badge(st)}</div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Inventario completo */}
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <div className="p-4 flex items-center justify-between gap-3">
+        <div className="bg-white p-5 rounded-xl shadow flex items-center justify-between">
           <div>
-            <p className="font-semibold text-gray-900">Inventario Completo</p>
-            <p className="text-xs text-gray-500">Lista de todos los productos en stock</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <select
-              value={categoriaFiltro}
-              onChange={(e) => setCategoriaFiltro(e.target.value)}
-              className="px-3 py-2 border rounded-lg"
-              title="Filtrar por categoría"
-            >
-              <option value="">Todas las categorías</option>
-              {CATEGORIAS.map((c) => (
-                <option key={c} value={c}>{c}</option>
+            <p className="text-sm text-gray-500">Distribución</p>
+            <div className="text-xs mt-1 space-y-1">
+              {stats.distData.slice(0, 3).map(d => (
+                <div key={d.name} className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full" style={{ background: d.color }} />
+                  <span>{d.name}: {d.value}</span>
+                </div>
               ))}
+            </div>
+          </div>
+          <div className="w-16 h-16">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={stats.distData} dataKey="value" innerRadius={15} outerRadius={30} paddingAngle={2}>
+                  {stats.distData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab("INVENTARIO")}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "INVENTARIO" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"}`}
+          >
+            Inventario
+          </button>
+          <button
+            onClick={() => setActiveTab("HISTORIAL")}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "HISTORIAL" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"}`}
+          >
+            Historial de Movimientos
+          </button>
+        </nav>
+      </div>
+
+      {/* Content */}
+      {activeTab === "INVENTARIO" ? (
+        <div className="space-y-4">
+          {/* Filters */}
+          <div className="bg-white p-4 rounded-lg shadow flex flex-wrap gap-4 items-center">
+            <input
+              placeholder="Buscar..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="px-3 py-2 border rounded-md w-full md:w-64"
+            />
+            <select value={filterCategoria} onChange={e => setFilterCategoria(e.target.value)} className="px-3 py-2 border rounded-md">
+              <option value="">Todas las Categorías</option>
+              {categorias.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
             </select>
-            <select
-              value={estadoFiltro}
-              onChange={(e) => setEstadoFiltro(e.target.value)}
-              className="px-3 py-2 border rounded-lg"
-              title="Filtrar por estado"
-            >
-              <option value="">Todos los estados</option>
+            <select value={filterTipo} onChange={e => setFilterTipo(e.target.value)} className="px-3 py-2 border rounded-md">
+              <option value="">Todos los Tipos</option>
+              {TIPOS_PRODUCTO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+            <select value={filterEstado} onChange={e => setFilterEstado(e.target.value)} className="px-3 py-2 border rounded-md">
+              <option value="">Todos los Estados</option>
               <option value="OK">OK</option>
               <option value="BAJO">Bajo</option>
               <option value="CRITICO">Crítico</option>
             </select>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar productos..."
-              className="px-3 py-2 border rounded-lg"
-            />
-            <button
-              onClick={exportarExcel}
-              className="px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
-              title="Exportar a Excel"
-            >
-              Exportar
-            </button>
           </div>
+
+          <AdminEditableTable
+            items={filteredProductos}
+            loading={loading}
+            onEdit={openEdit}
+            onDelete={(id) => { setDeleteId(id); setShowDeleteModal(true); }}
+            columns={[
+              { key: "imagen", header: "Img", render: (p) => p.imagen_principal ? <img src={p.imagen_principal} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 bg-gray-100 rounded" /> },
+              { key: "nombre", header: "Producto", render: (p) => <div><div className="font-medium">{p.nombre}</div><div className="text-xs text-gray-500">{p.sku}</div></div> },
+              { key: "tipo", header: "Tipo", render: (p) => <span className="text-xs font-medium px-2 py-1 bg-gray-100 rounded-full">{p.tipo_producto}</span> },
+              { key: "stock", header: "Stock", render: (p) => <span className="font-bold">{p.stock} {p.unidad}</span> },
+              {
+                key: "estado", header: "Estado", render: (p) => {
+                  const st = getStatus(p.stock, p.stock_min);
+                  const color = st === "OK" ? "bg-green-100 text-green-800" : st === "BAJO" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800";
+                  return <span className={`text-xs px-2 py-1 rounded-full ${color}`}>{st}</span>
+                }
+              },
+              { key: "precio", header: "Precio", render: (p) => formatCurrency(p.precio) },
+            ]}
+          />
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left p-3 font-medium text-gray-600">Producto</th>
-                <th className="text-left p-3 font-medium text-gray-600">Categoría</th>
-                <th className="text-left p-3 font-medium text-gray-600">Cantidad</th>
-                <th className="text-left p-3 font-medium text-gray-600">Stock Min.</th>
-                <th className="text-left p-3 font-medium text-gray-600">Precio Unit.</th>
-                <th className="text-left p-3 font-medium text-gray-600">Estado</th>
-                <th className="text-left p-3 font-medium text-gray-600">Acciones</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Movimiento</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lote</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Obs</th>
               </tr>
             </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="p-6 text-center text-gray-500">Cargando…</td>
+            <tbody className="divide-y divide-gray-200">
+              {loadingMovs ? <tr><td colSpan={6} className="p-4 text-center">Cargando...</td></tr> : movimientos.map(m => (
+                <tr key={m.id}>
+                  <td className="px-6 py-4 text-sm text-gray-900">{new Date(m.fecha).toLocaleString()}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{m.productos?.nombre}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${m.tipo_movimiento === 'ENTRADA' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {m.tipo_movimiento}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm font-bold">{m.cantidad}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{m.inventario_lotes?.numero_lote || '-'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{m.observacion}</td>
                 </tr>
-              ) : filtrados.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-6 text-center text-gray-500">Sin registros</td>
-                </tr>
-              ) : (
-                filtrados.map((it) => {
-                  const st = getStatus(Number(it.cantidad || 0), it.stock_min);
-                  return (
-                    <tr key={it.id} className="border-t hover:bg-gray-50">
-                      <td className="p-3 font-medium text-gray-900">{it.nombre}</td>
-                      <td className="p-3 text-gray-700">{it.categoria}</td>
-                      <td className="p-3 text-gray-700">
-                        <div className="inline-flex items-center gap-2">
-                          <button
-                            className="px-2 py-1 rounded border text-gray-700 hover:bg-gray-50"
-                            title="Restar 1"
-                            onClick={async () => {
-                              const res = await fetch('/api/stock', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: it.id, action: 'decrement' }) });
-                              const j = await res.json();
-                              if (res.ok && j.ok) {
-                                setItems((prev) => prev.map((p) => (p.id === it.id ? j.data : p)));
-                              } else {
-                                alert(j.error || 'Error al ajustar');
-                              }
-                            }}
-                          >
-                            −
-                          </button>
-                          <span className="min-w-[72px] text-center">{Number(it.cantidad || 0)} {it.unidad}</span>
-                          <button
-                            className="px-2 py-1 rounded border text-gray-700 hover:bg-gray-50"
-                            title="Sumar 1"
-                            onClick={async () => {
-                              const res = await fetch('/api/stock', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: it.id, action: 'increment' }) });
-                              const j = await res.json();
-                              if (res.ok && j.ok) {
-                                setItems((prev) => prev.map((p) => (p.id === it.id ? j.data : p)));
-                              } else {
-                                alert(j.error || 'Error al ajustar');
-                              }
-                            }}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </td>
-                      <td className="p-3 text-gray-700">{it.stock_min} {it.unidad}</td>
-                      <td className="p-3 text-gray-900">{formatCurrency(Number(it.precio || 0))}</td>
-                      <td className="p-3">{badge(st)}</td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => abrirEditar(it)}
-                            className="px-3 py-1 rounded border"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => confirmarEliminar(it.id)}
-                            className="px-3 py-1 rounded bg-red-600 text-white"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+              ))}
             </tbody>
           </table>
         </div>
-      </div>
+      )}
 
-      {/* Modal de confirmación para eliminar */}
-      <ConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => { setShowDeleteModal(false); setDeleteId(null); }}
-        onConfirm={eliminar}
-        title="Confirmar Eliminación"
-        message="¿Seguro deseas eliminar este producto de stock? Esta acción no se puede deshacer."
-        confirmText="Eliminar"
-        cancelText="Cancelar"
-        danger
-      />
-
-      {/* Modal Crear/Editar */}
+      {/* Modal Create/Edit */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-xl w-full overflow-hidden">
-            <div className="p-5 border-b flex items-center justify-between">
-              <h3 className="text-xl font-bold">{isEditing ? "Editar Producto" : "Agregar Nuevo Producto"}</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-800">×</button>
-            </div>
-            <form onSubmit={guardar} className="p-5 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nombre del Producto</label>
-                <input
-                  value={form.nombre}
-                  onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
-                  placeholder="Ej: Vacuna Antirrábica"
-                  className="w-full px-3 py-2 border rounded-md"
-                />
-              </div>
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <form onSubmit={handleSave} className="p-6 space-y-6">
+              <h2 className="text-xl font-bold">{isEditing ? "Editar Producto" : "Nuevo Producto"}</h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                  <input required value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} className="w-full px-3 py-2 border rounded-md" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">SKU</label>
+                  <input required value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} className="w-full px-3 py-2 border rounded-md" />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700">Categoría</label>
-                  <select
-                    value={form.categoria}
-                    onChange={(e) => setForm((f) => ({ ...f, categoria: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-md"
-                  >
-                    <option value="">Seleccionar</option>
-                    {CATEGORIAS.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
+                  <select required value={form.categoria_id} onChange={e => setForm({ ...form, categoria_id: Number(e.target.value) })} className="w-full px-3 py-2 border rounded-md">
+                    <option value="">Seleccionar...</option>
+                    {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Unidad</label>
-                  <input
-                    value={form.unidad}
-                    onChange={(e) => setForm((f) => ({ ...f, unidad: e.target.value }))}
-                    placeholder="Ej: dosis, cajas"
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
+                  <label className="block text-sm font-medium text-gray-700">Tipo Producto</label>
+                  <select required value={form.tipo_producto} onChange={e => setForm({ ...form, tipo_producto: e.target.value })} className="w-full px-3 py-2 border rounded-md">
+                    {TIPOS_PRODUCTO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Cantidad</label>
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    value={form.cantidad}
-                    onChange={(e) => setForm((f) => ({ ...f, cantidad: Number(e.target.value || 0) }))}
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
+                  <label className="block text-sm font-medium text-gray-700">Precio</label>
+                  <input type="number" required value={form.precio} onChange={e => setForm({ ...form, precio: Number(e.target.value) })} className="w-full px-3 py-2 border rounded-md" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Stock Actual</label>
+                  <input type="number" required value={form.stock} onChange={e => setForm({ ...form, stock: Number(e.target.value) })} className="w-full px-3 py-2 border rounded-md" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Stock Mínimo</label>
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    value={form.stock_min}
-                    onChange={(e) => setForm((f) => ({ ...f, stock_min: Number(e.target.value || 0) }))}
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
+                  <input type="number" required value={form.stock_min} onChange={e => setForm({ ...form, stock_min: Number(e.target.value) })} className="w-full px-3 py-2 border rounded-md" />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Precio Unitario</label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  value={form.precio}
-                  onChange={(e) => setForm((f) => ({ ...f, precio: Number(e.target.value || 0) }))}
-                  className="w-full px-3 py-2 border rounded-md"
-                />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Unidad de Medida</label>
+                  <input required value={form.unidad} onChange={e => setForm({ ...form, unidad: e.target.value })} placeholder="Ej: unidad, ml, kg" className="w-full px-3 py-2 border rounded-md" />
+                </div>
+                <div className="flex items-center gap-4 pt-6">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.controlar_lotes} onChange={e => setForm({ ...form, controlar_lotes: e.target.checked })} className="w-4 h-4" />
+                    <span className="text-sm font-medium">Controlar Lotes</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.es_publico} onChange={e => setForm({ ...form, es_publico: e.target.checked })} className="w-4 h-4" />
+                    <span className="text-sm font-medium">Visible al Público</span>
+                  </label>
+                </div>
               </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-md border">Cancelar</button>
-                <button type="submit" disabled={saving} className="px-5 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700">
-                  {saving ? "Guardando…" : isEditing ? "Actualizar Producto" : "Guardar Producto"}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                <textarea value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })} className="w-full px-3 py-2 border rounded-md h-24" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Imagen Principal</label>
+                  <div className="flex items-center gap-4 mt-2">
+                    {imagePreview && <img src={imagePreview} className="w-20 h-20 object-cover rounded border" />}
+                    <input type="file" accept="image/*" onChange={e => {
+                      const f = e.target.files?.[0];
+                      if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); }
+                    }} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Imágenes Adicionales (Máx 3)</label>
+                  <div className="space-y-2 mt-2">
+                    {[0, 1, 2].map((idx) => (
+                      <div key={idx} className="flex items-center gap-3">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="text-sm"
+                          onChange={e => {
+                            const f = e.target.files?.[0] || null;
+                            setExtraFiles(prev => { const n = [...prev]; n[idx] = f; return n; });
+                            setExtraPreviews(prev => { const n = [...prev]; n[idx] = f ? URL.createObjectURL(f) : null; return n; });
+                          }}
+                        />
+                        {extraPreviews[idx] && <img src={extraPreviews[idx]!} className="w-10 h-10 object-cover rounded border" />}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-md">Cancelar</button>
+                <button type="submit" disabled={saving} className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                  {saving ? "Guardando..." : "Guardar"}
                 </button>
               </div>
             </form>
@@ -737,10 +558,14 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* error */}
-      {error && <div className="text-sm text-red-600">{error}</div>}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Eliminar Producto"
+        message="¿Estás seguro? Esta acción no se puede deshacer."
+        danger
+      />
     </div>
   );
 }
-
-

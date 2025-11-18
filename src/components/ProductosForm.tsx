@@ -39,7 +39,7 @@ export default function ProductosForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
+
   const [productos, setProductos] = useState<Producto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [loadingList, setLoadingList] = useState(false);
@@ -146,15 +146,15 @@ export default function ProductosForm() {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    
+
     const precioNum = parseFloat(precio);
     const stockNum = parseInt(stock);
-    
+
     if (!nombre.trim() || !descripcion.trim() || !sku.trim() || !categoriaId || precioNum <= 0 || stockNum < 0) {
       setError("Todos los campos marcados con * y la categoría son obligatorios");
       return;
     }
-    
+
     setLoading(true);
     try {
       let imagen_principal: string | null = null;
@@ -181,15 +181,15 @@ export default function ProductosForm() {
       const res = await fetch("/api/productos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          nombre, 
-          descripcion, 
-          precio: precioNum, 
-          sku, 
-          categoria_id: parseInt(categoriaId), 
-          stock: stockNum, 
+        body: JSON.stringify({
+          nombre,
+          descripcion,
+          precio: precioNum,
+          sku,
+          categoria_id: parseInt(categoriaId),
+          stock: stockNum,
           publico,
-          imagen_principal, 
+          imagen_principal,
           imagenes
         }),
       });
@@ -229,15 +229,15 @@ export default function ProductosForm() {
     setError(null);
     setSuccess(null);
     if (!editing) return;
-    
+
     const precioNum = parseFloat(precio);
     const stockNum = parseInt(stock);
-    
+
     if (!nombre.trim() || !descripcion.trim() || !sku.trim() || !categoriaId || precioNum <= 0 || stockNum < 0) {
       setError("Todos los campos marcados con * y la categoría son obligatorios");
       return;
     }
-    
+
     setLoading(true);
     try {
       let imagen_principal: string | null | undefined = imagePreview || editing.imagen_principal || null;
@@ -267,16 +267,16 @@ export default function ProductosForm() {
       const res = await fetch("/api/productos", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          id: editing.id, 
-          nombre, 
-          descripcion, 
-          precio: precioNum, 
-          sku, 
-          categoria_id: parseInt(categoriaId), 
-          stock: stockNum, 
+        body: JSON.stringify({
+          id: editing.id,
+          nombre,
+          descripcion,
+          precio: precioNum,
+          sku,
+          categoria_id: parseInt(categoriaId),
+          stock: stockNum,
           publico,
-          imagen_principal, 
+          imagen_principal,
           ...(typeof imagenesUpdate !== 'undefined' ? { imagenes: imagenesUpdate } : {})
         }),
       });
@@ -339,7 +339,7 @@ export default function ProductosForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al crear la categoría');
-      
+
       await fetchCategorias(); // Refresh categories list
       setCategoriaId(data.categoria.id.toString()); // Select new category
       setShowCreateCategoryModal(false);
@@ -457,10 +457,10 @@ export default function ProductosForm() {
                   <label className="block text-sm font-medium text-gray-700">Imagen Principal</label>
                   <div className="flex items-center gap-3 flex-wrap">
                     <input ref={mainImageInputRef} aria-label="Subir imagen principal del producto" className="block w-full sm:w-auto px-3 py-2 border rounded-md" type="file" accept="image/*" onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        setImageFile(file);
-                        setImagePreview(file ? URL.createObjectURL(file) : null);
-                      }} />
+                      const file = e.target.files?.[0] || null;
+                      setImageFile(file);
+                      setImagePreview(file ? URL.createObjectURL(file) : null);
+                    }} />
                     {imagePreview && <img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />}
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Formatos: JPG, PNG, WEBP. Máx 4MB.</p>
@@ -476,14 +476,14 @@ export default function ProductosForm() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Imágenes adicionales (hasta 3)</label>
                   <div className="grid grid-cols-1 gap-3 mt-1">
-                    {[0,1,2].map((idx) => (
+                    {[0, 1, 2].map((idx) => (
                       <div key={idx} className="flex items-center gap-3 flex-wrap">
                         <input ref={(el) => { extraInputRefs.current[idx] = el; }} className="block w-full sm:w-auto px-3 py-2 border rounded-md" type="file" accept="image/*" onChange={(e) => {
-                            const file = e.target.files?.[0] || null;
-                            setExtraFiles((prev) => { const next = [...prev]; next[idx] = file; return next; });
-                            setExtraPreviews((prev) => { const next = [...prev]; next[idx] = file ? URL.createObjectURL(file) : null; return next; });
-                          }} />
-                        {(extraPreviews[idx]) && <img src={extraPreviews[idx] as string} alt={`extra-${idx+1}`} className="w-16 h-16 object-cover rounded border shrink-0" />}
+                          const file = e.target.files?.[0] || null;
+                          setExtraFiles((prev) => { const next = [...prev]; next[idx] = file; return next; });
+                          setExtraPreviews((prev) => { const next = [...prev]; next[idx] = file ? URL.createObjectURL(file) : null; return next; });
+                        }} />
+                        {(extraPreviews[idx]) && <img src={extraPreviews[idx] as string} alt={`extra-${idx + 1}`} className="w-16 h-16 object-cover rounded border shrink-0" />}
                       </div>
                     ))}
                   </div>
@@ -532,33 +532,37 @@ export default function ProductosForm() {
             onEdit={(p) => handleEdit(p as Producto)}
             onDelete={(id) => handleDelete(id)}
             columns={[
-              { key: "imagen", header: "Imagen", className: "w-[140px]", render: (p: Producto) => (
-                <div className="flex flex-col items-center w-16">
-                  {p.imagen_principal ? <img src={p.imagen_principal} alt={p.nombre} className="w-14 h-14 object-cover rounded" /> : <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>}
-                  <label className="mt-1 text-xs text-blue-600 cursor-pointer">
-                    Subir
-                    <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      try { await handleUploadImage(p.id, file); }
-                      catch (err: any) { alert(err.message || "Error subiendo imagen"); }
-                      finally { e.currentTarget.value = ""; }
-                    }} />
-                  </label>
-                </div>
-              ) },
+              {
+                key: "imagen", header: "Imagen", className: "w-[140px]", render: (p: Producto) => (
+                  <div className="flex flex-col items-center w-16">
+                    {p.imagen_principal ? <img src={p.imagen_principal} alt={p.nombre} className="w-14 h-14 object-cover rounded" /> : <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>}
+                    <label className="mt-1 text-xs text-blue-600 cursor-pointer">
+                      Subir
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try { await handleUploadImage(p.id, file); }
+                        catch (err: any) { alert(err.message || "Error subiendo imagen"); }
+                        finally { e.currentTarget.value = ""; }
+                      }} />
+                    </label>
+                  </div>
+                )
+              },
               { key: "nombre", header: "Nombre", render: (p: Producto) => p.nombre },
               { key: "sku", header: "SKU", render: (p: Producto) => p.sku },
               { key: "precio", header: "Precio", render: (p: Producto) => `$${p.precio.toLocaleString()}` },
               { key: "stock", header: "Stock", render: (p: Producto) => p.stock },
               { key: "categoria", header: "Categoría", render: (p: Producto) => p.categorias?.nombre || "-" },
               { key: "fecha", header: "Creado", render: (p: Producto) => new Date(p.created_at).toLocaleString() },
-              { key: "ajuste", header: "", render: (p: Producto) => (
-                <div className="flex items-center gap-2">
-                  <button type="button" className="px-2 py-1 rounded border" title="Restar 1 del stock" onClick={() => handleAdjustStock(p.id, p.stock, -1)}>−</button>
-                  <button type="button" className="px-2 py-1 rounded border" title="Sumar 1 al stock" onClick={() => handleAdjustStock(p.id, p.stock, 1)}>+</button>
-                </div>
-              ) },
+              {
+                key: "ajuste", header: "", render: (p: Producto) => (
+                  <div className="flex items-center gap-2">
+                    <button type="button" className="px-2 py-1 rounded border" title="Restar 1 del stock" onClick={() => handleAdjustStock(p.id, p.stock, -1)}>−</button>
+                    <button type="button" className="px-2 py-1 rounded border" title="Sumar 1 al stock" onClick={() => handleAdjustStock(p.id, p.stock, 1)}>+</button>
+                  </div>
+                )
+              },
             ]}
           />
         </div>

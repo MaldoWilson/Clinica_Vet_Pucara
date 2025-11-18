@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { supabaseServer } from '@/lib/supabaseClient'
 
 export const dynamic = 'force-dynamic'
 
 // GET all records
-export async function GET (request: Request) {
-  const supabase = createServerComponentClient({ cookies })
+export async function GET(request: Request) {
+  const supabase = supabaseServer()
   const { searchParams } = new URL(request.url)
   const page = parseInt(searchParams.get('page') ?? '1', 10)
   const limit = parseInt(searchParams.get('limit') ?? '10', 10)
@@ -44,14 +43,51 @@ export async function GET (request: Request) {
 }
 
 // POST a new record
-export async function POST (request: Request) {
-  const supabase = createServerComponentClient({ cookies })
+export async function POST(request: Request) {
+  const supabase = supabaseServer()
   const body = await request.json()
 
-  const { veterinario_id, nombre_vacuna, fecha_aplicacion } = body
+  const { veterinario_id, nombre_vacuna, fecha_aplicacion, producto_id } = body
 
   if (!veterinario_id || !nombre_vacuna || !fecha_aplicacion) {
     return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 })
+  }
+
+  // Logic to deduct stock if producto_id is provided
+  if (producto_id) {
+    // 1. Check current stock
+    const { data: product, error: prodError } = await supabase
+      .from('productos')
+      .select('stock, nombre')
+      .eq('id', producto_id)
+      .single()
+
+    if (prodError || !product) {
+      return NextResponse.json({ error: 'Producto no encontrado en stock' }, { status: 400 })
+    }
+
+    if (product.stock <= 0) {
+      return NextResponse.json({ error: `Sin stock disponible para ${product.nombre}` }, { status: 400 })
+    }
+
+    // 2. Deduct stock
+    const { error: updateError } = await supabase
+      .from('productos')
+      .update({ stock: product.stock - 1 })
+      .eq('id', producto_id)
+
+    if (updateError) {
+      return NextResponse.json({ error: 'Error al actualizar stock' }, { status: 500 })
+    }
+
+    // 3. Record movement
+    await supabase.from('movimientos_stock').insert({
+      producto_id: producto_id,
+      tipo_movimiento: 'VACUNACION',
+      cantidad: -1,
+      fecha: new Date().toISOString(),
+      observacion: `Aplicación de vacuna: ${nombre_vacuna}`
+    })
   }
 
   const { data, error } = await supabase
@@ -72,8 +108,8 @@ export async function POST (request: Request) {
 }
 
 // PUT to update a record
-export async function PUT (request: Request) {
-  const supabase = createServerComponentClient({ cookies })
+export async function PUT(request: Request) {
+  const supabase = supabaseServer()
   const body = await request.json()
   const { id, veterinario_id, nombre_vacuna, fecha_aplicacion } = body
 
@@ -100,8 +136,8 @@ export async function PUT (request: Request) {
 }
 
 // DELETE a record
-export async function DELETE (request: Request) {
-  const supabase = createServerComponentClient({ cookies })
+export async function DELETE(request: Request) {
+  const supabase = supabaseServer()
   const { id } = await request.json()
 
   if (!id) {

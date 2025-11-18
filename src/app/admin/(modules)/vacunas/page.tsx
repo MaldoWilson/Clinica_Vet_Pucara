@@ -12,7 +12,8 @@ import * as XLSX from 'xlsx'
 // Types
 type Vet = { id: string; nombre: string }
 type VaccineRecord = { id: number; nombre_vacuna: string; fecha_aplicacion: string; veterinarios: Vet | Vet[] | null }
-type FormData = { id?: number; veterinario_id: string; nombre_vacuna: string; fecha_aplicacion: string }
+type FormData = { id?: number; veterinario_id: string; nombre_vacuna: string; fecha_aplicacion: string; producto_id?: string }
+type StockVaccine = { id: string; nombre: string; stock: number }
 
 // Helper function to safely get veterinarian name
 function getVetName(veterinarios: Vet | Vet[] | null | undefined): string {
@@ -34,7 +35,7 @@ function getVetId(veterinarios: Vet | Vet[] | null | undefined): string {
 
 // Stats Types from API
 type KpiData = { totalMes: number; vetDestacado: string; vacunaComun: string }
-type RendimientoData = { name: string; [key: string]: number | string }
+type RendimientoData = { name: string;[key: string]: number | string }
 type DistribucionData = { name: string; value: number }
 type TendenciaData = { date: string; count: number }
 
@@ -54,7 +55,7 @@ const getMonthName = (monthString: string) => {
   return date.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })
 }
 
-export default function VacunasPage () {
+export default function VacunasPage() {
   // Dashboard data
   const [kpis, setKpis] = useState<KpiData | null>(null)
   const [rendimientoData, setRendimientoData] = useState<RendimientoData[]>([])
@@ -62,6 +63,9 @@ export default function VacunasPage () {
   const [tendenciaData, setTendenciaData] = useState<TendenciaData[]>([])
   const [allVets, setAllVets] = useState<Vet[]>([])
   const [allVetsFromStats, setAllVetsFromStats] = useState<string[]>([])
+
+  // Stock Data
+  const [stockVacunas, setStockVacunas] = useState<StockVaccine[]>([])
 
   // Table data
   const [tableData, setTableData] = useState<VaccineRecord[]>([])
@@ -85,15 +89,17 @@ export default function VacunasPage () {
     setLoading(true)
     setError(null)
     try {
-      const [statsRes, tableRes, vetsRes] = await Promise.all([
+      const [statsRes, tableRes, vetsRes, stockRes] = await Promise.all([
         fetch(`/api/admin/vacunas/stats?mes=${selectedMonth}`),
         fetch(`/api/vacunas-registradas?mes=${selectedMonth}&limit=1000`), // Fetch all for the month
-        fetch('/api/Veterinarios')
+        fetch('/api/Veterinarios'),
+        fetch('/api/productos?tipo=VACUNA&all=true')
       ])
 
       const statsJson = await statsRes.json()
       const tableJson = await tableRes.json()
       const vetsJson = await vetsRes.json()
+      const stockJson = await stockRes.json()
 
       if (!statsRes.ok) throw new Error(statsJson.error || 'Error al cargar estadísticas')
       if (!tableRes.ok) throw new Error(tableJson.error || 'Error al cargar registros')
@@ -106,6 +112,8 @@ export default function VacunasPage () {
       setAllVetsFromStats(statsJson.allVets)
       setTableData(tableJson.data || [])
       setAllVets(vetsJson.data || [])
+      if (stockJson.productos) setStockVacunas(stockJson.productos)
+
     } catch (e: any) {
       setError(e.message)
     } finally {
@@ -311,15 +319,15 @@ export default function VacunasPage () {
               <thead><tr><th>Veterinario/a</th><th>Nombre Vacuna</th><th>Fecha Aplicación</th></tr></thead>
               <tbody>
                 ${tableData.map(rec => {
-                  const formattedDate = rec.fecha_aplicacion ? rec.fecha_aplicacion.split('-').reverse().join('-') : ''
-                  return `
+      const formattedDate = rec.fecha_aplicacion ? rec.fecha_aplicacion.split('-').reverse().join('-') : ''
+      return `
                     <tr>
                       <td>${getVetName(rec.veterinarios)}</td>
                       <td>${rec.nombre_vacuna}</td>
                       <td>${formattedDate}</td>
                     </tr>
                   `
-                }).join('')}
+    }).join('')}
               </tbody>
             </table>
           </div>
@@ -344,7 +352,7 @@ export default function VacunasPage () {
           <p className="text-gray-600 mt-1 capitalize">Mostrando datos para: <span className="font-semibold">{monthTitle}</span></p>
         </div>
         <div className="flex items-center flex-wrap gap-2">
-          <input type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md"/>
+          <input type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md" />
           <button onClick={exportarExcel} disabled={loading || tableData.length === 0} className="px-4 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 flex items-center gap-2">Exportar</button>
           <button onClick={imprimirMes} disabled={loading || tableData.length === 0} className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">Imprimir</button>
           <button onClick={handleNew} className="px-4 py-2 rounded-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700">+ Registrar</button>
@@ -386,19 +394,19 @@ export default function VacunasPage () {
                 : displayedRecords.length === 0
                   ? (<tr><td colSpan={4} className="p-8 text-center text-gray-500">No hay registros para el mes seleccionado.</td></tr>)
                   : (displayedRecords.map((rec) => (
-                      <tr key={rec.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-4 text-sm font-medium text-gray-900">{getVetName(rec.veterinarios)}</td>
-                        <td className="px-4 py-4 text-sm text-gray-700">{rec.nombre_vacuna}</td>
-                        <td className="px-4 py-4 text-sm text-gray-600">
-                          {rec.fecha_aplicacion ? rec.fecha_aplicacion.split('-').reverse().join('-') : ''}
-                        </td>
-                        <td className="px-4 py-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <button onClick={() => handleEdit(rec)} className="px-3 py-1 text-sm rounded border">Editar</button>
-                            <button onClick={() => handleDeleteConfirm(rec.id)} className="px-3 py-1 text-sm rounded bg-red-600 text-white">Eliminar</button>
-                          </div>
-                        </td>
-                      </tr>
+                    <tr key={rec.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900">{getVetName(rec.veterinarios)}</td>
+                      <td className="px-4 py-4 text-sm text-gray-700">{rec.nombre_vacuna}</td>
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {rec.fecha_aplicacion ? rec.fecha_aplicacion.split('-').reverse().join('-') : ''}
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => handleEdit(rec)} className="px-3 py-1 text-sm rounded border">Editar</button>
+                          <button onClick={() => handleDeleteConfirm(rec.id)} className="px-3 py-1 text-sm rounded bg-red-600 text-white">Eliminar</button>
+                        </div>
+                      </td>
+                    </tr>
                   )))}
             </tbody>
           </table>
@@ -413,14 +421,14 @@ export default function VacunasPage () {
       </div>
 
       {/* Modals */}
-      {showModal && <FormModal formData={formData} setFormData={setFormData} allVets={allVets} handleSave={handleSave} setShowModal={setShowModal} isEditing={isEditing} saving={saving} />}
+      {showModal && <FormModal formData={formData} setFormData={setFormData} allVets={allVets} stockVacunas={stockVacunas} handleSave={handleSave} setShowModal={setShowModal} isEditing={isEditing} saving={saving} />}
       <ConfirmationModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} onConfirm={handleDelete} title="Confirmar Eliminación" message="¿Seguro que quieres eliminar este registro?" />
     </div>
   )
 }
 
 // Sub-components
-function KpiCard ({ title, value, loading }: { title: string, value: string | number | undefined, loading: boolean }) {
+function KpiCard({ title, value, loading }: { title: string, value: string | number | undefined, loading: boolean }) {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <h3 className="text-md font-medium text-gray-500">{title}</h3>
@@ -432,9 +440,19 @@ function KpiCard ({ title, value, loading }: { title: string, value: string | nu
   )
 }
 
-function FormModal({ formData, setFormData, allVets, handleSave, setShowModal, isEditing, saving }: any) {
+function FormModal({ formData, setFormData, allVets, stockVacunas, handleSave, setShowModal, isEditing, saving }: any) {
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData((prev: FormData) => ({ ...prev, [field]: value }))
+  }
+
+  const handleVaccineChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const pid = e.target.value;
+    const vac = stockVacunas.find((v: any) => String(v.id) === pid);
+    setFormData((prev: FormData) => ({
+      ...prev,
+      producto_id: pid,
+      nombre_vacuna: vac ? vac.nombre : ''
+    }));
   }
 
   return (
@@ -451,8 +469,25 @@ function FormModal({ formData, setFormData, allVets, handleSave, setShowModal, i
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la Vacuna</label>
-              <input type="text" value={formData.nombre_vacuna} onChange={(e) => handleInputChange('nombre_vacuna', e.target.value)} required placeholder="Ej: Antirrábica" className="w-full px-3 py-2 border border-gray-300 rounded-md" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Vacuna (Stock)</label>
+              <select
+                value={formData.producto_id || ''}
+                onChange={handleVaccineChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccionar del inventario...</option>
+                {stockVacunas.map((v: any) => (
+                  <option key={v.id} value={v.id} disabled={v.stock <= 0}>
+                    {v.nombre} (Stock: {v.stock})
+                  </option>
+                ))}
+              </select>
+              {!formData.producto_id && (
+                <div className="mt-2">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">O ingresar nombre manual (si no está en stock)</label>
+                  <input type="text" value={formData.nombre_vacuna} onChange={(e) => handleInputChange('nombre_vacuna', e.target.value)} required placeholder="Ej: Antirrábica" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Aplicación</label>

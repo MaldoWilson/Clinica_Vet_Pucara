@@ -146,18 +146,6 @@ const modules = [
     ),
   },
   {
-    title: "Productos",
-    href: "/admin/productos",
-    desc: "Catálogo de venta",
-    bg: "bg-indigo-50",
-    color: "text-indigo-600",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V7a2 2 0 00-2-2h-3l-2-2-2 2H8a2 2 0 00-2 2v6m14 0v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4m16 0H4" />
-      </svg>
-    ),
-  },
-  {
     title: "Blogs",
     href: "/admin/blogs",
     desc: "Contenido y artículos",
@@ -221,12 +209,24 @@ export default function AdminHome() {
         const [fc, ct, st, ms] = await Promise.all([
           fetch("/api/flujo-caja?limit=1000").then((r) => r.json()).catch(() => ({ data: [] })),
           fetch("/api/citas").then((r) => r.json()).catch(() => ({ citas: [] })),
-          fetch("/api/stock").then((r) => r.json()).catch(() => ({ data: [] })),
+          fetch("/api/productos?all=true").then((r) => r.json()).catch(() => ({ productos: [] })),
           fetch("/api/mascotas?page=1&pageSize=1").then((r) => r.json()).catch(() => ({ total: 0 })),
         ]);
         setFlujo(fc?.data || []);
         setCitas(ct?.citas || []);
-        setStock((st?.data || []).map((x: any) => ({ ...x, cantidad: x.cantidad ?? 0 })));
+        // Map products to stock items
+        const productos = st?.productos || [];
+        const stockItems = productos.map((p: any) => ({
+          id: p.id,
+          nombre: p.nombre,
+          categoria: p.categorias?.nombre || "General",
+          cantidad: p.stock,
+          stock_min: p.stock_min,
+          unidad: p.unidad,
+          precio: p.precio,
+          estado: p.stock <= 0 ? "CRITICO" : p.stock < p.stock_min ? "BAJO" : "OK"
+        }));
+        setStock(stockItems);
         setMascotasTotal(ms?.total || 0);
       } finally {
         setLoading(false);
@@ -397,26 +397,8 @@ export default function AdminHome() {
                   <p className="text-xs text-gray-600">Stock actual: {Number(b.cantidad || 0)} {b.unidad} (Mínimo: {b.stock_min})</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    className="px-3 py-1 rounded-lg border text-gray-700 hover:bg-gray-50"
-                    onClick={async () => {
-                      const res = await fetch("/api/stock", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: b.id, action: "decrement" }) });
-                      const j = await res.json();
-                      if (res.ok && j.ok) setStock((prev) => prev.map((i) => (i.id === b.id ? j.data : i)));
-                    }}
-                  >
-                    Restar 1
-                  </button>
-                  <button
-                    className="px-3 py-1 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-                    onClick={async () => {
-                      const res = await fetch("/api/stock", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: b.id, action: "increment" }) });
-                      const j = await res.json();
-                      if (res.ok && j.ok) setStock((prev) => prev.map((i) => (i.id === b.id ? j.data : i)));
-                    }}
-                  >
-                    Aumentar 1
-                  </button>
+                  {/* Actions removed as they require complex update logic. Manage in Stock page. */}
+                  <Link href="/admin/stock" className="text-xs text-indigo-600 hover:underline">Gestionar</Link>
                 </div>
               </div>
             ))}
@@ -433,7 +415,7 @@ export default function AdminHome() {
               <div className="group bg-white rounded-xl border border-indigo-100 hover:border-indigo-300 shadow-sm hover:shadow-md transition-all p-5">
                 <div className="flex items-start justify-between">
                   <div className={`h-9 w-9 rounded-lg grid place-items-center ${m.bg} ${m.color}`}>{m.icon}</div>
-                  <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                  <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-gray-900 group-hover:text-indigo-700">{m.title}</h3>
                 <p className="text-sm text-gray-600 mt-1">{m.desc}</p>
