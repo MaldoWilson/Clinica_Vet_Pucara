@@ -137,25 +137,25 @@ export default function ServiciosPage() {
           />
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <h2 className="text-4xl font-bold text-center mb-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 px-4">
             <span className="text-gray-800">Servicios </span>
             <span className="text-indigo-400">Disponibles</span>
             <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
           </h2>
           
           {servicios.length === 0 ? (
-            <div className="text-center py-16">
+            <div className="text-center py-12 sm:py-16 px-4">
               <div className="text-gray-400 mb-4">
-                <svg className="mx-auto h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="mx-auto h-20 sm:h-24 w-20 sm:w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">No hay servicios disponibles</h3>
-              <p className="text-gray-600">Pronto agregaremos nuestros servicios veterinarios.</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">No hay servicios disponibles</h3>
+              <p className="text-sm sm:text-base text-gray-600">Pronto agregaremos nuestros servicios veterinarios.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch auto-rows-fr">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch auto-rows-fr">
               {servicios.map((s) => (
                 <ServiceCard
                   key={s.id}

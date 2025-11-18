@@ -21,8 +21,8 @@ export default function Footer() {
     <footer className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 text-white ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Contenido principal del footer */}
-        <div className="py-8 sm:py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="py-6 sm:py-8 md:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
             
             {/* Logo y nombre - Lado derecho */}
             <div className="flex flex-col items-center lg:items-start space-y-4 order-2 lg:order-1">

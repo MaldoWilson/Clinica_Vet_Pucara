@@ -102,13 +102,13 @@ export default function ContactSection({
       )}
 
       <section className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24 md:pb-20">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-            <div className="text-white order-1 lg:order-1">
-              <div className="flex items-center gap-3 mb-6">
-                <h1 className="text-3xl md:text-4xl font-bold leading-tight">¡Contactate con nosotros!</h1>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 md:pb-24">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-start">
+            <div className="text-white order-2 lg:order-1">
+              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">¡Contactate con nosotros!</h1>
               </div>
-              <p className="text-teal-50/90 max-w-2xl mb-6">
+              <p className="text-sm sm:text-base text-teal-50/90 max-w-2xl mb-4 sm:mb-6">
                 Estamos aquí para cuidar de tu mascota. Completa el formulario y te contactaremos a la brevedad.
                 También puedes escribirnos o visitar nuestra ubicación a continuación.
               </p>
@@ -124,28 +124,28 @@ export default function ContactSection({
                 </p>
               </div>
 
-              <div className="bg-white/90 rounded-xl p-4 shadow-xl">
-                <h2 className="text-neutral-900 text-lg font-semibold mb-1">Ubicación</h2>
-                <p className="text-neutral-700 text-sm mb-2">{direccion}</p>
+              <div className="bg-white/90 rounded-xl p-3 sm:p-4 shadow-xl">
+                <h2 className="text-neutral-900 text-base sm:text-lg font-semibold mb-1">Ubicación</h2>
+                <p className="text-neutral-700 text-xs sm:text-sm mb-2">{direccion}</p>
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-teal-700 hover:underline text-sm"
+                  className="text-teal-700 hover:underline text-xs sm:text-sm"
                 >
                   Ver en Google Maps
                 </a>
                 <div className="mt-3">
-                  <MapVet query={direccion} heightClass="h-[260px]" />
+                  <MapVet query={direccion} heightClass="h-[200px] sm:h-[240px] md:h-[260px]" />
                 </div>
               </div>
             </div>
 
-            <div className="order-2 lg:order-2">
-              <form onSubmit={submit} className="bg-white rounded-2xl shadow-xl p-6 md:p-8 space-y-4 lg:sticky lg:top-24">
+            <div className="order-1 lg:order-2">
+              <form onSubmit={submit} className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 space-y-3 sm:space-y-4 lg:sticky lg:top-24">
                 <div>
-                  <h2 className="text-2xl font-bold text-neutral-900">Formulario</h2>
-                  <p className="text-sm text-neutral-600">¡Estamos aquí para ayudarte!</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">Formulario</h2>
+                  <p className="text-xs sm:text-sm text-neutral-600">¡Estamos aquí para ayudarte!</p>
                 </div>
                 <input
                   name="nombre"

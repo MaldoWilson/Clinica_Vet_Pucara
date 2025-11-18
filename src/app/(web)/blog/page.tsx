@@ -139,19 +139,19 @@ export default function BlogPage() {
   return (
     <>
       <HeaderSection />
-      <div className="py-20">
-        <div className="container mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12">
+      <div className="py-12 sm:py-16 lg:py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12">
             <span className="text-gray-800">Blog </span>
             <span className="text-indigo-400">Veterinario</span>
             <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
           </h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-sm sm:text-base text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
             Descubre consejos, noticias y artículos sobre el cuidado de tus mascotas, 
             escritos por nuestros veterinarios especialistas.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {blogs.map((blog) => (
               <BlogCard key={blog.id} blog={blog} />
             ))}

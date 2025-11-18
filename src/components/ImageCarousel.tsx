@@ -117,8 +117,9 @@ export default function ImageCarousel({
           prev();
           resetAutoplay();
         }}
-        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 text-white
-             p-3 sm:p-3 md:p-3 lg:p-2 hover:bg-black/70 focus:outline-none transition-all z-10"
+        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 text-white
+             p-2.5 sm:p-3 md:p-2.5 lg:p-2 hover:bg-black/70 focus:outline-none transition-all z-10
+             text-xl sm:text-2xl md:text-xl w-10 h-10 sm:w-12 sm:h-12 md:w-10 md:h-10 flex items-center justify-center"
       >
         ‹
       </button>
@@ -128,8 +129,9 @@ export default function ImageCarousel({
           next();
           resetAutoplay();
         }}
-        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 text-white
-             p-3 sm:p-3 md:p-3 lg:p-2 hover:bg-black/70 focus:outline-none transition-all z-10"
+        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 text-white
+             p-2.5 sm:p-3 md:p-2.5 lg:p-2 hover:bg-black/70 focus:outline-none transition-all z-10
+             text-xl sm:text-2xl md:text-xl w-10 h-10 sm:w-12 sm:h-12 md:w-10 md:h-10 flex items-center justify-center"
       >
         ›
       </button>

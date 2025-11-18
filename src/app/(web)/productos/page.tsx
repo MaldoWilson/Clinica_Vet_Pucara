@@ -144,25 +144,25 @@ export default function ProductosPage() {
       <HeaderSection />
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          <div className="text-center mb-8 sm:mb-12 px-4">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
               <span className="text-gray-800">Nuestros </span>
               <span className="text-indigo-400">Productos</span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto">
               Descubre nuestra amplia gama de productos veterinarios de alta calidad para el cuidado de tus mascotas. <span className="text-indigo-500">Compra solo disponible en tienda física.</span>
             </p>
             <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-4"></div>
           </div>
 
-          <div className="mb-8 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between md:gap-4">
+          <div className="mb-6 sm:mb-8 space-y-3 sm:space-y-4 md:space-y-0 md:flex md:items-center md:justify-between md:gap-4 px-4">
             <div className="flex-1">
               <input
                 type="text"
                 placeholder="Buscar productos por nombre, descripción o SKU..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
 
@@ -170,7 +170,7 @@ export default function ProductosPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 aria-label="Filtrar por categoría"
               >
                 <option value="">Todas las categorías</option>
@@ -219,7 +219,7 @@ export default function ProductosPage() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-4">
               {filteredProductos.map((producto) => (
                 <ProductCard key={producto.id} producto={producto} />
               ))}

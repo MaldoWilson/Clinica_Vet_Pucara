@@ -124,29 +124,29 @@ export default function EquipoPage() {
       <HeaderSection />
 
       {/* Equipo Grid */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <h2 className="text-4xl font-bold text-center mb-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4 sm:mb-6">
           <span className="text-gray-800">Quienes </span>
           <span className="text-indigo-400">Somos</span>
           <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
         </h2>
 
-        <p className="text-gray-600 text-center max-w-3xl mx-auto mb-12 text-lg leading-relaxed px-4">
+        <p className="text-sm sm:text-base lg:text-lg text-gray-600 text-center max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed px-4">
           En Clínica Veterinaria Pucará, nuestro equipo está conformado por profesionales apasionados y comprometidos con la salud y el bienestar de tus mascotas. Combinamos experiencia, tecnología avanzada y un trato cercano para brindar una atención integral, asegurando que cada paciente reciba el cuidado y el cariño que merece en cada visita.
         </p>
 
         {vets.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="text-center py-12 sm:py-16 px-4">
             <div className="text-gray-400 mb-4">
-              <svg className="mx-auto h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="mx-auto h-20 sm:h-24 w-20 sm:w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">No hay veterinarios disponibles</h3>
-            <p className="text-gray-600">Pronto agregaremos información sobre nuestro equipo veterinario.</p>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">No hay veterinarios disponibles</h3>
+            <p className="text-sm sm:text-base text-gray-600">Pronto agregaremos información sobre nuestro equipo veterinario.</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {vets.map((v) => (
               <VetCard key={v.id} vet={v} />
             ))}

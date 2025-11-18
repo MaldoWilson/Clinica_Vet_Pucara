@@ -47,8 +47,8 @@ export default function Navbar() {
       )}
       
       <header className="fixed top-0 left-0 right-0 z-50">
-        <nav className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between bg-white rounded-full px-6 py-3 shadow-lg">
+        <nav className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
+        <div className="flex items-center justify-between bg-white rounded-full px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 shadow-lg">
           {/* Mobile menu button and title (visible on mobile, hidden on desktop) */}
           <div className="flex items-center md:hidden">
             <button
@@ -69,16 +69,16 @@ export default function Navbar() {
                 )}
               </svg>
             </button>
-            <span className="ml-3 text-lg font-semibold text-gray-800">Veterinaria Pucará</span>
+            <span className="ml-2 sm:ml-3 text-base sm:text-lg font-semibold text-gray-800">Veterinaria Pucará</span>
           </div>
 
           {/* Desktop Navigation (hidden on mobile, visible and centered on desktop) */}
-          <div className="hidden md:flex flex-grow justify-center items-center space-x-2">
+          <div className="hidden md:flex flex-grow justify-center items-center space-x-1 lg:space-x-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`px-2 lg:px-4 py-2 rounded-full text-xs lg:text-sm font-medium transition-all duration-200 ${
                   isActive(link.href)
                     ? 'text-indigo-600 bg-indigo-100'
                     : 'text-gray-700 hover:text-indigo-500 hover:bg-gray-50'

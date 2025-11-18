@@ -88,23 +88,23 @@ export default function LatestBlogs() {
   }
 
   return (
-    <section className="py-16 bg-white w-full">
-      <div className="mx-auto max-w-screen-2xl px-6">
-        <h2 className="text-4xl font-bold text-center mb-12">
+    <section className="py-12 sm:py-16 bg-white w-full">
+      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 px-4">
           <span className="text-gray-800">Nuestras </span>
           <span className="text-indigo-400">Recomendaciones</span>
           <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
 
           {blogs.map((blog) => (
             <BlogCard key={blog.id} blog={blog} />
           ))}
         </div>
 
-        <div className="text-center">
+        <div className="text-center px-4">
           <Link
-            href="/blog" className="px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300">
+            href="/blog" className="inline-block px-6 py-3 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-300 text-sm sm:text-base">
             Ver Más Artículos
 
           </Link>

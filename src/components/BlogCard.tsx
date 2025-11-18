@@ -80,7 +80,7 @@ export default function BlogCard({ blog }: Props) {
   };
 
   return (
-    <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group">
+    <div className="w-full max-w-sm mx-auto bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group">
       <Link href={`/blog/${blog.id}`}>
         {blog.image_url && (
           // eslint-disable-next-line @next/next/no-img-element
