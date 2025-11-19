@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   PieChart,
   Pie,
@@ -77,11 +78,16 @@ export default function StockPage() {
   const [loadingMovs, setLoadingMovs] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Pagination
+  const [invPage, setInvPage] = useState(1);
+  const [histPage, setHistPage] = useState(1);
+
   // Filters
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [filterCategoria, setFilterCategoria] = useState("");
   const [filterTipo, setFilterTipo] = useState("");
-  const [filterEstado, setFilterEstado] = useState("");
+  const [filterEstado, setFilterEstado] = useState(searchParams.get("filter") || "");
 
   // Modal / Form
   const [showModal, setShowModal] = useState(false);
@@ -155,7 +161,8 @@ export default function StockPage() {
   const stats = useMemo(() => {
     const total = productos.length;
     const valor = productos.reduce((acc, p) => acc + (p.stock * p.precio), 0);
-    const bajos = productos.filter(p => getStatus(p.stock, p.stock_min) !== "OK").length;
+    const itemsBajos = productos.filter(p => getStatus(p.stock, p.stock_min) !== "OK");
+    const bajos = itemsBajos.length;
 
     // Distribution by Type
     const distMap = new Map<string, number>();
@@ -167,10 +174,26 @@ export default function StockPage() {
       name, value, color: COLORES[i % COLORES.length]
     }));
 
-    return { total, valor, bajos, distData };
+    return { total, valor, bajos, itemsBajos, distData };
   }, [productos]);
 
   // --- Handlers ---
+  const handleQuickStock = async (p: Producto, change: number) => {
+    try {
+      const newStock = Math.max(0, (p.stock || 0) + change);
+      const res = await fetch("/api/productos", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: p.id, stock: newStock })
+      });
+      if (!res.ok) throw new Error("Error al actualizar stock");
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      alert("Error al actualizar stock rápido");
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -347,6 +370,33 @@ export default function StockPage() {
         </div>
       </div>
 
+      {/* Alertas de Stock Bajo */}
+      <div className="bg-white rounded-xl shadow border">
+        <div className="flex items-center justify-between p-4 border-b">
+          <p className="font-semibold text-gray-900">Alertas de Stock Bajo</p>
+          <button onClick={() => setFilterEstado("BAJO")} className="px-3 py-1 rounded-lg border text-sm hover:bg-gray-50">Ver Todo</button>
+        </div>
+        {stats.itemsBajos.length === 0 ? (
+          <div className="p-6 text-sm text-gray-500">Sin alertas</div>
+        ) : (
+          <div className="divide-y">
+            {stats.itemsBajos.slice(0, 3).map((b) => (
+              <div key={b.id} className="p-4 flex items-center justify-between bg-orange-50">
+                <div>
+                  <p className="font-medium text-gray-900">{b.nombre}</p>
+                  <p className="text-xs text-gray-600">Stock actual: {Number(b.stock || 0)} {b.unidad} (Mínimo: {b.stock_min})</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => openEdit(b)} className="text-xs text-indigo-600 hover:underline font-medium">
+                    Editar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
@@ -373,18 +423,18 @@ export default function StockPage() {
             <input
               placeholder="Buscar..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => { setSearch(e.target.value); setInvPage(1); }}
               className="px-3 py-2 border rounded-md w-full md:w-64"
             />
-            <select value={filterCategoria} onChange={e => setFilterCategoria(e.target.value)} className="px-3 py-2 border rounded-md">
+            <select value={filterCategoria} onChange={e => { setFilterCategoria(e.target.value); setInvPage(1); }} className="px-3 py-2 border rounded-md">
               <option value="">Todas las Categorías</option>
               {categorias.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
             </select>
-            <select value={filterTipo} onChange={e => setFilterTipo(e.target.value)} className="px-3 py-2 border rounded-md">
+            <select value={filterTipo} onChange={e => { setFilterTipo(e.target.value); setInvPage(1); }} className="px-3 py-2 border rounded-md">
               <option value="">Todos los Tipos</option>
               {TIPOS_PRODUCTO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
-            <select value={filterEstado} onChange={e => setFilterEstado(e.target.value)} className="px-3 py-2 border rounded-md">
+            <select value={filterEstado} onChange={e => { setFilterEstado(e.target.value); setInvPage(1); }} className="px-3 py-2 border rounded-md">
               <option value="">Todos los Estados</option>
               <option value="OK">OK</option>
               <option value="BAJO">Bajo</option>
@@ -393,7 +443,7 @@ export default function StockPage() {
           </div>
 
           <AdminEditableTable
-            items={filteredProductos}
+            items={filteredProductos.slice((invPage - 1) * 20, invPage * 20)}
             loading={loading}
             onEdit={openEdit}
             onDelete={(id) => { setDeleteId(id); setShowDeleteModal(true); }}
@@ -401,7 +451,30 @@ export default function StockPage() {
               { key: "imagen", header: "Img", render: (p) => p.imagen_principal ? <img src={p.imagen_principal} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 bg-gray-100 rounded" /> },
               { key: "nombre", header: "Producto", render: (p) => <div><div className="font-medium">{p.nombre}</div><div className="text-xs text-gray-500">{p.sku}</div></div> },
               { key: "tipo", header: "Tipo", render: (p) => <span className="text-xs font-medium px-2 py-1 bg-gray-100 rounded-full">{p.tipo_producto}</span> },
-              { key: "stock", header: "Stock", render: (p) => <span className="font-bold">{p.stock} {p.unidad}</span> },
+              {
+                key: "stock",
+                header: "Stock",
+                render: (p) => (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleQuickStock(p, -1)}
+                      className="w-6 h-6 flex items-center justify-center rounded bg-red-100 text-red-700 hover:bg-red-200 text-xs font-bold"
+                      title="Restar 1"
+                    >
+                      -
+                    </button>
+                    <span className="font-bold min-w-[3ch] text-center">{p.stock}</span>
+                    <button
+                      onClick={() => handleQuickStock(p, 1)}
+                      className="w-6 h-6 flex items-center justify-center rounded bg-green-100 text-green-700 hover:bg-green-200 text-xs font-bold"
+                      title="Sumar 1"
+                    >
+                      +
+                    </button>
+                    <span className="text-xs text-gray-500 ml-1">{p.unidad}</span>
+                  </div>
+                )
+              },
               {
                 key: "estado", header: "Estado", render: (p) => {
                   const st = getStatus(p.stock, p.stock_min);
@@ -412,44 +485,100 @@ export default function StockPage() {
               { key: "precio", header: "Precio", render: (p) => formatCurrency(p.precio) },
             ]}
           />
+
+          {/* Pagination Inventory */}
+          {filteredProductos.length > 20 && (
+            <div className="flex items-center justify-center gap-4 mt-4 pb-8">
+              <button
+                onClick={() => setInvPage(p => Math.max(1, p - 1))}
+                disabled={invPage === 1}
+                className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <span className="text-sm font-medium text-gray-600">
+                Página {invPage} de {Math.ceil(filteredProductos.length / 20)}
+              </span>
+              <button
+                onClick={() => setInvPage(p => Math.min(Math.ceil(filteredProductos.length / 20), p + 1))}
+                disabled={invPage === Math.ceil(filteredProductos.length / 20)}
+                className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Movimiento</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lote</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Obs</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {loadingMovs ? <tr><td colSpan={6} className="p-4 text-center">Cargando...</td></tr> : movimientos.map(m => (
-                <tr key={m.id}>
-                  <td className="px-6 py-4 text-sm text-gray-900">{new Date(m.fecha).toLocaleString()}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{m.productos?.nombre}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${m.tipo_movimiento === 'ENTRADA' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {m.tipo_movimiento}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-bold">{m.cantidad}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{m.inventario_lotes?.numero_lote || '-'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{m.observacion}</td>
+        <div className="space-y-4">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Movimiento</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lote</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Obs</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {loadingMovs ? <tr><td colSpan={6} className="p-4 text-center">Cargando...</td></tr> : movimientos.slice((histPage - 1) * 20, histPage * 20).map(m => (
+                  <tr key={m.id}>
+                    <td className="px-6 py-4 text-sm text-gray-900">{new Date(m.fecha).toLocaleString()}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{m.productos?.nombre}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${m.tipo_movimiento === 'ENTRADA' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {m.tipo_movimiento}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold">{m.cantidad}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{m.inventario_lotes?.numero_lote || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{m.observacion}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination History */}
+          {movimientos.length > 20 && (
+            <div className="flex items-center justify-center gap-4 mt-4 pb-8">
+              <button
+                onClick={() => setHistPage(p => Math.max(1, p - 1))}
+                disabled={histPage === 1}
+                className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <span className="text-sm font-medium text-gray-600">
+                Página {histPage} de {Math.ceil(movimientos.length / 20)}
+              </span>
+              <button
+                onClick={() => setHistPage(p => Math.min(Math.ceil(movimientos.length / 20), p + 1))}
+                disabled={histPage === Math.ceil(movimientos.length / 20)}
+                className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {/* Modal Create/Edit */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
             <form onSubmit={handleSave} className="p-6 space-y-6">
               <h2 className="text-xl font-bold">{isEditing ? "Editar Producto" : "Nuevo Producto"}</h2>
 
@@ -517,9 +646,9 @@ export default function StockPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Imagen Principal</label>
-                  <div className="flex items-center gap-4 mt-2">
-                    {imagePreview && <img src={imagePreview} className="w-20 h-20 object-cover rounded border" />}
-                    <input type="file" accept="image/*" onChange={e => {
+                  <div className="flex items-center gap-4 mt-2 p-3 border rounded-lg bg-gray-50">
+                    {imagePreview && <img src={imagePreview} className="w-20 h-20 object-cover rounded border shrink-0" />}
+                    <input type="file" accept="image/*" className="flex-1 min-w-0 text-sm text-gray-500" onChange={e => {
                       const f = e.target.files?.[0];
                       if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); }
                     }} />
@@ -529,18 +658,18 @@ export default function StockPage() {
                   <label className="block text-sm font-medium text-gray-700">Imágenes Adicionales (Máx 3)</label>
                   <div className="space-y-2 mt-2">
                     {[0, 1, 2].map((idx) => (
-                      <div key={idx} className="flex items-center gap-3">
+                      <div key={idx} className="flex items-center gap-3 p-2 border rounded bg-gray-50">
                         <input
                           type="file"
                           accept="image/*"
-                          className="text-sm"
+                          className="text-sm flex-1 min-w-0 text-gray-500"
                           onChange={e => {
                             const f = e.target.files?.[0] || null;
                             setExtraFiles(prev => { const n = [...prev]; n[idx] = f; return n; });
                             setExtraPreviews(prev => { const n = [...prev]; n[idx] = f ? URL.createObjectURL(f) : null; return n; });
                           }}
                         />
-                        {extraPreviews[idx] && <img src={extraPreviews[idx]!} className="w-10 h-10 object-cover rounded border" />}
+                        {extraPreviews[idx] && <img src={extraPreviews[idx]!} className="w-10 h-10 object-cover rounded border shrink-0" />}
                       </div>
                     ))}
                   </div>

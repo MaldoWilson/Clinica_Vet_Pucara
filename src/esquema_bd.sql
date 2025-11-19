@@ -1,6 +1,5 @@
 -- Es solo un esquema sql de la base de datos real
 
-
 CREATE TABLE public.antecedentes (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   mascota_id bigint NOT NULL,

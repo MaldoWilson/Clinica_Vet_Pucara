@@ -384,7 +384,7 @@ export default function AdminHome() {
       <div className="bg-white rounded-xl shadow border">
         <div className="flex items-center justify-between p-4 border-b">
           <p className="font-semibold text-gray-900">Alertas de Stock Bajo</p>
-          <Link href="/admin/stock" className="px-3 py-1 rounded-lg border text-sm">Ver Todo</Link>
+          <Link href="/admin/stock?filter=BAJO" className="px-3 py-1 rounded-lg border text-sm">Ver Todo</Link>
         </div>
         {bajos.length === 0 ? (
           <div className="p-6 text-sm text-gray-500">Sin alertas</div>

@@ -135,6 +135,20 @@ export async function PUT(request: NextRequest) {
     updates.updated_at = new Date().toISOString();
 
     const supabase = supabaseServer();
+
+    // 1. Fetch current product to get old stock
+    const { data: oldProduct, error: fetchError } = await supabase
+      .from('productos')
+      .select('stock')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching old product:', fetchError);
+      return NextResponse.json({ error: 'Error al obtener producto original' }, { status: 500 });
+    }
+
+    // 2. Update product
     const { data, error } = await supabase
       .from('productos')
       .update(updates)
@@ -145,6 +159,26 @@ export async function PUT(request: NextRequest) {
     if (error) {
       console.error('Error al actualizar producto:', error);
       return NextResponse.json({ error: 'No se pudo actualizar el producto' }, { status: 500 });
+    }
+
+    // 3. Check for stock change and record movement
+    if (typeof body?.stock === 'number' && oldProduct) {
+      const oldStock = Number(oldProduct.stock || 0);
+      const newStock = Number(body.stock);
+      const diff = newStock - oldStock;
+
+      if (diff !== 0) {
+        const tipo_movimiento = diff > 0 ? 'ENTRADA' : 'SALIDA';
+        const cantidad = Math.abs(diff);
+
+        await supabase.from('movimientos_stock').insert([{
+          producto_id: id,
+          tipo_movimiento,
+          cantidad,
+          fecha: new Date().toISOString(),
+          observacion: 'Ajuste manual desde edición de producto'
+        }]);
+      }
     }
 
     return NextResponse.json({ producto: data });
