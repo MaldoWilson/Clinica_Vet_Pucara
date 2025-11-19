@@ -473,6 +473,7 @@ function FormModal({ formData, setFormData, allVets, stockVacunas, handleSave, s
               <select
                 value={formData.producto_id || ''}
                 onChange={handleVaccineChange}
+                required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
                 <option value="">Seleccionar del inventario...</option>
@@ -482,12 +483,6 @@ function FormModal({ formData, setFormData, allVets, stockVacunas, handleSave, s
                   </option>
                 ))}
               </select>
-              {!formData.producto_id && (
-                <div className="mt-2">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">O ingresar nombre manual (si no está en stock)</label>
-                  <input type="text" value={formData.nombre_vacuna} onChange={(e) => handleInputChange('nombre_vacuna', e.target.value)} required placeholder="Ej: Antirrábica" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                </div>
-              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Aplicación</label>

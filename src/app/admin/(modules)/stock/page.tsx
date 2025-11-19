@@ -89,6 +89,14 @@ export default function StockPage() {
   const [filterTipo, setFilterTipo] = useState("");
   const [filterEstado, setFilterEstado] = useState(searchParams.get("filter") || "");
 
+  // Sort states for Inventory
+  const [invSortField, setInvSortField] = useState<"nombre" | "fecha">("nombre");
+  const [invSortDir, setInvSortDir] = useState<"asc" | "desc">("asc");
+
+  // Sort states for Movement History
+  const [histSortField, setHistSortField] = useState<"producto" | "fecha">("fecha");
+  const [histSortDir, setHistSortDir] = useState<"asc" | "desc">("desc");
+
   // Modal / Form
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -148,7 +156,7 @@ export default function StockPage() {
 
   // --- Computed ---
   const filteredProductos = useMemo(() => {
-    return productos.filter(p => {
+    let result = productos.filter(p => {
       const matchSearch = !search || p.nombre.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
       const matchCat = !filterCategoria || p.categorias?.nombre === filterCategoria;
       const matchTipo = !filterTipo || p.tipo_producto === filterTipo;
@@ -156,7 +164,36 @@ export default function StockPage() {
       const matchEstado = !filterEstado || status === filterEstado;
       return matchSearch && matchCat && matchTipo && matchEstado;
     });
-  }, [productos, search, filterCategoria, filterTipo, filterEstado]);
+
+    // Apply sorting
+    result.sort((a, b) => {
+      let comparison = 0;
+      if (invSortField === "nombre") {
+        comparison = a.nombre.localeCompare(b.nombre);
+      } else if (invSortField === "fecha") {
+        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      }
+      return invSortDir === "asc" ? comparison : -comparison;
+    });
+
+    return result;
+  }, [productos, search, filterCategoria, filterTipo, filterEstado, invSortField, invSortDir]);
+
+  const sortedMovimientos = useMemo(() => {
+    const result = [...movimientos];
+    result.sort((a, b) => {
+      let comparison = 0;
+      if (histSortField === "producto") {
+        const nameA = a.productos?.nombre || "";
+        const nameB = b.productos?.nombre || "";
+        comparison = nameA.localeCompare(nameB);
+      } else if (histSortField === "fecha") {
+        comparison = new Date(a.fecha).getTime() - new Date(b.fecha).getTime();
+      }
+      return histSortDir === "asc" ? comparison : -comparison;
+    });
+    return result;
+  }, [movimientos, histSortField, histSortDir]);
 
   const stats = useMemo(() => {
     const total = productos.length;
@@ -419,27 +456,45 @@ export default function StockPage() {
       {activeTab === "INVENTARIO" ? (
         <div className="space-y-4">
           {/* Filters */}
-          <div className="bg-white p-4 rounded-lg shadow flex flex-wrap gap-4 items-center">
-            <input
-              placeholder="Buscar..."
-              value={search}
-              onChange={e => { setSearch(e.target.value); setInvPage(1); }}
-              className="px-3 py-2 border rounded-md w-full md:w-64"
-            />
-            <select value={filterCategoria} onChange={e => { setFilterCategoria(e.target.value); setInvPage(1); }} className="px-3 py-2 border rounded-md">
-              <option value="">Todas las Categorías</option>
-              {categorias.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
-            </select>
-            <select value={filterTipo} onChange={e => { setFilterTipo(e.target.value); setInvPage(1); }} className="px-3 py-2 border rounded-md">
-              <option value="">Todos los Tipos</option>
-              {TIPOS_PRODUCTO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
-            <select value={filterEstado} onChange={e => { setFilterEstado(e.target.value); setInvPage(1); }} className="px-3 py-2 border rounded-md">
-              <option value="">Todos los Estados</option>
-              <option value="OK">OK</option>
-              <option value="BAJO">Bajo</option>
-              <option value="CRITICO">Crítico</option>
-            </select>
+          <div className="bg-white p-4 rounded-lg shadow space-y-4">
+            <div className="flex flex-wrap gap-3">
+              <input
+                placeholder="Buscar..."
+                value={search}
+                onChange={e => { setSearch(e.target.value); setInvPage(1); }}
+                className="px-3 py-2 border rounded-md w-full sm:w-auto sm:flex-1 sm:min-w-[200px]"
+              />
+              <select value={filterCategoria} onChange={e => { setFilterCategoria(e.target.value); setInvPage(1); }} className="px-3 py-2 border rounded-md w-full sm:w-auto">
+                <option value="">Todas las Categorías</option>
+                {categorias.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
+              </select>
+              <select value={filterTipo} onChange={e => { setFilterTipo(e.target.value); setInvPage(1); }} className="px-3 py-2 border rounded-md w-full sm:w-auto">
+                <option value="">Todos los Tipos</option>
+                {TIPOS_PRODUCTO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+              <select value={filterEstado} onChange={e => { setFilterEstado(e.target.value); setInvPage(1); }} className="px-3 py-2 border rounded-md w-full sm:w-auto">
+                <option value="">Todos los Estados</option>
+                <option value="OK">OK</option>
+                <option value="BAJO">Bajo</option>
+                <option value="CRITICO">Crítico</option>
+              </select>
+            </div>
+
+            {/* Sorting Controls */}
+            <div className="flex items-center gap-2 pt-2 border-t">
+              <label className="text-sm text-gray-600 font-medium whitespace-nowrap">Ordenar por:</label>
+              <select value={invSortField} onChange={e => setInvSortField(e.target.value as "nombre" | "fecha")} className="px-3 py-2 border rounded-md text-sm flex-1 sm:flex-initial">
+                <option value="nombre">Nombre</option>
+                <option value="fecha">Fecha</option>
+              </select>
+              <button
+                onClick={() => setInvSortDir(invSortDir === "asc" ? "desc" : "asc")}
+                className="px-4 py-2 border rounded-md hover:bg-gray-50 text-sm font-medium min-w-[44px] whitespace-nowrap"
+                title={invSortDir === "asc" ? "Ascendente" : "Descendente"}
+              >
+                {invSortDir === "asc" ? "↑ A-Z" : "↓ Z-A"}
+              </button>
+            </div>
           </div>
 
           <AdminEditableTable
@@ -519,8 +574,42 @@ export default function StockPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => {
+                      if (histSortField === "fecha") {
+                        setHistSortDir(histSortDir === "asc" ? "desc" : "asc");
+                      } else {
+                        setHistSortField("fecha");
+                        setHistSortDir("desc");
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-1">
+                      Fecha
+                      {histSortField === "fecha" && (
+                        <span className="text-indigo-600">{histSortDir === "asc" ? "↑" : "↓"}</span>
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => {
+                      if (histSortField === "producto") {
+                        setHistSortDir(histSortDir === "asc" ? "desc" : "asc");
+                      } else {
+                        setHistSortField("producto");
+                        setHistSortDir("asc");
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-1">
+                      Producto
+                      {histSortField === "producto" && (
+                        <span className="text-indigo-600">{histSortDir === "asc" ? "↑" : "↓"}</span>
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Movimiento</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lote</th>
@@ -528,7 +617,7 @@ export default function StockPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {loadingMovs ? <tr><td colSpan={6} className="p-4 text-center">Cargando...</td></tr> : movimientos.slice((histPage - 1) * 20, histPage * 20).map(m => (
+                {loadingMovs ? <tr><td colSpan={6} className="p-4 text-center">Cargando...</td></tr> : sortedMovimientos.slice((histPage - 1) * 20, histPage * 20).map(m => (
                   <tr key={m.id}>
                     <td className="px-6 py-4 text-sm text-gray-900">{new Date(m.fecha).toLocaleString()}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">{m.productos?.nombre}</td>
@@ -547,7 +636,7 @@ export default function StockPage() {
           </div>
 
           {/* Pagination History */}
-          {movimientos.length > 20 && (
+          {sortedMovimientos.length > 20 && (
             <div className="flex items-center justify-center gap-4 mt-4 pb-8">
               <button
                 onClick={() => setHistPage(p => Math.max(1, p - 1))}
@@ -559,11 +648,11 @@ export default function StockPage() {
                 </svg>
               </button>
               <span className="text-sm font-medium text-gray-600">
-                Página {histPage} de {Math.ceil(movimientos.length / 20)}
+                Página {histPage} de {Math.ceil(sortedMovimientos.length / 20)}
               </span>
               <button
-                onClick={() => setHistPage(p => Math.min(Math.ceil(movimientos.length / 20), p + 1))}
-                disabled={histPage === Math.ceil(movimientos.length / 20)}
+                onClick={() => setHistPage(p => Math.min(Math.ceil(sortedMovimientos.length / 20), p + 1))}
+                disabled={histPage === Math.ceil(sortedMovimientos.length / 20)}
                 className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
