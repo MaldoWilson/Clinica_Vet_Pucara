@@ -400,8 +400,17 @@ export default function VacunasPage() {
                         <div className="font-medium">{rec.nombre_vacuna}</div>
                         <div className="text-xs text-gray-500 sm:hidden">{getVetName(rec.veterinarios)}</div>
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-600">
-                        {rec.fecha_aplicacion ? new Date(rec.fecha_aplicacion).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
+                      <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
+                        {rec.fecha_aplicacion ? (
+                          <>
+                            <span className="block sm:hidden">
+                              {new Date(rec.fecha_aplicacion).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                            </span>
+                            <span className="hidden sm:block">
+                              {new Date(rec.fecha_aplicacion).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </span>
+                          </>
+                        ) : ''}
                       </td>
                       <td className="px-4 py-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
@@ -479,29 +488,29 @@ function FormModal({ formData, setFormData, allVets, stockVacunas, handleSave, s
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-        <form onSubmit={handleSave} className="p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">{isEditing ? 'Editar Registro' : 'Nuevo Registro'}</h2>
+        <form onSubmit={handleSave} className="p-3 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{isEditing ? 'Editar Registro' : 'Nuevo Registro'}</h2>
             <button type="button" onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Veterinario/a</label>
-              <select value={formData.veterinario_id} onChange={(e) => handleInputChange('veterinario_id', e.target.value)} required className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Veterinario/a</label>
+              <select value={formData.veterinario_id} onChange={(e) => handleInputChange('veterinario_id', e.target.value)} required className="w-full px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm sm:text-base">
                 <option value="" disabled>Seleccionar...</option>
                 {allVets.map((v: Vet) => <option key={v.id} value={v.id}>{v.nombre}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Vacuna (Stock)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Vacuna (Stock)</label>
               <select
                 value={formData.producto_id || ''}
                 onChange={handleVaccineChange}
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                className="w-full px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm sm:text-base"
               >
                 <option value="">Seleccionar del inventario...</option>
                 {stockVacunas.map((v: any) => (
@@ -512,14 +521,14 @@ function FormModal({ formData, setFormData, allVets, stockVacunas, handleSave, s
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Fecha de Aplicación</label>
-              <input type="date" value={formData.fecha_aplicacion} onChange={(e) => handleInputChange('fecha_aplicacion', e.target.value)} required className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Aplicación</label>
+              <input type="date" value={formData.fecha_aplicacion} onChange={(e) => handleInputChange('fecha_aplicacion', e.target.value)} required className="w-full px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base" />
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
-            <button type="button" onClick={() => setShowModal(false)} disabled={saving} className="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">Cancelar</button>
-            <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors shadow-sm">{saving ? 'Guardando...' : 'Guardar Registro'}</button>
+          <div className="flex justify-end gap-3 mt-5 pt-4 sm:mt-8 sm:pt-6 border-t">
+            <button type="button" onClick={() => setShowModal(false)} disabled={saving} className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base">Cancelar</button>
+            <button type="submit" disabled={saving} className="px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors shadow-sm text-sm sm:text-base">{saving ? 'Guardando...' : 'Guardar Registro'}</button>
           </div>
         </form>
       </div>
