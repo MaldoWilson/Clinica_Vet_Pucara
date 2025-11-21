@@ -34,6 +34,7 @@ export default function AdminCitasTable({
   const [page, setPage] = useState<number>(1);
   const pageSize = 20;
   const [pending, startTransition] = useTransition();
+  const [selectedCita, setSelectedCita] = useState<Cita | null>(null);
 
   const options = ["", "PENDIENTE", "CONFIRMADA", "ATENDIDA", "CANCELADA"];
 
@@ -110,7 +111,7 @@ export default function AdminCitasTable({
 
   const doAction = async (id: string, action: "confirmar" | "atendida" | "cancelar") => {
     console.log("🔍 Debug - Acción iniciada:", { id, action });
-    
+
     try {
       const res = await fetch("/api/admin/citas", {
         method: "PATCH",
@@ -121,17 +122,17 @@ export default function AdminCitasTable({
         next: { revalidate: 0 },
         body: JSON.stringify({ id, action }),
       });
-      
+
       console.log("🔍 Debug - Respuesta del servidor:", { status: res.status, ok: res.ok });
-      
+
       const j = await res.json();
       console.log("🔍 Debug - Datos de respuesta:", j);
-      
+
       if (!res.ok) {
         alert(`Error: ${j.error || "Error desconocido"}`);
         return;
       }
-      
+
       // actualiza la fila localmente
       setCitas((prev) =>
         prev.map((c) =>
@@ -140,7 +141,7 @@ export default function AdminCitasTable({
             : c
         )
       );
-      
+
       console.log("🔍 Debug - Estado actualizado localmente");
       // forzar refresco de datos del servidor
       router.refresh();
@@ -156,76 +157,92 @@ export default function AdminCitasTable({
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl shadow p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="text-sm font-medium text-gray-700">Estado:</label>
-            <select 
-              value={estado} 
-              onChange={onChangeEstado} 
-              className="px-3 py-2 border rounded-lg"
-              title="Seleccionar estado de cita para filtrar"
-            >
-              {options.map((o) => (
-                <option key={o} value={o}>
-                  {o || "Todos"}
-                </option>
-              ))}
-            </select>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3 w-full">
+            {/* Estado */}
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
+              <label className="text-sm font-medium text-gray-700">Estado</label>
+              <select
+                value={estado}
+                onChange={onChangeEstado}
+                className="w-full sm:w-40 px-3 py-2 border rounded-lg"
+                title="Seleccionar estado de cita para filtrar"
+              >
+                {options.map((o) => (
+                  <option key={o} value={o}>
+                    {o || "Todos"}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <label className="text-sm font-medium text-gray-700">Fecha:</label>
-            <input
-              type="date"
-              value={fechaDesde}
-              onChange={onChangeDesde}
-              className="px-3 py-2 border rounded-lg"
-              title="Fecha desde"
-            />
-            <span className="text-gray-500">—</span>
-            <input
-              type="date"
-              value={fechaHasta}
-              onChange={onChangeHasta}
-              className="px-3 py-2 border rounded-lg"
-              title="Fecha hasta"
-            />
+            {/* Fechas */}
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
+              <label className="text-sm font-medium text-gray-700">Fecha</label>
+              <div className="flex items-center gap-2 w-full">
+                <input
+                  type="date"
+                  value={fechaDesde}
+                  onChange={onChangeDesde}
+                  className="flex-1 min-w-0 sm:flex-none sm:w-auto px-3 py-2 border rounded-lg"
+                  title="Fecha desde"
+                />
+                <span className="text-gray-500 hidden sm:inline">—</span>
+                <input
+                  type="date"
+                  value={fechaHasta}
+                  onChange={onChangeHasta}
+                  className="flex-1 min-w-0 sm:flex-none sm:w-auto px-3 py-2 border rounded-lg"
+                  title="Fecha hasta"
+                />
+              </div>
+            </div>
 
-            <label className="text-sm font-medium text-gray-700">Tutor:</label>
-            <input
-              type="text"
-              value={tutor}
-              onChange={onChangeTutor}
-              placeholder="Nombre, teléfono o email"
-              className="px-3 py-2 border rounded-lg"
-            />
+            {/* Tutor */}
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
+              <label className="text-sm font-medium text-gray-700">Tutor</label>
+              <input
+                type="text"
+                value={tutor}
+                onChange={onChangeTutor}
+                placeholder="Nombre, teléfono o email"
+                className="w-full sm:w-48 px-3 py-2 border rounded-lg"
+              />
+            </div>
 
-            <button
-              className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 hover:bg-gray-200"
-              onClick={limpiarFiltros}
-              title="Limpiar filtros"
-            >
-              Limpiar
-            </button>
-            
-            <button
-              className="px-3 py-2 rounded-lg text-sm font-medium bg-red-100 hover:bg-red-200 text-red-700"
-              onClick={async () => {
-              if (confirm('¿Limpiar datos de citas canceladas? Esto limpiará los horarios de citas ya canceladas.')) {
-                try {
-                  const res = await fetch('/api/admin/citas', { method: 'PUT' });
-                  const data = await res.json();
-                  alert(data.message || 'Limpieza completada');
-                  window.location.reload();
-                } catch (err) {
-                  alert('Error: ' + err);
-                }
-              }
-            }}
-            title="Limpiar datos de citas canceladas"
-          >
-            🧹 Limpiar Canceladas
-          </button>
-          {pending && <span className="text-sm text-neutral-500">Cargando…</span>}
+            {/* Botones */}
+            <div className="flex gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
+              <button
+                className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-700"
+                onClick={limpiarFiltros}
+                title="Limpiar filtros"
+              >
+                Limpiar
+              </button>
+
+              <button
+                className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium bg-red-50 hover:bg-red-100 text-red-600 border border-red-200"
+                onClick={async () => {
+                  if (confirm('¿Limpiar datos de citas canceladas? Esto limpiará los horarios de citas ya canceladas.')) {
+                    try {
+                      const res = await fetch('/api/admin/citas', { method: 'PUT' });
+                      const data = await res.json();
+                      alert(data.message || 'Limpieza completada');
+                      window.location.reload();
+                    } catch (err) {
+                      alert('Error: ' + err);
+                    }
+                  }
+                }}
+                title="Limpiar datos de citas canceladas"
+              >
+                Limpiar Canceladas
+              </button>
+            </div>
+
+            {pending && <span className="text-sm text-neutral-500 self-center">Cargando…</span>}
           </div>
+
           <div className="text-sm text-gray-600">
             <span className="font-medium">{filteredCitas.length}</span> cita{filteredCitas.length !== 1 ? 's' : ''} encontrada{filteredCitas.length !== 1 ? 's' : ''}
           </div>
@@ -267,18 +284,22 @@ export default function AdminCitasTable({
             </thead>
             <tbody>
               {pageItems.map((c) => {
-                const fechaCreacion = new Date(c.creado_en).toLocaleString("es-CL", { 
+                const fechaCreacion = new Date(c.creado_en).toLocaleString("es-CL", {
                   dateStyle: "medium",
                   timeStyle: "short"
                 });
-                
+
                 return (
-                  <tr key={c.id} className="border-t hover:bg-gray-50">
+                  <tr
+                    key={c.id}
+                    className="border-t hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => setSelectedCita(c)}
+                  >
                     <td className="p-3">{fechaCreacion}</td>
                     <td className="p-3">
                       {c.horarios ? (() => {
                         const fechaServicio = new Date(c.horarios!.inicio);
-                        return fechaServicio.toLocaleDateString("es-CL", { 
+                        return fechaServicio.toLocaleDateString("es-CL", {
                           dateStyle: "medium"
                         });
                       })() : "-"}
@@ -302,49 +323,45 @@ export default function AdminCitasTable({
                       })() : "-"}
                     </td>
                     <td className="p-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        c.estado === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-800' :
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${c.estado === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-800' :
                         c.estado === 'CONFIRMADA' ? 'bg-blue-100 text-blue-800' :
-                        c.estado === 'ATENDIDA' ? 'bg-green-100 text-green-800' :
-                        c.estado === 'CANCELADA' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                          c.estado === 'ATENDIDA' ? 'bg-green-100 text-green-800' :
+                            c.estado === 'CANCELADA' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                        }`}>
                         {c.estado}
                       </span>
                     </td>
                     <td className="p-3">
                       <div className="flex gap-2 flex-wrap">
                         <button
-                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                            c.estado !== "PENDIENTE" 
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-                              : "bg-blue-500 text-white hover:bg-blue-600"
-                          }`}
-                          onClick={() => doAction(c.id, "confirmar")}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${c.estado !== "PENDIENTE"
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-blue-500 text-white hover:bg-blue-600"
+                            }`}
+                          onClick={(e) => { e.stopPropagation(); doAction(c.id, "confirmar"); }}
                           disabled={c.estado !== "PENDIENTE"}
                           title="Confirmar cita"
                         >
                           ✓ Confirmar
                         </button>
                         <button
-                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                            c.estado === "ATENDIDA" || c.estado === "CANCELADA"
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : "bg-green-500 text-white hover:bg-green-600"
-                          }`}
-                          onClick={() => doAction(c.id, "atendida")}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${c.estado === "ATENDIDA" || c.estado === "CANCELADA"
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-green-500 text-white hover:bg-green-600"
+                            }`}
+                          onClick={(e) => { e.stopPropagation(); doAction(c.id, "atendida"); }}
                           disabled={c.estado === "ATENDIDA" || c.estado === "CANCELADA"}
                           title="Marcar como atendida"
                         >
                           ✓ Atendida
                         </button>
                         <button
-                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                            c.estado === "CANCELADA"
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : "bg-red-500 text-white hover:bg-red-600"
-                          }`}
-                          onClick={() => doAction(c.id, "cancelar")}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${c.estado === "CANCELADA"
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-red-500 text-white hover:bg-red-600"
+                            }`}
+                          onClick={(e) => { e.stopPropagation(); doAction(c.id, "cancelar"); }}
                           disabled={c.estado === "CANCELADA"}
                           title="Cancelar cita (libera el horario)"
                         >
@@ -404,6 +421,122 @@ export default function AdminCitasTable({
           >
             Siguiente
           </button>
+        </div>
+      )}
+
+      {/* Modal de detalles de cita */}
+      {selectedCita && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedCita(null)}>
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Detalles de la Cita</h3>
+                <button
+                  onClick={() => setSelectedCita(null)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                {/* Tutor */}
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Tutor</p>
+                    <h4 className="font-semibold text-gray-900 text-lg">{selectedCita.tutor_nombre}</h4>
+                    <div className="flex flex-col gap-1 mt-1 text-sm text-gray-600">
+                      {selectedCita.tutor_telefono && (
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
+                          <span>{selectedCita.tutor_telefono}</span>
+                        </div>
+                      )}
+                      {selectedCita.tutor_email && (
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                          <span>{selectedCita.tutor_email}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mascota */}
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Mascota</p>
+                    <h4 className="font-semibold text-gray-900 text-lg">{selectedCita.mascota_nombre}</h4>
+                  </div>
+                </div>
+
+                {/* Servicio y Horario */}
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Servicio y Horario</p>
+                    <h4 className="font-semibold text-gray-900">{selectedCita.servicios?.nombre || "Servicio no especificado"}</h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {selectedCita.horarios ? (() => {
+                        const start = new Date(selectedCita.horarios!.inicio);
+                        const dur = selectedCita.servicios?.duracion_min ?? 30;
+                        const end = new Date(start.getTime() + (dur || 30) * 60 * 1000);
+                        return `${start.toLocaleDateString("es-CL", { weekday: 'long', day: 'numeric', month: 'long' })} • ${fmtHora(start.toISOString())} - ${fmtHora(end.toISOString())}`;
+                      })() : "Horario no asignado"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Notas */}
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Notas</p>
+                    {selectedCita.notas ? (
+                      <div className="mt-1 p-3 bg-amber-50 border border-amber-100 rounded-lg text-sm text-gray-700 italic">
+                        "{selectedCita.notas}"
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400 italic mt-1">Sin notas adicionales</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-4 border-t border-gray-100 flex justify-end">
+                <button
+                  onClick={() => setSelectedCita(null)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
