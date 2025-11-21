@@ -22,7 +22,7 @@ export default async function Home() {
       <ImageCarousel
         images={[
           { src: "/1.png", alt: "Clinica Vet Pucara 1", href: "/productos" },
-          { src: "/2.png", alt: "Clinica Vet Pucara 2", href: "/servicios" },
+          { src: "/3.png", alt: "Clinica Vet Pucara 2", href: "/servicios" },
           { src: "/4.png", alt: "Clinica Vet Pucara 3", href: "/productos" },
         ]}
         aspectRatio="aspect-[5/2] sm:aspect-[5/2] lg:aspect-[5/2]"

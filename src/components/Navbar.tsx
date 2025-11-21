@@ -26,11 +26,11 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Inicio" },
-    { href: "/equipo", label: "Quienes somos" },
     { href: "/servicios", label: "Servicios" },
     { href: "/reservas", label: "Reservas" },
     { href: "/productos", label: "Productos" },
     { href: "/blog", label: "Blogs" },
+    { href: "/mision-vision", label: "Mision Vision" },
 
   ];
 

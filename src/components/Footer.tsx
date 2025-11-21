@@ -23,16 +23,16 @@ export default function Footer() {
         {/* Contenido principal del footer */}
         <div className="py-6 sm:py-8 md:py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
-            
+
             {/* Logo y nombre - Lado derecho */}
             <div className="flex flex-col items-center lg:items-start space-y-4 order-2 lg:order-1">
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="flex items-center gap-3 group transition-transform duration-200 hover:scale-105"
               >
                 <div className="relative">
                   <Image
-                    src="/logo.webp" 
+                    src="/logo.webp"
                     alt="Clínica Pucará"
                     width={56}
                     height={56}
@@ -49,21 +49,21 @@ export default function Footer() {
                   </p>
                 </div>
               </Link>
-              
+
               {/* Información de contacto  iconos https://emojitool.com/*/}
               <div className="text-center lg:text-left space-y-1 sm:space-y-2 text-sm sm:text-base text-slate-300">
-              <Link href="https://www.google.com/maps/place/Esmeralda+97,+8071269+San+Bernardo,+Regi%C3%B3n+Metropolitana/@-33.5988668,-70.7005737,19z/data=!4m15!1m8!3m7!1s0x9662d944194edecb:0xeb6ef5e24a4ec7b8!2sEsmeralda+97,+8071269+San+Bernardo,+Regi%C3%B3n+Metropolitana!3b1!8m2!3d-33.5990456!4d-70.7001928!16s%2Fg%2F11knj7sxlf!3m5!1s0x9662d944194edecb:0xeb6ef5e24a4ec7b8!8m2!3d-33.5990456!4d-70.7001928!16s%2Fg%2F11knj7sxlf?entry=ttu&g_ep=EgoyMDI1MTExMi4wIKXMDSoASAFQAw%3D%3D" className="hover:text-indigo-300 transition-colors block py-1">
-              🗺️ Esmeralda 97, San Bernardo, Región Metropolitana
-                    </Link>
-                  <p>☎️ {WHATSAPP_PHONE ? `+${WHATSAPP_PHONE.replace(/^(?!\+)/, "")}` : "+56 2 859 2840"}</p>
-                  <p>✉️ {CONTACT_EMAIL}</p>
-            
+                <Link href="https://www.google.com/maps/place/Esmeralda+97,+8071269+San+Bernardo,+Regi%C3%B3n+Metropolitana/@-33.5988668,-70.7005737,19z/data=!4m15!1m8!3m7!1s0x9662d944194edecb:0xeb6ef5e24a4ec7b8!2sEsmeralda+97,+8071269+San+Bernardo,+Regi%C3%B3n+Metropolitana!3b1!8m2!3d-33.5990456!4d-70.7001928!16s%2Fg%2F11knj7sxlf!3m5!1s0x9662d944194edecb:0xeb6ef5e24a4ec7b8!8m2!3d-33.5990456!4d-70.7001928!16s%2Fg%2F11knj7sxlf?entry=ttu&g_ep=EgoyMDI1MTExMi4wIKXMDSoASAFQAw%3D%3D" className="hover:text-indigo-300 transition-colors block py-1">
+                  🗺️ Esmeralda 97, San Bernardo, Región Metropolitana
+                </Link>
+                <p>☎️ {WHATSAPP_PHONE ? `+${WHATSAPP_PHONE.replace(/^(?!\+)/, "")}` : "+56 2 859 2840"}</p>
+                <p>✉️ {CONTACT_EMAIL}</p>
+
               </div>
             </div>
 
             {/* Columnas de información - Lado izquierdo */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 order-1 lg:order-2">
-              
+
               {/* Atención  */}
               <div className="text-left">
                 <button
@@ -93,7 +93,7 @@ export default function Footer() {
                   </li>
                   <li>
                     <Link href="/productos" className="hover:text-indigo-300 transition-colors block py-1">
-                    Productos
+                      Productos
                     </Link>
                   </li>
                 </ul>
@@ -172,11 +172,7 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/equipo" className="hover:text-indigo-300 transition-colors block py-1">
-                      Quienes somos
-                    </Link>
-                  </li>
-                  <li>
+
                     <Link href="/#contacto" className="hover:text-indigo-300 transition-colors block py-1">
                       Contacto
                     </Link>
@@ -198,7 +194,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="py-4 sm:py-6 text-center">
           <p className="text-xs sm:text-sm text-slate-400">
-            © {new Date().getFullYear()} Clínica Veterinaria Pucará – San Bernardo. 
+            © {new Date().getFullYear()} Clínica Veterinaria Pucará – San Bernardo.
             Todos los derechos reservados.
           </p>
         </div>
