@@ -376,15 +376,15 @@ export default function VacunasPage() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="p-4 border-b"><h2 className="text-xl font-bold text-gray-900">Historial de Registros ({monthTitle})</h2></div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Veterinario/a</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Veterinario/a</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vacuna</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Aplicación</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
               </tr>
             </thead>
@@ -395,15 +395,34 @@ export default function VacunasPage() {
                   ? (<tr><td colSpan={4} className="p-8 text-center text-gray-500">No hay registros para el mes seleccionado.</td></tr>)
                   : (displayedRecords.map((rec) => (
                     <tr key={rec.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-4 text-sm font-medium text-gray-900">{getVetName(rec.veterinarios)}</td>
-                      <td className="px-4 py-4 text-sm text-gray-700">{rec.nombre_vacuna}</td>
-                      <td className="px-4 py-4 text-sm text-gray-600">
-                        {rec.fecha_aplicacion ? rec.fecha_aplicacion.split('-').reverse().join('-') : ''}
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900 hidden sm:table-cell">{getVetName(rec.veterinarios)}</td>
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        <div className="font-medium">{rec.nombre_vacuna}</div>
+                        <div className="text-xs text-gray-500 sm:hidden">{getVetName(rec.veterinarios)}</div>
                       </td>
-                      <td className="px-4 py-4 text-center">
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {rec.fecha_aplicacion ? new Date(rec.fecha_aplicacion).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
+                      </td>
+                      <td className="px-4 py-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
-                          <button onClick={() => handleEdit(rec)} className="px-3 py-1 text-sm rounded border">Editar</button>
-                          <button onClick={() => handleDeleteConfirm(rec.id)} className="px-3 py-1 text-sm rounded bg-red-600 text-white">Eliminar</button>
+                          <button
+                            onClick={() => handleEdit(rec)}
+                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
+                            title="Editar"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteConfirm(rec.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                            title="Eliminar"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -411,19 +430,21 @@ export default function VacunasPage() {
             </tbody>
           </table>
         </div>
-        {tableData.length > 10 && (
-          <div className="bg-gray-50 px-4 py-3 text-center border-t">
-            <button onClick={() => setIsTableExpanded(!isTableExpanded)} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
-              {isTableExpanded ? 'Ver Menos' : `Ver ${tableData.length - 10} más`}
-            </button>
-          </div>
-        )}
-      </div>
+        {
+          tableData.length > 10 && (
+            <div className="bg-gray-50 px-4 py-3 text-center border-t">
+              <button onClick={() => setIsTableExpanded(!isTableExpanded)} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                {isTableExpanded ? 'Ver Menos' : `Ver ${tableData.length - 10} más`}
+              </button>
+            </div>
+          )
+        }
+      </div >
 
       {/* Modals */}
       {showModal && <FormModal formData={formData} setFormData={setFormData} allVets={allVets} stockVacunas={stockVacunas} handleSave={handleSave} setShowModal={setShowModal} isEditing={isEditing} saving={saving} />}
       <ConfirmationModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} onConfirm={handleDelete} title="Confirmar Eliminación" message="¿Seguro que quieres eliminar este registro?" />
-    </div>
+    </div >
   )
 }
 
@@ -457,24 +478,30 @@ function FormModal({ formData, setFormData, allVets, stockVacunas, handleSave, s
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
-        <form onSubmit={handleSave} className="p-6">
-          <h2 className="text-2xl font-bold mb-4">{isEditing ? 'Editar Registro' : 'Nuevo Registro'}</h2>
-          <div className="space-y-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+        <form onSubmit={handleSave} className="p-6 sm:p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">{isEditing ? 'Editar Registro' : 'Nuevo Registro'}</h2>
+            <button type="button" onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+
+          <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Veterinario/a</label>
-              <select value={formData.veterinario_id} onChange={(e) => handleInputChange('veterinario_id', e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Veterinario/a</label>
+              <select value={formData.veterinario_id} onChange={(e) => handleInputChange('veterinario_id', e.target.value)} required className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
                 <option value="" disabled>Seleccionar...</option>
                 {allVets.map((v: Vet) => <option key={v.id} value={v.id}>{v.nombre}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Vacuna (Stock)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Vacuna (Stock)</label>
               <select
                 value={formData.producto_id || ''}
                 onChange={handleVaccineChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
               >
                 <option value="">Seleccionar del inventario...</option>
                 {stockVacunas.map((v: any) => (
@@ -485,13 +512,14 @@ function FormModal({ formData, setFormData, allVets, stockVacunas, handleSave, s
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Aplicación</label>
-              <input type="date" value={formData.fecha_aplicacion} onChange={(e) => handleInputChange('fecha_aplicacion', e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md" />
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Fecha de Aplicación</label>
+              <input type="date" value={formData.fecha_aplicacion} onChange={(e) => handleInputChange('fecha_aplicacion', e.target.value)} required className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
           </div>
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-            <button type="button" onClick={() => setShowModal(false)} disabled={saving} className="px-4 py-2 rounded-md border">Cancelar</button>
-            <button type="submit" disabled={saving} className="px-6 py-2 rounded-md bg-indigo-600 text-white">{saving ? 'Guardando...' : 'Guardar'}</button>
+
+          <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
+            <button type="button" onClick={() => setShowModal(false)} disabled={saving} className="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">Cancelar</button>
+            <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors shadow-sm">{saving ? 'Guardando...' : 'Guardar Registro'}</button>
           </div>
         </form>
       </div>

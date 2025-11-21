@@ -19,10 +19,10 @@ const CustomTooltip = ({ active, payload }: any) => {
     const { percent } = payload[0]
     const percentage = !isNaN(percent) ? `(${(percent * 100).toFixed(0)}%)` : ''
     return (
-      <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-3">
-        <p className="font-semibold text-gray-900">{name}</p>
-        <p className="text-sm text-gray-700">
-          Cantidad: {value} {percentage}
+      <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-2">
+        <p className="font-semibold text-gray-900 text-xs">{name}</p>
+        <p className="text-xs text-gray-700">
+          {value} {percentage}
         </p>
       </div>
     )
@@ -30,17 +30,18 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null
 }
 
-export default function DistribucionVacunasChart ({ data }: ChartProps) {
+export default function DistribucionVacunasChart({ data }: ChartProps) {
   const total = data.reduce((sum, entry) => sum + entry.value, 0)
+
   if (total === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6 h-full">
-        <h3 className="text-xl font-bold text-gray-900 mb-6">
-          Distribución por Tipo de Vacuna
+      <div className="bg-white rounded-lg shadow-lg p-4 h-full">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">
+          Distribución por Tipo
         </h3>
         <div className="text-center py-12 text-gray-500 flex items-center justify-center h-full">
           <div>
-            <p className="text-lg font-medium">No hay datos para mostrar</p>
+            <p className="text-sm font-medium">No hay datos</p>
           </div>
         </div>
       </div>
@@ -48,34 +49,42 @@ export default function DistribucionVacunasChart ({ data }: ChartProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 h-full">
-      <h3 className="text-xl font-bold text-gray-900 mb-6">
-        Distribución por Tipo de Vacuna
+    <div className="bg-white rounded-lg shadow-lg p-4 h-full">
+      <h3 className="text-lg font-bold text-gray-900 mb-2">
+        Distribución por Tipo
       </h3>
-      <ResponsiveContainer width="100%" height={400}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            labelLine={true}
-            label={(props: any) => {
-              const percent = props.percent as number | undefined
-              return percent ? `${(percent * 100).toFixed(0)}%` : ''
-            }}
-            outerRadius={120}
-            fill="#8884d8"
-            dataKey="value"
-            nameKey="name"
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-          <Legend iconType="circle" layout="vertical" verticalAlign="middle" align="right" />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className="h-[300px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="45%"
+              labelLine={false}
+              label={(props: any) => {
+                const percent = props.percent as number | undefined
+                return percent && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''
+              }}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+              nameKey="name"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+            <Legend
+              iconType="circle"
+              layout="horizontal"
+              verticalAlign="bottom"
+              align="center"
+              wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }

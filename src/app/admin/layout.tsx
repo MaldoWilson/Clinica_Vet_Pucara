@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0">
-          <main className="p-4 sm:p-6 lg:p-8 pt-16 md:pt-8">
+          <main className="p-4 sm:p-6 lg:p-8 pt-20 md:pt-8">
             {children}
           </main>
         </div>
