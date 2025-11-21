@@ -1953,6 +1953,12 @@ body * {
     return `${fecha} · ${hora}`;
   }
 
+  function formatFechaShort(iso?: string | null) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  }
+
   const photoSrc = data.imagen_url || (data.especie ? "/gato.webp" : "/perro.webp");
 
   return (
@@ -2652,7 +2658,14 @@ body * {
                 </button>
                 <div className="flex items-center justify-between pr-8">
                   <h4 className="text-sm font-semibold text-indigo-600">Receta #{ultimaReceta.id}</h4>
-                  <div className="text-sm text-gray-500">{ultimaReceta.fecha ? new Date(ultimaReceta.fecha).toLocaleString('es-CL') : ''}</div>
+                  <div className="text-sm text-gray-500">
+                    {ultimaReceta.fecha ? (
+                      <>
+                        <span className="sm:hidden">{formatFechaShort(ultimaReceta.fecha)}</span>
+                        <span className="hidden sm:inline">{new Date(ultimaReceta.fecha).toLocaleString('es-CL')}</span>
+                      </>
+                    ) : ''}
+                  </div>
                 </div>
                 <div className="text-sm text-gray-600 mt-1">
                   {ultimaReceta.peso && <span className="mr-4">Peso: {ultimaReceta.peso} kg</span>}
@@ -2790,7 +2803,8 @@ body * {
                                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                       </svg>
-                                      {formatFechaHora(cert.created_at)}
+                                      <span className="sm:hidden">{formatFechaShort(cert.created_at)}</span>
+                                      <span className="hidden sm:inline">{formatFechaHora(cert.created_at)}</span>
                                     </span>
                                     {cert.datos?.veterinario_nombre && (
                                       <span className="flex items-center gap-1">
@@ -2971,7 +2985,8 @@ body * {
                                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                       </svg>
-                                      {formatFechaHora(c.fecha)}
+                                      <span className="sm:hidden">{formatFechaShort(c.fecha)}</span>
+                                      <span className="hidden sm:inline">{formatFechaHora(c.fecha)}</span>
                                     </span>
                                     {c.veterinario && (
                                       <span className="flex items-center gap-1">
@@ -3080,7 +3095,8 @@ body * {
                                             </div>
                                             <div className="flex items-center gap-2">
                                               <span className="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">
-                                                {formatFechaHora(r.fecha || r.created_at)}
+                                                <span className="sm:hidden">{formatFechaShort(r.fecha || r.created_at)}</span>
+                                                <span className="hidden sm:inline">{formatFechaHora(r.fecha || r.created_at)}</span>
                                               </span>
                                               <div className="relative">
                                                 <button

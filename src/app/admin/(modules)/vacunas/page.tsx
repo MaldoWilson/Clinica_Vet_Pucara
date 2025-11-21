@@ -479,7 +479,7 @@ function FormModal({ formData, setFormData, allVets, stockVacunas, handleSave, s
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-        <form onSubmit={handleSave} className="p-6 sm:p-8">
+        <form onSubmit={handleSave} className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">{isEditing ? 'Editar Registro' : 'Nuevo Registro'}</h2>
             <button type="button" onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">

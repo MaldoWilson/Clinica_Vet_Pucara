@@ -457,7 +457,22 @@ export default function BlogsForm() {
                     )
                   },
                   { key: "titulo", header: "Título", render: (b) => b.titulo },
-                  { key: "fecha", header: "Creado", render: (b) => new Date(b.created_at).toLocaleString() },
+                  {
+                    key: "fecha", header: "Creado", render: (b) => (
+                      <span className="text-sm text-gray-500 whitespace-nowrap">
+                        {b.created_at ? (
+                          <>
+                            <span className="block sm:hidden">
+                              {new Date(b.created_at).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                            </span>
+                            <span className="hidden sm:block">
+                              {new Date(b.created_at).toLocaleString()}
+                            </span>
+                          </>
+                        ) : "-"}
+                      </span>
+                    )
+                  },
                   { key: "publico", header: "Público", render: (b) => (b.publico ? "Sí" : "No") },
                 ]}
               />

@@ -141,49 +141,49 @@ export default function AdminServiciosPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre *</label>
-                <input 
-                  className="w-full px-3 py-2 border rounded-md" 
-                  value={form.nombre} 
-                  onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))} 
-                  required 
-                  placeholder="Nombre del servicio" 
-                  aria-label="Nombre del servicio" 
+                <input
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={form.nombre}
+                  onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
+                  required
+                  placeholder="Nombre del servicio"
+                  aria-label="Nombre del servicio"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Precio (CLP)</label>
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  className="w-full px-3 py-2 border rounded-md" 
-                  value={form.precio_clp} 
-                  onChange={(e) => setForm((f) => ({ ...f, precio_clp: e.target.value }))} 
-                  placeholder="Precio en CLP" 
-                  aria-label="Precio en CLP" 
+                <input
+                  type="number"
+                  step="0.01"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={form.precio_clp}
+                  onChange={(e) => setForm((f) => ({ ...f, precio_clp: e.target.value }))}
+                  placeholder="Precio en CLP"
+                  aria-label="Precio en CLP"
                 />
               </div>
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700">Descripción</label>
-              <textarea 
-                className="w-full px-3 py-2 border rounded-md" 
-                rows={3} 
-                value={form.descripcion} 
-                onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))} 
-                placeholder="Descripción del servicio" 
-                aria-label="Descripción del servicio" 
+              <textarea
+                className="w-full px-3 py-2 border rounded-md"
+                rows={3}
+                value={form.descripcion}
+                onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))}
+                placeholder="Descripción del servicio"
+                aria-label="Descripción del servicio"
               />
             </div>
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Duración (minutos)</label>
-                <input 
-                  type="number" 
-                  className="w-full px-3 py-2 border rounded-md" 
-                  value={form.duracion_min} 
-                  onChange={(e) => setForm((f) => ({ ...f, duracion_min: e.target.value }))} 
-                  placeholder="Duración en minutos" 
-                  aria-label="Duración en minutos" 
+                <input
+                  type="number"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={form.duracion_min}
+                  onChange={(e) => setForm((f) => ({ ...f, duracion_min: e.target.value }))}
+                  placeholder="Duración en minutos"
+                  aria-label="Duración en minutos"
                 />
               </div>
             </div>
@@ -194,16 +194,16 @@ export default function AdminServiciosPage() {
             <div className="mt-3">
               <label className="block text-sm font-medium text-gray-700">Imagen</label>
               <div className="flex items-center gap-3 flex-wrap">
-                <input 
-                  className="block w-full sm:w-auto px-3 py-2 border rounded-md" 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={(e) => { 
-                    const file = e.target.files?.[0] || null; 
-                    setImageFile(file); 
-                    setImagePreview(file ? URL.createObjectURL(file) : null); 
-                  }} 
-                  aria-label="Subir imagen del servicio" 
+                <input
+                  className="block w-full sm:w-auto px-3 py-2 border rounded-md"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setImageFile(file);
+                    setImagePreview(file ? URL.createObjectURL(file) : null);
+                  }}
+                  aria-label="Subir imagen del servicio"
                 />
                 {imagePreview && (<img src={imagePreview} alt="preview" className="w-16 h-16 object-cover rounded border shrink-0" />)}
               </div>
@@ -212,17 +212,17 @@ export default function AdminServiciosPage() {
           </div>
 
           <div className="flex items-end gap-2">
-            <button 
-              type="submit" 
-              className={`px-5 py-2 rounded-md ${saving ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700'}`} 
+            <button
+              type="submit"
+              className={`px-5 py-2 rounded-md ${saving ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700'}`}
               disabled={saving}
             >
               {saving ? "Guardando..." : isEdit ? "Actualizar Servicio" : "Guardar Servicio"}
             </button>
             {isEdit && (
-              <button 
-                type="button" 
-                onClick={resetForm} 
+              <button
+                type="button"
+                onClick={resetForm}
                 className="px-4 py-2 rounded-md border"
               >
                 Cancelar
@@ -240,26 +240,43 @@ export default function AdminServiciosPage() {
           onDelete={(id) => handleDelete(id)}
           onUploadImage={async (id, file) => { try { await handleUpload(id, file); } catch (err: any) { alert(err.message || "Error subiendo imagen"); } }}
           columns={[
-            { key: "imagen", header: "Imagen", className: "w-[140px]", render: (s: Servicio) => (
-              <div className="flex">
-                <div className="flex flex-col items-center w-16">
-                  {s.image_url ? (
-                    <Image src={s.image_url} alt={s.nombre} width={56} height={56} className="w-14 h-14 object-cover rounded" />
-                  ) : (
-                    <div className="w-14 h-14 bg-gray-100 rounded grid place-items-center text-xs text-gray-400">Sin imagen</div>
-                  )}
-                  <label className="mt-1 text-xs text-blue-600 cursor-pointer">
-                    Subir
-                    <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const input = e.currentTarget; await handleUpload(s.id, file); if (input) input.value = ""; }} />
-                  </label>
+            {
+              key: "imagen", header: "Imagen", className: "w-[140px]", render: (s: Servicio) => (
+                <div className="flex">
+                  <div className="flex flex-col items-center w-16">
+                    {s.image_url ? (
+                      <Image src={s.image_url} alt={s.nombre} width={56} height={56} className="w-14 h-14 object-cover rounded" />
+                    ) : (
+                      <div className="w-14 h-14 bg-gray-100 rounded grid place-items-center text-xs text-gray-400">Sin imagen</div>
+                    )}
+                    <label className="mt-1 text-xs text-blue-600 cursor-pointer">
+                      Subir
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const input = e.currentTarget; await handleUpload(s.id, file); if (input) input.value = ""; }} />
+                    </label>
+                  </div>
                 </div>
-              </div>
-            ) },
+              )
+            },
             { key: "nombre", header: "Nombre", className: "min-w-[180px] max-w-[260px]", render: (s: Servicio) => (<span className="font-medium block truncate" title={s.nombre}>{s.nombre}</span>) },
             { key: "descripcion", header: "Descripción", render: (s: Servicio) => <span className="text-sm text-gray-600 max-w-[360px] truncate inline-block">{s.descripcion}</span> },
             { key: "precio", header: "Precio", render: (s: Servicio) => (s.precio_clp != null ? `$${s.precio_clp}` : "-") },
             { key: "duracion", header: "Duración", render: (s: Servicio) => (s.duracion_min != null ? `${s.duracion_min} min` : "-") },
-            { key: "creado", header: "Creado", render: (s: Servicio) => <span className="text-sm text-gray-500">{s.creado_en ? new Date(s.creado_en).toLocaleString() : "-"}</span> },
+            {
+              key: "creado", header: "Creado", render: (s: Servicio) => (
+                <span className="text-sm text-gray-500 whitespace-nowrap">
+                  {s.creado_en ? (
+                    <>
+                      <span className="block sm:hidden">
+                        {new Date(s.creado_en).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                      </span>
+                      <span className="hidden sm:block">
+                        {new Date(s.creado_en).toLocaleString()}
+                      </span>
+                    </>
+                  ) : "-"}
+                </span>
+              )
+            },
           ]}
         />
       </div>

@@ -284,18 +284,20 @@ export default function AdminCitasTable({
             </thead>
             <tbody>
               {pageItems.map((c) => {
-                const fechaCreacion = new Date(c.creado_en).toLocaleString("es-CL", {
-                  dateStyle: "medium",
-                  timeStyle: "short"
-                });
-
                 return (
                   <tr
                     key={c.id}
                     className="border-t hover:bg-gray-50 cursor-pointer transition-colors"
                     onClick={() => setSelectedCita(c)}
                   >
-                    <td className="p-3">{fechaCreacion}</td>
+                    <td className="p-3">
+                      <span className="block sm:hidden">
+                        {new Date(c.creado_en).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                      </span>
+                      <span className="hidden sm:block">
+                        {new Date(c.creado_en).toLocaleString("es-CL", { dateStyle: "medium", timeStyle: "short" })}
+                      </span>
+                    </td>
                     <td className="p-3">
                       {c.horarios ? (() => {
                         const fechaServicio = new Date(c.horarios!.inicio);

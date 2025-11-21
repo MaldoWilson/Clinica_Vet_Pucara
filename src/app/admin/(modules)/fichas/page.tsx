@@ -179,7 +179,12 @@ export default function FichasPage() {
                         <div className="font-medium">{p.nombre}</div>
                         <div className="text-gray-500">{especie}{p.raza ? ` · ${p.raza}` : ""}</div>
                         <div className="text-gray-500">Sexo: {sexo}</div>
-                        {p.fecha_nacimiento && (<div className="text-gray-500">Nac.: {new Date(p.fecha_nacimiento).toLocaleDateString("es-CL")}</div>)}
+                        {p.fecha_nacimiento && (
+                          <div className="text-gray-500">
+                            Nac.: <span className="sm:hidden">{new Date(p.fecha_nacimiento).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "2-digit" })}</span>
+                            <span className="hidden sm:inline">{new Date(p.fecha_nacimiento).toLocaleDateString("es-CL")}</span>
+                          </div>
+                        )}
                         {p.numero_microchip && (<div className="text-gray-500">Chip: {p.numero_microchip}</div>)}
                         {p.esterilizado === true && (<span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Esterilizado/a</span>)}
                       </div>

@@ -43,7 +43,7 @@ export default function FormulariosTable({ items }: { items: MensajeContacto[] }
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl shadow p-4 flex items-center justify-between gap-3">
+      <div className="bg-white rounded-xl shadow p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <p className="font-semibold text-gray-900">Mensajes Recibidos</p>
           <p className="text-xs text-gray-500">Desde el formulario de contacto</p>
@@ -52,7 +52,7 @@ export default function FormulariosTable({ items }: { items: MensajeContacto[] }
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar por nombre, correo, teléfono o texto..."
-          className="px-3 py-2 border rounded-lg w-full max-w-xs"
+          className="px-3 py-2 border rounded-lg w-full sm:max-w-xs"
         />
       </div>
 
@@ -79,7 +79,18 @@ export default function FormulariosTable({ items }: { items: MensajeContacto[] }
                   className="border-t hover:bg-gray-50 align-top cursor-pointer transition-colors"
                   onClick={() => setSelected(m)}
                 >
-                  <td className="p-3">{m.creado_en ? new Date(m.creado_en).toLocaleString("es-CL", { dateStyle: "medium", timeStyle: "short" }) : "-"}</td>
+                  <td className="p-3 whitespace-nowrap">
+                    {m.creado_en ? (
+                      <>
+                        <span className="block sm:hidden">
+                          {new Date(m.creado_en).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                        </span>
+                        <span className="hidden sm:block">
+                          {new Date(m.creado_en).toLocaleString("es-CL", { dateStyle: "medium", timeStyle: "short" })}
+                        </span>
+                      </>
+                    ) : "-"}
+                  </td>
                   <td className="p-3 font-medium">{m.nombre}</td>
                   <td className="p-3 text-blue-700">{m.correo || "-"}</td>
                   <td className="p-3">{m.telefono || "-"}</td>
