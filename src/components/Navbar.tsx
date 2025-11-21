@@ -29,7 +29,7 @@ export default function Navbar() {
     { href: "/equipo", label: "Quienes somos" },
     { href: "/servicios", label: "Servicios" },
     { href: "/reservas", label: "Reservas" },
-    { href: "/productos", label: "Productos en tienda" },
+    { href: "/productos", label: "Productos" },
     { href: "/blog", label: "Blogs" },
 
   ];

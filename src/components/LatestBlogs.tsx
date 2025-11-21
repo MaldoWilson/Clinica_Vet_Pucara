@@ -53,7 +53,7 @@ export default function LatestBlogs() {
           </div>
         </div>
       </section>
-      
+
     );
   }
 
@@ -91,8 +91,8 @@ export default function LatestBlogs() {
     <section className="py-12 sm:py-16 bg-white w-full">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 px-4">
-          <span className="text-gray-800">Nuestras </span>
-          <span className="text-indigo-400">Recomendaciones</span>
+          <span className="text-gray-800">Nuestros </span>
+          <span className="text-indigo-400">Blogs</span>
           <div className="w-16 h-0.5 bg-indigo-400 mx-auto mt-2"></div>
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
