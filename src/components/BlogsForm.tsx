@@ -309,8 +309,8 @@ export default function BlogsForm() {
               <div>
                 <label className="block text-sm font-medium text-gray-700">Imagen</label>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <input 
-                    aria-label="Subir imagen del blog" 
+                  <input
+                    aria-label="Subir imagen del blog"
                     className="block w-full sm:w-auto px-3 py-2 border rounded-md"
                     type="file"
                     accept="image/*"
@@ -357,11 +357,11 @@ export default function BlogsForm() {
             >
               {loading ? (editing ? "Actualizando..." : "Guardando...") : (editing ? "Actualizar Blog" : "Guardar Blog")}
             </button>
-            
+
             {editing && (
-              <button 
-                type="button" 
-                className="px-4 py-2 rounded-md border" 
+              <button
+                type="button"
+                className="px-4 py-2 rounded-md border"
                 onClick={() => {
                   setEditing(null);
                   setTitulo("");
@@ -405,6 +405,10 @@ export default function BlogsForm() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Tabla fuera del recuadro de filtros */}
+      <div>
         {(() => {
           const totalPages = Math.max(1, Math.ceil(filteredBlogs.length / pageSize));
           const start = (page - 1) * pageSize;
@@ -413,47 +417,49 @@ export default function BlogsForm() {
           return (
             <>
               <AdminEditableTable
-          items={pageItems}
-          loading={loadingList}
-          emptyText="Sin blogs aún."
-          onEdit={(b) => handleEdit(b)}
-          onDelete={(id) => handleDelete(id)}
-          columns={[
-            { key: "imagen", header: "Imagen", className: "w-[140px]", render: (b) => (
-              <div className="flex">
-                <div className="flex flex-col items-center w-16">
-                  {b.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={b.image_url} alt={b.titulo} className="w-14 h-14 object-cover rounded" />
-                  ) : (
-                    <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>
-                  )}
-                  <label className="mt-1 text-xs text-blue-600 cursor-pointer">
-                    Subir
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          await handleUploadImage(b.id, file);
-                        } catch (err: any) {
-                          alert(err.message || "Error subiendo imagen");
-                        } finally {
-                          e.currentTarget.value = "";
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-              </div>
-            ) },
-            { key: "titulo", header: "Título", render: (b) => b.titulo },
-            { key: "fecha", header: "Creado", render: (b) => new Date(b.created_at).toLocaleString() },
-            { key: "publico", header: "Público", render: (b) => (b.publico ? "Sí" : "No") },
-          ]}
+                items={pageItems}
+                loading={loadingList}
+                emptyText="Sin blogs aún."
+                onEdit={(b) => handleEdit(b)}
+                onDelete={(id) => handleDelete(id)}
+                columns={[
+                  {
+                    key: "imagen", header: "Imagen", className: "w-[140px]", render: (b) => (
+                      <div className="flex">
+                        <div className="flex flex-col items-center w-16">
+                          {b.image_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={b.image_url} alt={b.titulo} className="w-14 h-14 object-cover rounded" />
+                          ) : (
+                            <span className="w-14 h-14 grid place-items-center text-xs text-gray-400 bg-gray-100 rounded">Sin imagen</span>
+                          )}
+                          <label className="mt-1 text-xs text-blue-600 cursor-pointer">
+                            Subir
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  await handleUploadImage(b.id, file);
+                                } catch (err: any) {
+                                  alert(err.message || "Error subiendo imagen");
+                                } finally {
+                                  e.currentTarget.value = "";
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    )
+                  },
+                  { key: "titulo", header: "Título", render: (b) => b.titulo },
+                  { key: "fecha", header: "Creado", render: (b) => new Date(b.created_at).toLocaleString() },
+                  { key: "publico", header: "Público", render: (b) => (b.publico ? "Sí" : "No") },
+                ]}
               />
               {filteredBlogs.length > 0 && (
                 <div className="mt-4 flex items-center justify-center gap-2">
