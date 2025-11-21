@@ -116,15 +116,15 @@ export default function FichasPage() {
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
           <div className="flex-1">
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <input type="text" placeholder="Buscar: mascota, propietario, RUT, sexo, raza, teléfono, dirección" className="w-full px-3 py-2 border rounded-md pr-24" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') fetchPacientes(search, 1); }} />
                 <button className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-700" onClick={() => fetchPacientes(search, 1)} title="Buscar">Buscar</button>
               </div>
               <div className="flex-shrink-0 relative">
-                <button type="button" className="inline-flex items-center justify-between gap-2 px-3 py-2 border rounded-lg bg-white min-w-[140px]" onClick={() => setSpeciesOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={speciesOpen}>
+                <button type="button" className="flex w-full sm:w-auto items-center justify-between gap-2 px-3 py-2 border rounded-lg bg-white min-w-[140px]" onClick={() => setSpeciesOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={speciesOpen}>
                   <span className="text-sm text-gray-700">{especieFilter === '' ? 'Todos' : especieFilter === 'gato' ? 'Gatos' : 'Perros'}</span>
-                  <svg className={`w-4 h-4 text-gray-500 transition-transform ${speciesOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.585l3.71-3.355a.75.75 0 111.02 1.1l-4.22 3.815a.75.75 0 01-1.02 0L5.25 8.33a.75.75 0 01-.02-1.06z" clipRule="evenodd"/></svg>
+                  <svg className={`w-4 h-4 text-gray-500 transition-transform ${speciesOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.585l3.71-3.355a.75.75 0 111.02 1.1l-4.22 3.815a.75.75 0 01-1.02 0L5.25 8.33a.75.75 0 01-.02-1.06z" clipRule="evenodd" /></svg>
                 </button>
                 {speciesOpen && (
                   <div className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow border z-10 overflow-hidden" role="listbox">
@@ -134,7 +134,7 @@ export default function FichasPage() {
                         <button type="button" key={opt.key || 'all'} className={`w-full text-left px-3 py-2 text-sm hover:bg-indigo-50 ${active ? 'bg-indigo-500 text-white' : 'text-gray-700'}`} onClick={() => { setEspecieFilter(opt.key); setSpeciesOpen(false); }} role="option" aria-selected={active}>
                           <div className="flex items-center justify-between">
                             <span>{opt.label}</span>
-                            {active && (<svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.071 7.071a1 1 0 01-1.414 0L3.293 8.85a1 1 0 011.414-1.414l3.121 3.121 6.364-6.364a1 1 0 011.415 0z" clipRule="evenodd"/></svg>)}
+                            {active && (<svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.071 7.071a1 1 0 01-1.414 0L3.293 8.85a1 1 0 011.414-1.414l3.121 3.121 6.364-6.364a1 1 0 011.415 0z" clipRule="evenodd" /></svg>)}
                           </div>
                         </button>
                       );
