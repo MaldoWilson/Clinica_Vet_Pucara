@@ -103,9 +103,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-64 max-w-[85vw] bg-white shadow-xl">
+          <div className="absolute inset-y-0 left-0 max-w-[85vw] bg-white shadow-xl">
             <div className="h-full overflow-y-auto">
-              <AdminSidebar />
+              <AdminSidebar onClose={() => setMobileOpen(false)} />
             </div>
           </div>
         </div>

@@ -8,7 +8,7 @@ import { supabaseBrowser } from "@/lib/supabaseClient";
 
 type Item = { label: string; href: string; icon: JSX.Element; disabled?: boolean };
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const [email, setEmail] = useState<string>("");
@@ -160,9 +160,15 @@ export default function AdminSidebar() {
         )}
 
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={() => {
+            if (onClose) {
+              onClose();
+            } else {
+              setIsCollapsed(!isCollapsed);
+            }
+          }}
           className={`p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors ${isCollapsed ? 'mb-auto' : ''}`}
-          title={isCollapsed ? "Expandir" : "Contraer"}
+          title={onClose ? "Cerrar menú" : (isCollapsed ? "Expandir" : "Contraer")}
         >
           {isCollapsed ? (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
