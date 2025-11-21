@@ -1968,7 +1968,7 @@ body * {
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600" />
         <div className="absolute -inset-1 opacity-0 group-hover:opacity-5 pointer-events-none" />
         <div className="relative p-6">
-          <div className="flex items-start gap-4">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
             <div className="relative group w-32 h-32 rounded-2xl bg-gradient-to-br from-indigo-50 to-white ring-1 ring-indigo-100 overflow-hidden flex items-center justify-center shadow-sm">
               <Image
                 src={photoSrc}
@@ -1997,8 +1997,8 @@ body * {
                 onChange={onPhotoChange}
               />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex-1 text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start gap-3 flex-wrap">
                 <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">{data.nombre}</h1>
                 {data.esterilizado === true && (
                   <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Esterilizado/a</span>
@@ -2007,7 +2007,7 @@ body * {
                   <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200">Chip {data.numero_microchip}</span>
                 )}
               </div>
-              <div className="text-gray-600 flex flex-wrap gap-x-6 gap-y-2 mt-2 text-sm">
+              <div className="text-gray-600 flex flex-wrap justify-center sm:justify-start gap-x-6 gap-y-2 mt-2 text-sm">
                 <span className="inline-flex items-center gap-1"><span className="text-gray-500">Especie:</span> {especie}{data.raza ? ` · ${data.raza}` : ""}</span>
                 <span className="inline-flex items-center gap-1"><span className="text-gray-500">Sexo:</span> {sexo}</span>
                 <span className="inline-flex items-center gap-1"><span className="text-gray-500">Edad:</span> {edadTexto}</span>
@@ -2431,12 +2431,12 @@ body * {
                         <textarea className="w-full min-h-[80px] rounded-lg border border-indigo-300/70 px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={consultaForm.observaciones} onChange={(e) => setConsultaForm({ ...consultaForm, observaciones: e.target.value })} />
                       </div>
                     </div>
-                    <div className="w-full flex justify-center mt-3 ">
-                      <button onClick={crearConsulta} disabled={savingConsulta} className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">{savingConsulta ? 'Guardando...' : 'Guardar consulta'}</button>
+                    <div className="w-full flex flex-col sm:flex-row justify-center gap-3 mt-3">
+                      <button onClick={crearConsulta} disabled={savingConsulta} className="w-full sm:w-auto px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">{savingConsulta ? 'Guardando...' : 'Guardar consulta'}</button>
                       <button
                         onClick={() => { setRecetaOpen(true); setFabOpen(false); }}
                         disabled={!ultimaConsultaId}
-                        className={`px-5 ml-5 py-2 rounded-lg text-white shadow-sm ${ultimaConsultaId
+                        className={`w-full sm:w-auto px-5 py-2 rounded-lg text-white shadow-sm ${ultimaConsultaId
                           ? 'bg-emerald-600 hover:bg-emerald-700'
                           : 'bg-gray-400 cursor-not-allowed'
                           }`}
@@ -2447,7 +2447,7 @@ body * {
                       <button
                         onClick={() => (ultimaConsultaId ? setCertMenuOpen(true) : null)}
                         disabled={!ultimaConsultaId}
-                        className={`px-5 ml-5 py-2 rounded-lg text-white shadow-sm ${ultimaConsultaId
+                        className={`w-full sm:w-auto px-5 py-2 rounded-lg text-white shadow-sm ${ultimaConsultaId
                           ? 'bg-amber-400 hover:bg-amber-500'
                           : 'bg-gray-400 cursor-not-allowed'
                           }`}

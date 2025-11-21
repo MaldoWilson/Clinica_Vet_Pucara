@@ -158,7 +158,7 @@ export default function FichaCreateModal({ isOpen, onClose, onSaved }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full overflow-hidden">
+      <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-5 border-b flex items-center justify-between">
           <h3 className="text-xl font-bold">Crear Ficha</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800">×</button>
@@ -168,11 +168,11 @@ export default function FichaCreateModal({ isOpen, onClose, onSaved }: Props) {
             <h4 className="text-xs font-semibold tracking-wide text-indigo-600">Datos del Propietario</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">RUT</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">RUT</label>
                 <div className="flex gap-2 items-center">
                   <input
                     type="text"
-                    className="w-full px-3 py-2 border rounded-md"
+                    className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     value={rut}
                     onChange={(e) => {
                       const cleaned = cleanRutInput(e.target.value);
@@ -201,18 +201,18 @@ export default function FichaCreateModal({ isOpen, onClose, onSaved }: Props) {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Nombre *</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-md" value={ownerNombre} onChange={(e) => setOwnerNombre(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nombre *</label>
+                <input type="text" className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={ownerNombre} onChange={(e) => setOwnerNombre(e.target.value)} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Apellido *</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-md" value={ownerApellido} onChange={(e) => setOwnerApellido(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Apellido *</label>
+                <input type="text" className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={ownerApellido} onChange={(e) => setOwnerApellido(e.target.value)} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Teléfono</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   value={ownerTelefono}
                   onChange={(e) => { const v = formatIntlPhone(e.target.value); setOwnerTelefono(v); setPhoneValido(isValidIntlPhone(v)); }}
                   placeholder="Ej: +56 912345678"
@@ -222,12 +222,12 @@ export default function FichaCreateModal({ isOpen, onClose, onSaved }: Props) {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Dirección</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-md" value={ownerDireccion} onChange={(e) => setOwnerDireccion(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Dirección</label>
+                <input type="text" className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={ownerDireccion} onChange={(e) => setOwnerDireccion(e.target.value)} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Correo electrónico</label>
-                <input type="email" className="w-full px-3 py-2 border rounded-md" value={ownerEmail} onChange={(e) => setOwnerEmail(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Correo electrónico</label>
+                <input type="email" className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={ownerEmail} onChange={(e) => setOwnerEmail(e.target.value)} />
               </div>
             </div>
           </div>
@@ -236,44 +236,44 @@ export default function FichaCreateModal({ isOpen, onClose, onSaved }: Props) {
             <h4 className="text-xs font-semibold tracking-wide text-indigo-600">Datos de la Mascota</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Nombre *</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-md" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nombre *</label>
+                <input type="text" className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={nombre} onChange={(e) => setNombre(e.target.value)} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Especie *</label>
-                <select className="w-full px-3 py-2 border rounded-md" value={especie} onChange={(e) => setEspecie(e.target.value as any)}>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Especie *</label>
+                <select className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={especie} onChange={(e) => setEspecie(e.target.value as any)}>
                   <option value="">Selecciona especie</option>
                   <option value="gato">Gato</option>
                   <option value="perro">Perro</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Raza</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-md" value={raza} onChange={(e) => setRaza(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Raza</label>
+                <input type="text" className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={raza} onChange={(e) => setRaza(e.target.value)} />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Sexo</label>
-                <select className="w-full px-3 py-2 border rounded-md" value={sexo} onChange={(e) => setSexo(e.target.value as any)}>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Sexo</label>
+                <select className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={sexo} onChange={(e) => setSexo(e.target.value as any)}>
                   <option value="">Sin especificar</option>
                   <option value="macho">Macho</option>
                   <option value="hembra">Hembra</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Color</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-md" value={color} onChange={(e) => setColor(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Color</label>
+                <input type="text" className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={color} onChange={(e) => setColor(e.target.value)} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Fecha de nacimiento</label>
-                <input type="date" className="w-full px-3 py-2 border rounded-md" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento</label>
+                <input type="date" className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700">N° microchip</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-md" value={microchip} onChange={(e) => setMicrochip(e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">N° microchip</label>
+                <input type="text" className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={microchip} onChange={(e) => setMicrochip(e.target.value)} />
               </div>
               <div className="flex items-end">
                 <div>
@@ -294,9 +294,9 @@ export default function FichaCreateModal({ isOpen, onClose, onSaved }: Props) {
           {error && <div className="text-sm text-red-600">{error}</div>}
           {success && <div className="text-sm text-green-600">{success}</div>}
 
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-md border">Cancelar</button>
-            <button type="submit" disabled={loading} className="px-5 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t mt-6">
+            <button type="button" onClick={onClose} className="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition-colors">Cancelar</button>
+            <button type="submit" disabled={loading} className="w-full sm:w-auto px-5 py-2.5 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 font-medium shadow-sm transition-colors disabled:opacity-50">
               {loading ? "Guardando…" : "Guardar Ficha"}
             </button>
           </div>
