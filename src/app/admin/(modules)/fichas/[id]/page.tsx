@@ -159,6 +159,11 @@ function PacienteDetailSkeleton() {
           </div>
         </div>
       </div>
+
+      {/* Generar consulta skeleton */}
+      <div className="mt-6 rounded-2xl ring-1 ring-gray-200/70 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6 flex justify-center">
+        <div className="h-10 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg w-40 animate-pulse"></div>
+      </div>
     </div>
   );
 }
@@ -2086,7 +2091,7 @@ body * {
                   <button aria-pressed={editPet} className={`text-sm ${editPet ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'}`} title={editPet ? "Cerrar edición" : "Editar paciente"} onClick={() => setEditPet((v) => !v)}>{editPet ? '✕' : '✎'}</button>
                 </div>
                 {!editPet ? (
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm">
                     <div><dt className="text-gray-500">Nombre</dt><dd className="font-medium">{data.nombre}</dd></div>
                     <div><dt className="text-gray-500">Especie</dt><dd className="font-medium">{especie}</dd></div>
                     <div><dt className="text-gray-500">Raza</dt><dd className="font-medium">{data.raza || '-'}</dd></div>
@@ -2111,9 +2116,9 @@ body * {
                   <button aria-pressed={editOwner} className={`text-sm ${editOwner ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'}`} title={editOwner ? "Cerrar edición" : "Editar tutor"} onClick={() => setEditOwner((v) => !v)}>{editOwner ? '✕' : '✎'}</button>
                 </div>
                 {!editOwner ? (
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm">
                     <div><dt className="text-gray-500">RUT</dt><dd className="font-medium">{o.rut ? formatRutPretty(o.rut) : '-'}</dd></div>
-                    <div><dt className="text-gray-500">Email</dt><dd className="font-medium">{o.correo_electronico || '-'}</dd></div>
+                    <div><dt className="text-gray-500">Email</dt><dd className="font-medium break-all">{o.correo_electronico || '-'}</dd></div>
                     <div><dt className="text-gray-500">Nombre</dt><dd className="font-medium">{[o.nombre, o.apellido].filter(Boolean).join(' ') || '-'}</dd></div>
                     <div><dt className="text-gray-500">Teléfono</dt><dd className="font-medium">{o.telefono || '-'}</dd></div>
                     <div className="md:col-span-2"><dt className="text-gray-500">Dirección</dt><dd className="font-medium">{o.direccion || '-'}</dd></div>
