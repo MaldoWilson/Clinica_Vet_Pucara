@@ -11,6 +11,9 @@ import { certificateTemplates } from "@/lib/certificate-templates";
 import { fillPdfFormFromBytes } from "@/lib/pdfFill";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { RecetaTemplate, RECETA_STYLES } from "@/components/RecetaDesign";
+import { ConsultaTemplate, CONSULTA_STYLES } from "@/components/ConsultaDesign";
 
 type Owner = {
   propietario_id: string;
@@ -218,7 +221,7 @@ export default function PacienteDetailPage() {
   const [savingReceta, setSavingReceta] = useState(false);
   const [editReceta, setEditReceta] = useState<null | any>(null);
   const [savingEditReceta, setSavingEditReceta] = useState(false);
-  const [ultimaReceta, setUltimaReceta] = useState<null | { id: string; fecha?: string; peso?: string; notas?: string; items: Array<{ nombre_medicamento: string; dosis: string; via?: string; frecuencia?: string; duracion?: string; instrucciones?: string; }>; }>(null);
+  const [ultimaReceta, setUltimaReceta] = useState<null | { id: string; fecha?: string; peso?: string; notas?: string; emitida_por?: string; items: Array<{ nombre_medicamento: string; dosis: string; via?: string; frecuencia?: string; duracion?: string; instrucciones?: string; }>; }>(null);
   const [openHistMenu, setOpenHistMenu] = useState<string | null>(null);
   const [editConsulta, setEditConsulta] = useState<null | any>(null);
   const [savingEditConsulta, setSavingEditConsulta] = useState(false);
@@ -449,7 +452,7 @@ export default function PacienteDetailPage() {
       setSuccess("Receta creada.");
       setRecetaOpen(false);
       setFabOpen(false);
-      setUltimaReceta({ id: String(json.data.id), fecha: json.data.fecha, peso: recetaForm.peso, notas: recetaForm.notas, items: recetaForm.items });
+      setUltimaReceta({ id: String(json.data.id), fecha: json.data.fecha, peso: recetaForm.peso, notas: recetaForm.notas, emitida_por: recetaForm.emitida_por, items: recetaForm.items });
 
       // Recargar consultas para actualizar el historial con la nueva receta
       await loadConsultas();
@@ -496,685 +499,61 @@ export default function PacienteDetailPage() {
   function imprimirConsulta(consulta: any) {
     const w = window.open("", "_blank", "width=800,height=900");
     if (!w) return;
-    //Primer CSS PARA CONSULTA
-    const css1 = `
-      @page { margin: 20mm; }
-      body { 
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-        line-height: 1.5; 
-        margin: 0; 
-        padding: 0; 
-        color: #2c3e50; 
-        background: #fff;
-      }
-      .header {
-        display: flex;
-        align-items: center;
-        border-bottom: 3px solid #2c5aa0;
-        padding-bottom: 20px;
-        margin-bottom: 30px;
-      }
-      .logo {
-        width: 80px;
-        height: 80px;
-        margin-right: 20px;
-        border-radius: 10px;
-      }
-      .clinic-info {
-        flex: 1;
-      }
-      .clinic-name {
-        font-size: 28px;
-        font-weight: bold;
-        color: #2c5aa0;
-        margin: 0;
-        line-height: 1.2;
-      }
-      .clinic-subtitle {
-        font-size: 16px;
-        color: #7f8c8d;
-        margin: 5px 0 0 0;
-      }
-      .clinic-contact {
-        font-size: 12px;
-        color: #95a5a6;
-        margin: 8px 0 0 0;
-      }
-      .document-title {
-        text-align: center;
-        font-size: 24px;
-        font-weight: bold;
-        color: #2c5aa0;
-        margin: 30px 0 20px 0;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border: 2px solid #e9ecef;
-      }
-      .consultation-info {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 25px;
-        border-left: 4px solid #2c5aa0;
-      }
-      .info-row {
-        display: flex;
-        margin-bottom: 8px;
-      }
-      .info-label {
-        font-weight: bold;
-        color: #2c5aa0;
-        min-width: 120px;
-      }
-      .info-value {
-        color: #2c3e50;
-      }
-      .patient-info {
-        background: #e8f4f8;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 25px;
-        border-left: 4px solid #17a2b8;
-      }
-      .section {
-        background: white;
-        margin: 20px 0;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      }
-      .section-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #2c5aa0;
-        margin: 0 0 12px 0;
-        padding-bottom: 8px;
-        border-bottom: 2px solid #e9ecef;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .section-content {
-        color: #2c3e50;
-        line-height: 1.6;
-        min-height: 20px;
-      }
-      .empty-value {
-        color: #95a5a6;
-        font-style: italic;
-      }
-      .footer {
-        margin-top: 40px;
-        padding-top: 20px;
-        border-top: 2px solid #e9ecef;
-        text-align: center;
-        color: #7f8c8d;
-        font-size: 12px;
-      }
-      .signature-section {
-        margin-top: 50px;
-        display: flex;
-        justify-content: space-between;
-      }
-      .signature-box {
-        text-align: center;
-        width: 200px;
-      }
-      .signature-line {
-        border-top: 1px solid #2c3e50;
-        margin-top: 40px;
-        padding-top: 5px;
-        font-size: 12px;
-        color: #7f8c8d;
-      }
-      @media print {
-        body { print-color-adjust: exact; }
-        .header { page-break-inside: avoid; }
-        .section { page-break-inside: avoid; }
-      }
-    `;
 
-    const fechaFormateada = consulta.fecha ? new Date(consulta.fecha).toLocaleDateString('es-CL', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }) : '';
+    const htmlContent = renderToStaticMarkup(
+      <ConsultaTemplate
+        consulta={consulta}
+        mascota={data}
+        veterinario={veterinarios.find(v => v.id === consulta.veterinario)}
+      />
+    );
 
-    const proximoControlFormateado = consulta.proximo_control ? new Date(consulta.proximo_control).toLocaleDateString('es-CL', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }) : '';
-    //PRIMER HTML PARA IMPRIMIR CONSULTA
     const html = `<!doctype html>
       <html>
         <head>
           <meta charset='utf-8'>
-          <title>Consulta Médica Veterinaria - ${consulta.id}</title>
-          <style>${css1}</style>
+          <title>Consulta Médica - ${consulta.id}</title>
+          <style>${CONSULTA_STYLES}</style>
         </head>
         <body>
-          <div class="header">
-            <img src="/logo.webp" alt="Logo Clínica Veterinaria Pucará" class="logo" onerror="this.style.display='none'">
-            <div class="clinic-info">
-              <h1 class="clinic-name">Clínica Veterinaria Pucará</h1>
-              <p class="clinic-subtitle">Atención Médica Veterinaria Integral</p>
-              <p class="clinic-contact">📍 Dirección de la clínica • 📞 Teléfono • 📧 correo@clinicapucara.cl</p>
-            </div>
-          </div>
-
-          <div class="document-title">
-            🩺 CONSULTA MÉDICA VETERINARIA
-          </div>
-
-          <div class="consultation-info">
-            <div class="info-row">
-              <span class="info-label">N° Consulta:</span>
-              <span class="info-value">#${consulta.id}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Fecha:</span>
-              <span class="info-value">${fechaFormateada}</span>
-            </div>
-          </div>
-
-          ${data ? `
-          <div class="patient-info">
-            <div class="info-row">
-              <span class="info-label">Paciente:</span>
-              <span class="info-value">${data.nombre || ''}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Especie:</span>
-              <span class="info-value">${data.especie || ''}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Propietario:</span>
-              <span class="info-value">${data.propietario?.nombre || ''} ${data.propietario?.apellido || ''}</span>
-            </div>
-          </div>
-          ` : ''}
-
-          <div class="section">
-            <div class="section-title">📋 Motivo de Consulta</div>
-            <div class="section-content">${consulta.motivo || '<span class="empty-value">No especificado</span>'}</div>
-          </div>
-
-          <div class="section">
-            <div class="section-title">🏥 Tipo de Atención</div>
-            <div class="section-content">${consulta.tipo_atencion || '<span class="empty-value">No especificado</span>'}</div>
-          </div>
-
-          <div class="section">
-            <div class="section-title">📝 Anamnesis</div>
-            <div class="section-content">${consulta.anamnesis || '<span class="empty-value">No especificado</span>'}</div>
-          </div>
-
-          <div class="section">
-            <div class="section-title">🔍 Diagnóstico</div>
-            <div class="section-content">${consulta.diagnostico || '<span class="empty-value">No especificado</span>'}</div>
-          </div>
-
-          <div class="section">
-            <div class="section-title">💊 Tratamiento</div>
-            <div class="section-content">${consulta.tratamiento || '<span class="empty-value">No especificado</span>'}</div>
-          </div>
-
-          ${consulta.proximo_control ? `
-          <div class="section">
-            <div class="section-title">📅 Próximo Control</div>
-            <div class="section-content">${proximoControlFormateado}</div>
-          </div>
-          ` : ''}
-
-          ${consulta.observaciones ? `
-          <div class="section">
-            <div class="section-title">💭 Observaciones</div>
-            <div class="section-content">${consulta.observaciones}</div>
-          </div>
-          ` : ''}
-
-          <div class="signature-section">
-            <div class="signature-box">
-              <div class="signature-line">Médico Veterinario</div>
-            </div>
-            <div class="signature-box">
-              <div class="signature-line">Fecha y Sello</div>
-            </div>
-          </div>
-
-          <div class="footer">
-            <p><strong>Clínica Veterinaria Pucará</strong> - Cuidando la salud de tus mascotas</p>
-            <p>Consulta registrada en el historial médico del paciente</p>
-          </div>
+          ${htmlContent}
         </body>
       </html>`;
 
     w.document.write(html);
     w.document.close();
     w.focus();
-    setTimeout(() => w.print(), 100);
+    setTimeout(() => w.print(), 500);
   }
 
   function imprimirReceta(receta: any) {
     const w = window.open("", "_blank", "width=800,height=900");
     if (!w) return;
-    //Segundo css RECETA
-    const css2 = `
-@page { 
-  margin: 15mm; 
-  size: A4;
-  @top-center { content: "VETERINARIA PUCARA - Receta Médica"; }
-}
 
-body {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  font-size: 13px;
-  color: #1a202c;
-  background: #fff;
-  margin: 0;
-  padding: 20px 40px;
-  position: relative;
-  line-height: 1.5;
-}
+    const htmlContent = renderToStaticMarkup(
+      <RecetaTemplate
+        receta={receta}
+        mascota={data}
+        veterinario={veterinarios.find(v => v.id === receta.emitida_por)}
+      />
+    );
 
-/* Asegurar que el contenido esté por encima del sello de agua */
-body > * {
-  position: relative;
-  z-index: 1;
-}
-
-
-/* ENCABEZADO PROFESIONAL MEJORADO */
-.header {
-  text-align: center;
-  margin-bottom: 25px;
-  padding: 20px 0;
-  border-top: 3px solid #2563eb;
-  border-bottom: 2px solid #e2e8f0;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.clinic-title {
-  font-size: 20px;
-  font-weight: 900;
-  color: #2563eb;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.vet-info {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #374151;
-  font-weight: 500;
-}
-
-.vet-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #2563eb;
-  margin-bottom: 4px;
-}
-
-.contact-info {
-  font-size: 11px;
-  color: #6b7280;
-  margin: 2px 0;
-}
-
-/* CAMPOS DE FORMULARIO PROFESIONALES MEJORADOS */
-.form-fields {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 25px 0;
-  padding: 15px 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.field-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.peso-label {
-  font-weight: 800;
-  color: #2563eb;
-  font-size: 14px;
-}
-
-.field-box {
-  border: 2px solid #2563eb;
-  padding: 6px 15px;
-  min-width: 90px;
-  text-align: center;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: bold;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  color: #1e40af;
-}
-
-.date-labels {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  color: #2563eb;
-  font-size: 13px;
-}
-
-.date-labels span {
-  font-size: 12px;
-  margin: 0 6px;
-  color: #1e40af;
-  font-weight: bold;
-}
-
-/* NÚMERO DE RECETA PROFESIONAL MEJORADO */
-.recipe-number {
-  position: absolute;
-  top: 110px;
-  right: 50px;
-  font-weight: 800;
-  font-size: 13px;
-  color: #2563eb;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 2px solid #93c5fd;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-/* INFO DEL PACIENTE MEJORADA */
-.patient-info {
-  border: 2px solid #e2e8f0;
-  padding: 15px 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  font-size: 13px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.patient-info strong {
-  color: #2563eb;
-  font-weight: 700;
-}
-
-/* TABLA DE MEDICAMENTOS PROFESIONAL MEJORADA */
-.medications-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 20px 0;
-  font-size: 12px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid #e2e8f0;
-}
-
-.medications-table th {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-  color: white;
-  padding: 12px 8px;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid #1e40af;
-}
-
-.medications-table td {
-  border: 1px solid #e2e8f0;
-  padding: 10px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #374151;
-  vertical-align: top;
-}
-
-.medications-table tr:nth-child(even) {
-  background: #f8fafc;
-}
-
-.medications-table tr:hover {
-  background: #f0f9ff;
-}
-
-/* OBSERVACIONES PROFESIONALES MEJORADAS */
-.observations {
-  margin-top: 25px;
-  padding: 15px 20px;
-  border-left: 4px solid #2563eb;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  font-size: 13px;
-  border-radius: 0 8px 8px 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.observations strong {
-  color: #2563eb;
-  font-weight: 800;
-}
-
-/* PRÓXIMO CONTROL PROFESIONAL MEJORADO */
-.next-control {
-  margin-top: 160px;
-  margin-left: 250px;
-  font-size: 13px;
-  font-weight: 800;
-  color: #2563eb;
-  background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
-  padding: 12px 18px;
-  border-radius: 8px;
-  border: 2px solid #93c5fd;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.control-line {
-  border-bottom: 3px solid #2563eb;
-  width: 220px;
-  height: 30px;
-  margin-top: 10px;
-  border-radius: 3px;
-}
-
-/* SECCIÓN DE FIRMA PROFESIONAL MEJORADA */
-.signature-section {
-  margin-top: 30px;
-  padding: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.signature-line {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.signature-label {
-  font-weight: 800;
-  color: #2563eb;
-  font-size: 13px;
-  margin-right: 15px;
-}
-
-.signature-space {
-  flex: 1;
-  border-bottom: 3px solid #2563eb;
-  height: 30px;
-  margin-left: 10px;
-}
-
-.vet-signature {
-  text-align: right;
-  font-size: 12px;
-  color: #374151;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-/* Para que el contenido quede por encima */
-body * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Mejoras adicionales para impresión */
-@media print {
-  body {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-  
-  .header {
-    page-break-inside: avoid;
-  }
-  
-  .medications-table {
-    page-break-inside: avoid;
-  }
-  
-  .signature-section {
-    page-break-inside: avoid;
-  }
-}
-    `;
-
-    const itemsRows = receta.items?.map((it: any, i: number) => `
-      <tr>
-        <td style="font-weight: 500;">${it.nombre_medicamento || ''}</td>
-        <td>${it.dosis || ''}</td>
-        <td>${it.via || ''}</td>
-        <td>${it.frecuencia || ''}</td>
-        <td>${it.duracion || ''}</td>
-        <td style="font-size: 11px;">${it.instrucciones || ''}</td>
-      </tr>
-    `).join('') || '';
-
-    // Extraer día, mes y año de la fecha
-    const fecha = receta.fecha ? new Date(receta.fecha) : new Date();
-    const dia = fecha.getDate().toString().padStart(2, '0');
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    const año = fecha.getFullYear().toString();
-    //Segundo HTML PARA IMPRIMIR RECETA
     const html = `<!doctype html>
       <html>
         <head>
           <meta charset='utf-8'>
           <title>Receta Médica - ${receta.id}</title>
-          <style>${css2}</style>
+          <style>${RECETA_STYLES}</style>
         </head>
         <body>
-          <div class="header">
-            <div class="clinic-title">VETERINARIA PUCARA</div>
-            <div class="vet-info">
-              <div class="vet-name">Dra. Pilar Zoccola Segovia</div>
-              <div>Médico Veterinario</div>
-              <div>R:U:T: 10.301.357-7</div>
-              <div>Esmeralda N° 97</div>
-              <div class="contact-info">Fono: 22859 2840/ Whatsapp: 9 39246250</div>
-              <div class="contact-info">San Bernardo</div>
-            </div>
-          </div>
-
-          <div class="form-fields">
-            <div class="field-group">
-              <span class="peso-label">PESO:</span>
-              <div class="field-box">${receta.peso || ''}</div>
-            </div>
-            
-            <div class="field-group">
-              <div class="date-labels">
-                <span>Día</span>
-                <div class="field-box">${dia}</div>
-                <span>Mes</span>
-                <div class="field-box">${mes}</div>
-                <span>Año</span>
-                <div class="field-box">${año}</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="recipe-number">
-            RP: ${receta.id}
-          </div>
-
-          <div class="content-area">
-            ${data ? `
-              <div class="patient-info">
-                <strong>Paciente:</strong> ${data.nombre || ''} (${data.especie ? 'Canino' : 'Felino'})<br>
-                <strong>Propietario:</strong> ${data.propietario?.nombre || ''} ${data.propietario?.apellido || ''}
-              </div>
-            ` : ''}
-            
-            ${receta.items && receta.items.length > 0 ? `
-              <table class="medications-table">
-                <thead>
-                  <tr>
-                    <th>Medicamento</th>
-                    <th>Dosis</th>
-                    <th>Vía</th>
-                    <th>Frecuencia</th>
-                    <th>Duración</th>
-                    <th>Instrucciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${itemsRows}
-                </tbody>
-              </table>
-            ` : ''}
-            
-            ${receta.notas ? `
-              <div class="observations">
-                <strong>Observaciones:</strong><br>
-                ${receta.notas}
-              </div>
-            ` : ''}
-          </div>
-
-          <div class="signature-section">
-            <div class="signature-line">
-              <div class="signature-label">Firma del Médico Veterinario:</div>
-              <div class="signature-space"></div>
-            </div>
-            <div class="vet-signature">
-              Dra. Pilar Zoccola Segovia<br>
-              R.U.T: 10.301.357-7<br>
-              Médico Veterinario
-            </div>
-          </div>
-
-          <div class="next-control">
-            PRÓXIMO CONTROL:
-            <div class="control-line"></div>
-          </div>
+          ${htmlContent}
         </body>
       </html>`;
 
     w.document.write(html);
     w.document.close();
     w.focus();
-    setTimeout(() => w.print(), 100);
+    setTimeout(() => w.print(), 500);
   }
 
   async function descargarPDFReceta(receta: any) {
@@ -1182,412 +561,24 @@ body * {
       // Crear una ventana temporal para generar el HTML
       const w = window.open("", "_blank", "width=800,height=900");
       if (!w) return;
-      //Tercer css DESCARGAR EN PDF
-      const css2 = `
-      @page { 
-        margin: 15mm; 
-        size: A4;
-        @top-center { content: "VETERINARIA PUCARA - Receta Médica"; }
-      }
-      
-      body {
-        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-        font-size: 13px;
-        color: #1a202c;
-        background: #fff;
-        margin: 0;
-        padding: 20px 40px;
-        position: relative;
-        line-height: 1.5;
-      }
-      
-      /* Asegurar que el contenido esté por encima del sello de agua */
-      body > * {
-        position: relative;
-        z-index: 1;
-      }
-      
-      
-      /* ENCABEZADO PROFESIONAL MEJORADO */
-      .header {
-        text-align: center;
-        margin-bottom: 25px;
-        padding: 20px 0;
-        border-top: 3px solid #2563eb;
-        border-bottom: 2px solid #e2e8f0;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      }
-      
-      .clinic-title {
-        font-size: 20px;
-        font-weight: 900;
-        color: #2563eb;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      }
-      
-      .vet-info {
-        font-size: 12px;
-        line-height: 1.5;
-        color: #374151;
-        font-weight: 500;
-      }
-      
-      .vet-name {
-        font-size: 14px;
-        font-weight: 700;
-        color: #2563eb;
-        margin-bottom: 4px;
-      }
-      
-      .contact-info {
-        font-size: 11px;
-        color: #6b7280;
-        margin: 2px 0;
-      }
-      
-      /* CAMPOS DE FORMULARIO PROFESIONALES MEJORADOS */
-      .form-fields {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 25px 0;
-        padding: 15px 20px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      }
-      
-      .field-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 13px;
-        font-weight: 600;
-      }
-      
-      .peso-label {
-        font-weight: 800;
-        color: #2563eb;
-        font-size: 14px;
-      }
-      
-      .field-box {
-        border: 2px solid #2563eb;
-        padding: 6px 15px;
-        min-width: 90px;
-        text-align: center;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: bold;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        color: #1e40af;
-      }
-      
-      .date-labels {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 700;
-        color: #2563eb;
-        font-size: 13px;
-      }
-      
-      .date-labels span {
-        font-size: 12px;
-        margin: 0 6px;
-        color: #1e40af;
-        font-weight: bold;
-      }
-      
-      /* NÚMERO DE RECETA PROFESIONAL MEJORADO */
-      .recipe-number {
-        position: absolute;
-        top: 110px;
-        right: 50px;
-        font-weight: 800;
-        font-size: 13px;
-        color: #2563eb;
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        padding: 8px 12px;
-        border-radius: 6px;
-        border: 2px solid #93c5fd;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      }
-      
-      /* INFO DEL PACIENTE MEJORADA */
-      .patient-info {
-        border: 2px solid #e2e8f0;
-        padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        font-size: 13px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      }
-      
-      .patient-info strong {
-        color: #2563eb;
-        font-weight: 700;
-      }
-      
-      /* TABLA DE MEDICAMENTOS PROFESIONAL MEJORADA */
-      .medications-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-        font-size: 12px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        overflow: hidden;
-        border: 2px solid #e2e8f0;
-      }
-      
-      .medications-table th {
-        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-        color: white;
-        padding: 12px 8px;
-        text-align: center;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #1e40af;
-      }
-      
-      .medications-table td {
-        border: 1px solid #e2e8f0;
-        padding: 10px 8px;
-        font-size: 12px;
-        font-weight: 500;
-        color: #374151;
-        vertical-align: top;
-      }
-      
-      .medications-table tr:nth-child(even) {
-        background: #f8fafc;
-      }
-      
-      .medications-table tr:hover {
-        background: #f0f9ff;
-      }
-      
-      /* OBSERVACIONES PROFESIONALES MEJORADAS */
-      .observations {
-        margin-top: 25px;
-        padding: 15px 20px;
-        border-left: 4px solid #2563eb;
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        font-size: 13px;
-        border-radius: 0 8px 8px 0;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      }
-      
-      .observations strong {
-        color: #2563eb;
-        font-weight: 800;
-      }
-      
-      /* PRÓXIMO CONTROL PROFESIONAL MEJORADO */
-      .next-control {
-        margin-top: 160px;
-        margin-left: 250px;
-        font-size: 13px;
-        font-weight: 800;
-        color: #2563eb;
-        background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
-        padding: 12px 18px;
-        border-radius: 8px;
-        border: 2px solid #93c5fd;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      }
-      
-      .control-line {
-        border-bottom: 3px solid #2563eb;
-        width: 220px;
-        height: 30px;
-        margin-top: 10px;
-        border-radius: 3px;
-      }
-      
-      /* SECCIÓN DE FIRMA PROFESIONAL MEJORADA */
-      .signature-section {
-        margin-top: 30px;
-        padding: 20px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      }
-      
-      .signature-line {
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
-      }
-      
-      .signature-label {
-        font-weight: 800;
-        color: #2563eb;
-        font-size: 13px;
-        margin-right: 15px;
-      }
-      
-      .signature-space {
-        flex: 1;
-        border-bottom: 3px solid #2563eb;
-        height: 30px;
-        margin-left: 10px;
-      }
-      
-      .vet-signature {
-        text-align: right;
-        font-size: 12px;
-        color: #374151;
-        font-weight: 600;
-        line-height: 1.4;
-      }
-      
-      /* Para que el contenido quede por encima */
-      body * {
-        position: relative;
-        z-index: 1;
-      }
-      
-      /* Mejoras adicionales para impresión */
-      @media print {
-        body {
-          print-color-adjust: exact;
-          -webkit-print-color-adjust: exact;
-        }
-        
-        .header {
-          page-break-inside: avoid;
-        }
-        
-        .medications-table {
-          page-break-inside: avoid;
-        }
-        
-        .signature-section {
-          page-break-inside: avoid;
-        }
-      }
-          `;
-      const itemsRows = receta.items?.map((it: any, i: number) => `
-        <tr>
-          <td style="font-weight: 500;">${it.nombre_medicamento || ''}</td>
-          <td>${it.dosis || ''}</td>
-          <td>${it.via || ''}</td>
-          <td>${it.frecuencia || ''}</td>
-          <td>${it.duracion || ''}</td>
-          <td style="font-size: 11px;">${it.instrucciones || ''}</td>
-        </tr>
-      `).join('') || '';
 
-      // Extraer día, mes y año de la fecha
-      const fecha = receta.fecha ? new Date(receta.fecha) : new Date();
-      const dia = fecha.getDate().toString().padStart(2, '0');
-      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-      const año = fecha.getFullYear().toString();
-      //Tercer Html para DESCARGAR EN PDF
+      const htmlContent = renderToStaticMarkup(
+        <RecetaTemplate
+          receta={receta}
+          mascota={data}
+          veterinario={veterinarios.find(v => v.id === receta.emitida_por)}
+        />
+      );
+
       const html = `<!doctype html>
         <html>
           <head>
             <meta charset='utf-8'>
             <title>Receta Médica - ${receta.id}</title>
-            <style>${css2}</style>
+            <style>${RECETA_STYLES}</style>
           </head>
           <body>
-            <div class="header">
-              <div class="clinic-title">VETERINARIA PUCARA</div>
-              <div class="vet-info">
-                <div class="vet-name">Dra. Pilar Zoccola Segovia</div>
-                <div>Médico Veterinario</div>
-                <div>R:U:T: 10.301.357-7</div>
-                <div>Esmeralda N° 97</div>
-                <div class="contact-info">Fono: 22859 2840/ Whatsapp: 9 39246250</div>
-                <div class="contact-info">San Bernardo</div>
-              </div>
-            </div>
-
-            <div class="form-fields">
-              <div class="field-group">
-                <span class="peso-label">PESO:</span>
-                <div class="field-box">${receta.peso || ''}</div>
-              </div>
-              
-              <div class="field-group">
-                <div class="date-labels">
-                  <span>Día</span>
-                  <div class="field-box">${dia}</div>
-                  <span>Mes</span>
-                  <div class="field-box">${mes}</div>
-                  <span>Año</span>
-                  <div class="field-box">${año}</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="recipe-number">
-              RP: ${receta.id}
-            </div>
-
-            <div class="content-area">
-              ${data ? `
-                <div class="patient-info">
-                  <strong>Paciente:</strong> ${data.nombre || ''} (${data.especie ? 'Canino' : 'Felino'})<br>
-                  <strong>Propietario:</strong> ${data.propietario?.nombre || ''} ${data.propietario?.apellido || ''}
-                </div>
-              ` : ''}
-              
-              ${receta.items && receta.items.length > 0 ? `
-                <table class="medications-table">
-                  <thead>
-                    <tr>
-                      <th>Medicamento</th>
-                      <th>Dosis</th>
-                      <th>Vía</th>
-                      <th>Frecuencia</th>
-                      <th>Duración</th>
-                      <th>Instrucciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${itemsRows}
-                  </tbody>
-                </table>
-              ` : ''}
-              
-              ${receta.notas ? `
-                <div class="observations">
-                  <strong>Observaciones:</strong><br>
-                  ${receta.notas}
-                </div>
-              ` : ''}
-            </div>
-
-            <div class="signature-section">
-              <div class="signature-line">
-                <div class="signature-label">Firma del Médico Veterinario:</div>
-                <div class="signature-space"></div>
-              </div>
-              <div class="vet-signature">
-                Dra. Pilar Zoccola Segovia<br>
-                R.U.T: 10.301.357-7<br>
-                Médico Veterinario
-              </div>
-            </div>
-
-            <div class="next-control">
-              PRÓXIMO CONTROL:
-              <div class="control-line"></div>
-            </div>
+            ${htmlContent}
           </body>
         </html>`;
 
@@ -1666,7 +657,8 @@ body * {
   const loadVeterinarios = async () => {
     try {
       const res = await fetch("/api/Veterinarios");
-      const json = await res.json();
+      if (!res.ok) return;
+      const json = await res.json().catch(() => ({}));
       if (json?.ok && Array.isArray(json.data)) {
         setVeterinarios(json.data);
       }
@@ -1679,13 +671,14 @@ body * {
   const loadConsultas = async () => {
     try {
       const res = await fetch(`/api/consultas?mascota_id=${encodeURIComponent(String(id))}`);
-      const json = await res.json();
-      if (res.ok && json?.ok) {
+      if (!res.ok) return;
+      const json = await res.json().catch(() => ({}));
+      if (json?.ok) {
         // Enriquecer cada consulta con sus recetas
         const mapped = await Promise.all((json.data || []).map(async (c: any) => {
           try {
             const resR = await fetch(`/api/recetas?consulta_id=${c.id}`);
-            const jsonR = await resR.json();
+            const jsonR = await resR.json().catch(() => ({}));
             const recetas = resR.ok && jsonR?.ok ? jsonR.data : [];
             return ({
               id: c.id,
@@ -1719,8 +712,9 @@ body * {
   const loadCertificados = async () => {
     try {
       const res = await fetch(`/api/certificados?mascota_id=${encodeURIComponent(String(id))}`);
-      const json = await res.json();
-      if (res.ok && json?.ok) {
+      if (!res.ok) return;
+      const json = await res.json().catch(() => ({}));
+      if (json?.ok) {
         setCertificados(json.data || []);
       }
     } catch (e) {
@@ -1742,8 +736,12 @@ body * {
     const loadAnte = async () => {
       try {
         const res = await fetch(`/api/antecedentes?mascota_id=${encodeURIComponent(String(id))}`);
-        const json = await res.json();
-        if (!res.ok || json?.ok === false) throw new Error(json?.error || "No se pudo cargar antecedentes");
+        if (!res.ok) {
+          setAnte(null);
+          return;
+        }
+        const json = await res.json().catch(() => ({}));
+        if (json?.ok === false) throw new Error(json?.error || "No se pudo cargar antecedentes");
         setAnte(json?.data || null);
       } catch (e: any) {
         // si no hay registros aún, ante queda null (es válido)
@@ -2656,49 +1654,20 @@ body * {
                     <path d="M18 6L6 18M6 6l12 12" />
                   </svg>
                 </button>
-                <div className="flex items-center justify-between pr-8">
-                  <h4 className="text-sm font-semibold text-indigo-600">Receta #{ultimaReceta.id}</h4>
-                  <div className="text-sm text-gray-500">
-                    {ultimaReceta.fecha ? (
-                      <>
-                        <span className="sm:hidden">{formatFechaShort(ultimaReceta.fecha)}</span>
-                        <span className="hidden sm:inline">{new Date(ultimaReceta.fecha).toLocaleString('es-CL')}</span>
-                      </>
-                    ) : ''}
+                <h4 className="text-sm font-semibold text-indigo-600 mb-4">Vista previa de receta #{ultimaReceta.id}</h4>
+
+                <div className="border rounded-lg overflow-hidden bg-white shadow-inner">
+                  <div className="scale-[0.85] origin-top-left w-[117.6%]">
+                    <style>{RECETA_STYLES}</style>
+                    <RecetaTemplate
+                      receta={ultimaReceta}
+                      mascota={data}
+                      veterinario={veterinarios.find(v => v.id === ultimaReceta.emitida_por)}
+                      isPreview={true}
+                    />
                   </div>
                 </div>
-                <div className="text-sm text-gray-600 mt-1">
-                  {ultimaReceta.peso && <span className="mr-4">Peso: {ultimaReceta.peso} kg</span>}
-                  {ultimaReceta.notas && <span>Notas: {ultimaReceta.notas}</span>}
-                </div>
-                <div className="mt-3 overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-gray-600">
-                        <th className="py-2 pr-4">#</th>
-                        <th className="py-2 pr-4">Medicamento</th>
-                        <th className="py-2 pr-4">Dosis</th>
-                        <th className="py-2 pr-4">Vía</th>
-                        <th className="py-2 pr-4">Frecuencia</th>
-                        <th className="py-2 pr-4">Duración</th>
-                        <th className="py-2 pr-4">Instrucciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ultimaReceta.items.map((it, idx) => (
-                        <tr key={idx} className="border-t">
-                          <td className="py-2 pr-4">{idx + 1}</td>
-                          <td className="py-2 pr-4">{it.nombre_medicamento}</td>
-                          <td className="py-2 pr-4">{it.dosis}</td>
-                          <td className="py-2 pr-4">{it.via}</td>
-                          <td className="py-2 pr-4">{it.frecuencia}</td>
-                          <td className="py-2 pr-4">{it.duracion}</td>
-                          <td className="py-2 pr-4">{it.instrucciones}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+
                 <div className="w-full flex justify-center gap-2 mt-4">
                   <button onClick={imprimirUltimaReceta} className="px-4 py-2 rounded-lg ring-1 ring-gray-300 bg-white hover:bg-gray-50">Imprimir</button>
                   <button onClick={() => descargarPDFReceta(ultimaReceta)} className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">Descargar PDF</button>
@@ -2943,7 +1912,7 @@ body * {
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    Descargar PDF
+                                    Download PDF
                                   </button>
                                 </div>
                               </div>
@@ -3156,65 +2125,16 @@ body * {
                                           </div>
                                           {selectedRecetaDetails?.id === r.id ? (
                                             <div className="mt-3 pt-3 border-t border-indigo-200">
-                                              <div className="space-y-3">
-                                                {r.peso && (
-                                                  <div className="text-sm">
-                                                    <span className="text-gray-500 font-medium">Peso: </span>
-                                                    <span className="text-gray-900">{r.peso} kg</span>
-                                                  </div>
-                                                )}
-                                                {r.notas && (
-                                                  <div className="text-sm">
-                                                    <span className="text-gray-500 font-medium">Notas: </span>
-                                                    <span className="text-gray-900">{r.notas}</span>
-                                                  </div>
-                                                )}
-                                                {Array.isArray(r.items) && r.items.length > 0 && (
-                                                  <div>
-                                                    <p className="text-sm font-semibold text-gray-700 mb-2">Medicamentos</p>
-                                                    <div className="space-y-2">
-                                                      {r.items.map((it: any, idx: number) => (
-                                                        <div key={idx} className="flex items-start gap-2 text-sm p-2 bg-white rounded border border-indigo-100">
-                                                          <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full flex-shrink-0 mt-1.5"></span>
-                                                          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                            <div>
-                                                              <span className="text-gray-500 font-medium">Medicamento: </span>
-                                                              <span className="text-gray-900 font-medium">{it.nombre_medicamento}</span>
-                                                            </div>
-                                                            <div>
-                                                              <span className="text-gray-500 font-medium">Dosis: </span>
-                                                              <span className="text-gray-900">{it.dosis}</span>
-                                                            </div>
-                                                            {it.via && (
-                                                              <div>
-                                                                <span className="text-gray-500 font-medium">Vía: </span>
-                                                                <span className="text-gray-900">{it.via}</span>
-                                                              </div>
-                                                            )}
-                                                            {it.frecuencia && (
-                                                              <div>
-                                                                <span className="text-gray-500 font-medium">Frecuencia: </span>
-                                                                <span className="text-gray-900">{it.frecuencia}</span>
-                                                              </div>
-                                                            )}
-                                                            {it.duracion && (
-                                                              <div>
-                                                                <span className="text-gray-500 font-medium">Duración: </span>
-                                                                <span className="text-gray-900">{it.duracion}</span>
-                                                              </div>
-                                                            )}
-                                                            {it.instrucciones && (
-                                                              <div className="md:col-span-2">
-                                                                <span className="text-gray-500 font-medium">Instrucciones: </span>
-                                                                <span className="text-gray-900">{it.instrucciones}</span>
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                        </div>
-                                                      ))}
-                                                    </div>
-                                                  </div>
-                                                )}
+                                              <div className="border rounded-lg overflow-hidden bg-white shadow-inner">
+                                                <div className="scale-[0.85] origin-top-left w-[117.6%]">
+                                                  <style>{RECETA_STYLES}</style>
+                                                  <RecetaTemplate
+                                                    receta={r}
+                                                    mascota={data}
+                                                    veterinario={veterinarios.find(v => v.id === r.emitida_por)}
+                                                    isPreview={true}
+                                                  />
+                                                </div>
                                               </div>
                                             </div>
                                           ) : (
@@ -3232,13 +2152,33 @@ body * {
                                                         <span className="text-gray-500 text-xs bg-gray-100 px-2 py-0.5 rounded-full">{it.via}</span>
                                                       </>
                                                     )}
+
+                                                    {/* Confirmación eliminar consulta */}
+                                                    {confirmDelete && (
+                                                      <ConfirmationModal
+                                                        isOpen={true}
+                                                        onClose={() => setConfirmDelete(null)}
+                                                        onConfirm={async () => {
+                                                          try {
+                                                            const res = await fetch('/api/consultas', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: confirmDelete.id }) });
+                                                            const json = await res.json();
+                                                            if (!res.ok || json?.ok === false) throw new Error(json?.error || 'Error al eliminar');
+                                                            await loadConsultas();
+                                                          } catch (e: any) {
+                                                            alert(e?.message || 'Error');
+                                                          } finally {
+                                                            setConfirmDelete(null);
+                                                          }
+                                                        }}
+                                                        title="Eliminar consulta"
+                                                        message="Esta acción eliminará la consulta permanentemente. ¿Deseas continuar?"
+                                                        confirmText="Eliminar"
+                                                        cancelText="Cancelar"
+                                                        danger
+                                                      />
+                                                    )}
                                                   </div>
                                                 ))}
-                                                {r.items.length > 3 && (
-                                                  <div className="text-xs text-gray-500 italic">
-                                                    +{r.items.length - 3} medicamentos más...
-                                                  </div>
-                                                )}
                                               </div>
                                             )
                                           )}
@@ -3248,9 +2188,7 @@ body * {
                                   </div>
                                 )}
                               </>
-                            ) : (
-                              <div className="text-sm text-gray-500">Sin información adicional</div>
-                            )}
+                            ) : null}
                           </div>
                         </div>
                       );
@@ -3260,34 +2198,6 @@ body * {
               </div>
             </div>
           )}
-
-          {/* Confirmación eliminar consulta */}
-          {confirmDelete && (
-            <ConfirmationModal
-              isOpen={true}
-              onClose={() => setConfirmDelete(null)}
-              onConfirm={async () => {
-                try {
-                  const res = await fetch('/api/consultas', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: confirmDelete.id }) });
-                  const json = await res.json();
-                  if (!res.ok || json?.ok === false) throw new Error(json?.error || 'Error al eliminar');
-                  await loadConsultas();
-                } catch (e: any) {
-                  alert(e?.message || 'Error');
-                } finally {
-                  setConfirmDelete(null);
-                }
-              }}
-              title="Eliminar consulta"
-              message="Esta acción eliminará la consulta permanentemente. ¿Deseas continuar?"
-              confirmText="Eliminar"
-              cancelText="Cancelar"
-              danger
-            />
-          )}
-
-          {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
-          {success && <p className="text-sm text-green-600 mt-4">{success}</p>}
         </div>
       </div>
     </div>
@@ -3446,5 +2356,3 @@ function AntecedentesForm({ data, onCancel, onSave, saving }: { data: Antecedent
     </form>
   );
 }
-
-
