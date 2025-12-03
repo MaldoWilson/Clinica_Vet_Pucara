@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -30,6 +30,7 @@ type FlujoCajaData = {
 
 type ChartProps = {
   data: FlujoCajaData[];
+  selectedMonth?: string;
 };
 
 type ChartData = {
@@ -50,28 +51,47 @@ const COLORES = [
   "#0284C7", // Azul
 ];
 
-// Obtener primer día del mes actual
-const getPrimerDiaMes = () => {
+// Obtener primer día del mes seleccionado o actual
+const getPrimerDiaMes = (mes?: string) => {
+  if (mes) {
+    return `${mes}-01`;
+  }
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   return `${year}-${month}-01`;
 };
 
-// Obtener último día del mes actual
-const getUltimoDiaMes = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+// Obtener último día del mes seleccionado o actual
+const getUltimoDiaMes = (mes?: string) => {
+  let year, month;
+
+  if (mes) {
+    [year, month] = mes.split('-').map(Number);
+    month = month - 1; // JS months are 0-indexed
+  } else {
+    const now = new Date();
+    year = now.getFullYear();
+    month = now.getMonth();
+  }
+
   const ultimoDia = new Date(year, month + 1, 0).getDate();
-  const mes = String(month + 1).padStart(2, '0');
-  return `${year}-${mes}-${String(ultimoDia).padStart(2, '0')}`;
+  const mesStr = String(month + 1).padStart(2, '0');
+  return `${year}-${mesStr}-${String(ultimoDia).padStart(2, '0')}`;
 };
 
-export default function ProfesionalesRendimientoChart({ data }: ChartProps) {
-  const [fechaInicio, setFechaInicio] = useState<string>(getPrimerDiaMes());
-  const [fechaFin, setFechaFin] = useState<string>(getUltimoDiaMes());
+export default function ProfesionalesRendimientoChart({ data, selectedMonth }: ChartProps) {
+  const [fechaInicio, setFechaInicio] = useState<string>(getPrimerDiaMes(selectedMonth));
+  const [fechaFin, setFechaFin] = useState<string>(getUltimoDiaMes(selectedMonth));
   const [incluirDeuda, setIncluirDeuda] = useState<boolean>(false);
+
+  // Actualizar fechas cuando cambia el mes seleccionado
+  useEffect(() => {
+    if (selectedMonth) {
+      setFechaInicio(getPrimerDiaMes(selectedMonth));
+      setFechaFin(getUltimoDiaMes(selectedMonth));
+    }
+  }, [selectedMonth]);
 
   // Procesar y filtrar datos
   const chartData = useMemo(() => {
@@ -104,7 +124,7 @@ export default function ProfesionalesRendimientoChart({ data }: ChartProps) {
     datosFiltrados.forEach(reg => {
       const profesional = reg.dr!.trim();
       const existing = groupedByProfesional.get(profesional) || { ingresos: 0, deuda: 0 };
-      
+
       const totalIngresos = (reg.efectivo || 0) + (reg.debito || 0) + (reg.credito || 0) + (reg.transferencia || 0);
       const totalDeuda = reg.deuda || 0;
 
@@ -174,14 +194,14 @@ export default function ProfesionalesRendimientoChart({ data }: ChartProps) {
     const totalIngresos = chartData.reduce((sum, d) => sum + d.ingresos, 0);
     const totalDeuda = chartData.reduce((sum, d) => sum + (d.ingresosConDeuda - d.ingresos), 0);
     const totalGeneral = incluirDeuda ? totalIngresos + totalDeuda : totalIngresos;
-    
+
     return { totalIngresos, totalDeuda, totalGeneral };
   }, [chartData, incluirDeuda]);
 
   // Limpiar filtros (volver a valores por defecto)
   const limpiarFiltros = () => {
-    setFechaInicio(getPrimerDiaMes());
-    setFechaFin(getUltimoDiaMes());
+    setFechaInicio(getPrimerDiaMes(selectedMonth));
+    setFechaFin(getUltimoDiaMes(selectedMonth));
     setIncluirDeuda(false);
   };
 
@@ -292,30 +312,30 @@ export default function ProfesionalesRendimientoChart({ data }: ChartProps) {
             margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis 
+            <XAxis
               type="number"
               label={{ value: incluirDeuda ? "Monto Total (CLP)" : "Ingresos (CLP)", position: "insideBottom", offset: -5 }}
               tick={{ fontSize: 12 }}
-              tickFormatter={(value) => 
+              tickFormatter={(value) =>
                 new Intl.NumberFormat("es-CL", {
                   notation: "compact",
                   compactDisplay: "short",
                 }).format(value)
               }
             />
-            <YAxis 
+            <YAxis
               type="category"
               dataKey="profesional"
               width={90}
               tick={{ fontSize: 12 }}
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }} />
-            <Bar 
+            <Bar
               dataKey={incluirDeuda ? "ingresosConDeuda" : "ingresos"}
               fill="#4F46E5"
               radius={[0, 4, 4, 0]}
-              label={{ 
-                position: 'right', 
+              label={{
+                position: 'right',
                 formatter: (value: any) => formatCurrency(Number(value)),
                 fontSize: 11,
                 fill: '#374151'
@@ -393,4 +413,3 @@ export default function ProfesionalesRendimientoChart({ data }: ChartProps) {
     </div>
   );
 }
-

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -28,6 +28,7 @@ type FlujoCajaData = {
 
 type ChartProps = {
   data: FlujoCajaData[];
+  selectedMonth?: string;
 };
 
 type ChartData = {
@@ -54,28 +55,47 @@ const COLORES = [
   "#E11D48", // Rosa rojo
 ];
 
-// Obtener primer día del mes actual
-const getPrimerDiaMes = () => {
+// Obtener primer día del mes seleccionado o actual
+const getPrimerDiaMes = (mes?: string) => {
+  if (mes) {
+    return `${mes}-01`;
+  }
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   return `${year}-${month}-01`;
 };
 
-// Obtener último día del mes actual
-const getUltimoDiaMes = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+// Obtener último día del mes seleccionado o actual
+const getUltimoDiaMes = (mes?: string) => {
+  let year, month;
+
+  if (mes) {
+    [year, month] = mes.split('-').map(Number);
+    month = month - 1; // JS months are 0-indexed
+  } else {
+    const now = new Date();
+    year = now.getFullYear();
+    month = now.getMonth();
+  }
+
   const ultimoDia = new Date(year, month + 1, 0).getDate();
-  const mes = String(month + 1).padStart(2, '0');
-  return `${year}-${mes}-${String(ultimoDia).padStart(2, '0')}`;
+  const mesStr = String(month + 1).padStart(2, '0');
+  return `${year}-${mesStr}-${String(ultimoDia).padStart(2, '0')}`;
 };
 
-export default function EgresosDistribucionChart({ data }: ChartProps) {
-  const [fechaInicio, setFechaInicio] = useState<string>(getPrimerDiaMes());
-  const [fechaFin, setFechaFin] = useState<string>(getUltimoDiaMes());
+export default function EgresosDistribucionChart({ data, selectedMonth }: ChartProps) {
+  const [fechaInicio, setFechaInicio] = useState<string>(getPrimerDiaMes(selectedMonth));
+  const [fechaFin, setFechaFin] = useState<string>(getUltimoDiaMes(selectedMonth));
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<string[]>(CATEGORIAS);
+
+  // Actualizar fechas cuando cambia el mes seleccionado
+  useEffect(() => {
+    if (selectedMonth) {
+      setFechaInicio(getPrimerDiaMes(selectedMonth));
+      setFechaFin(getUltimoDiaMes(selectedMonth));
+    }
+  }, [selectedMonth]);
 
   // Alternar selección de categoría
   const toggleCategoria = (categoria: string) => {
@@ -191,7 +211,7 @@ export default function EgresosDistribucionChart({ data }: ChartProps) {
     percent,
   }: any) => {
     if (percent < 0.05) return null; // No mostrar etiquetas para porcentajes menores a 5%
-    
+
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -218,8 +238,8 @@ export default function EgresosDistribucionChart({ data }: ChartProps) {
 
   // Limpiar filtros (volver a valores por defecto)
   const limpiarFiltros = () => {
-    setFechaInicio(getPrimerDiaMes());
-    setFechaFin(getUltimoDiaMes());
+    setFechaInicio(getPrimerDiaMes(selectedMonth));
+    setFechaFin(getUltimoDiaMes(selectedMonth));
     setCategoriasSeleccionadas(CATEGORIAS);
   };
 

@@ -58,28 +58,29 @@ const formatMoneyInput = (value: string): string => {
 
 export default function FlujoCajaPage() {
   const [registros, setRegistros] = useState<FlujoCaja[]>([]);
+  const [allRegistros, setAllRegistros] = useState<FlujoCaja[]>([]); // Estado para todos los registros del mes (para gráficos)
   const [veterinarios, setVeterinarios] = useState<Veterinario[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filtro de mes/año - Por defecto el mes actual
   const getCurrentMonthString = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   };
   const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentMonthString());
-  
+
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 20;
-  
+
   // Modal de formulario
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState<FormData>(initialFormState);
   const [isEditing, setIsEditing] = useState(false);
-  
+
   // Modal de confirmación para eliminar
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -89,7 +90,7 @@ export default function FlujoCajaPage() {
     try {
       const res = await fetch("/api/Veterinarios");
       const json = await res.json();
-      
+
       if (json.ok && json.data) {
         setVeterinarios(json.data);
       }
@@ -98,7 +99,7 @@ export default function FlujoCajaPage() {
     }
   };
 
-  // Cargar registros
+  // Cargar registros (paginados para la tabla)
   const cargarRegistros = async () => {
     setLoading(true);
     setError(null);
@@ -106,11 +107,11 @@ export default function FlujoCajaPage() {
       const offset = (currentPage - 1) * itemsPerPage;
       const res = await fetch(`/api/flujo-caja?limit=${itemsPerPage}&offset=${offset}&mes=${selectedMonth}`);
       const json = await res.json();
-      
+
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "Error al cargar registros");
       }
-      
+
       setRegistros(json.data || []);
       setTotalCount(json.meta?.count || 0);
     } catch (e: any) {
@@ -118,6 +119,21 @@ export default function FlujoCajaPage() {
       setRegistros([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Cargar TODOS los registros del mes para los gráficos
+  const cargarTodosRegistros = async () => {
+    try {
+      // Usamos un límite alto para traer todo el mes
+      const res = await fetch(`/api/flujo-caja?limit=2000&mes=${selectedMonth}`);
+      const json = await res.json();
+
+      if (json.ok && json.data) {
+        setAllRegistros(json.data);
+      }
+    } catch (e) {
+      console.error("Error al cargar datos para gráficos:", e);
     }
   };
 
@@ -129,6 +145,7 @@ export default function FlujoCajaPage() {
   useEffect(() => {
     setCurrentPage(1); // Resetear página al cambiar mes
     cargarRegistros();
+    cargarTodosRegistros(); // Cargar datos para gráficos
   }, [selectedMonth]);
 
   useEffect(() => {
@@ -184,7 +201,10 @@ export default function FlujoCajaPage() {
 
       setShowModal(false);
       setFormData(initialFormState);
+      setShowModal(false);
+      setFormData(initialFormState);
       await cargarRegistros();
+      await cargarTodosRegistros(); // Actualizar gráficos también
     } catch (e: any) {
       setError(e.message || "Error al guardar");
     } finally {
@@ -217,7 +237,9 @@ export default function FlujoCajaPage() {
 
       setShowDeleteModal(false);
       setDeleteId(null);
+      setDeleteId(null);
       await cargarRegistros();
+      await cargarTodosRegistros(); // Actualizar gráficos también
     } catch (e: any) {
       alert(e.message || "Error al eliminar");
     }
@@ -265,10 +287,10 @@ export default function FlujoCajaPage() {
     const titulo = [[`FLUJO DE CAJA - ${monthName.toUpperCase()}`]];
     const subtitulo = [[`Clínica Veterinaria Pucará`]];
     const espacioBlanco = [[]];
-    
+
     // Encabezados de columnas (en mayúsculas)
     const headers = [["DÍA", "TIPO", "CATEGORÍA", "NOMBRE", "EFECTIVO", "DÉBITO", "CRÉDITO", "TRANSFERENCIA", "DEUDA", "EGRESO", "DR", "FECHA CREACIÓN"]];
-    
+
     // Preparar datos - valores nulos o 0 se muestran como vacíos
     const datosBody = registros.map(reg => [
       new Date(reg.created_at).getDate(), // Día extraído de created_at
@@ -310,7 +332,7 @@ export default function FlujoCajaPage() {
 
     // Aplicar estilos
     const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
-    
+
     // Estilo del título (fila 1)
     if (worksheet['A1']) {
       worksheet['A1'].s = {
@@ -319,7 +341,7 @@ export default function FlujoCajaPage() {
         alignment: { horizontal: "center", vertical: "center" }
       };
     }
-    
+
     // Estilo del subtítulo (fila 2)
     if (worksheet['A2']) {
       worksheet['A2'].s = {
@@ -370,9 +392,9 @@ export default function FlujoCajaPage() {
           // Color por columna - solo si tiene valor
           let fontColor = { rgb: "000000" }; // Negro por defecto
           let fontBold = false;
-          
+
           if (worksheet[cellAddress].v !== "") {
-            switch(col) {
+            switch (col) {
               case 5: // DÉBITO - Verde
                 fontColor = { rgb: "16A34A" };
                 fontBold = true;
@@ -401,9 +423,9 @@ export default function FlujoCajaPage() {
 
           worksheet[cellAddress].s = {
             fill: { fgColor: { rgb: isEvenRow ? "FFFFFF" : "F3F4F6" } },
-            alignment: { 
+            alignment: {
               horizontal: col >= 4 && col <= 9 ? "right" : "left",
-              vertical: "center" 
+              vertical: "center"
             },
             border: {
               top: { style: "thin", color: { rgb: "E5E7EB" } },
@@ -422,7 +444,7 @@ export default function FlujoCajaPage() {
 
     // Agregar hoja al libro
     XLSX.utils.book_append_sheet(workbook, worksheet, monthName.substring(0, 31));
-    
+
     // Descargar archivo
     const fileName = `flujo_caja_${monthName.replace(/ /g, '_')}.xlsx`;
     XLSX.writeFile(workbook, fileName);
@@ -559,7 +581,7 @@ export default function FlujoCajaPage() {
       ventanaImpresion.document.write(contenidoImpresion);
       ventanaImpresion.document.close();
       ventanaImpresion.focus();
-      
+
       // Esperar a que cargue antes de imprimir
       setTimeout(() => {
         ventanaImpresion.print();
@@ -935,17 +957,17 @@ export default function FlujoCajaPage() {
 
       {/* Gráfico de Ingresos vs Egresos */}
       <div id="grafico-ingresos-egresos">
-        <IngresosEgresosChart data={registros} />
+        <IngresosEgresosChart data={allRegistros} selectedMonth={selectedMonth} />
       </div>
 
       {/* Gráfico de Distribución de Egresos */}
       <div id="grafico-distribucion-egresos">
-        <EgresosDistribucionChart data={registros} />
+        <EgresosDistribucionChart data={allRegistros} selectedMonth={selectedMonth} />
       </div>
 
       {/* Gráfico de Rendimiento por Profesional */}
       <div id="grafico-rendimiento-profesionales">
-        <ProfesionalesRendimientoChart data={registros} />
+        <ProfesionalesRendimientoChart data={allRegistros} selectedMonth={selectedMonth} />
       </div>
 
       {/* Modal de Confirmación de Eliminación */}

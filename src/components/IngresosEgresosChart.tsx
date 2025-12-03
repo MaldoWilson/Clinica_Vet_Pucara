@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -30,6 +30,7 @@ type FlujoCajaData = {
 
 type ChartProps = {
   data: FlujoCajaData[];
+  selectedMonth?: string;
 };
 
 type ChartData = {
@@ -40,27 +41,38 @@ type ChartData = {
 
 const CATEGORIAS = ["PRO", "GCL", "HON", "GC"];
 
-// Obtener primer día del mes actual
-const getPrimerDiaMes = () => {
+// Obtener primer día del mes seleccionado o actual
+const getPrimerDiaMes = (mes?: string) => {
+  if (mes) {
+    return `${mes}-01`;
+  }
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   return `${year}-${month}-01`;
 };
 
-// Obtener último día del mes actual
-const getUltimoDiaMes = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+// Obtener último día del mes seleccionado o actual
+const getUltimoDiaMes = (mes?: string) => {
+  let year, month;
+
+  if (mes) {
+    [year, month] = mes.split('-').map(Number);
+    month = month - 1; // JS months are 0-indexed
+  } else {
+    const now = new Date();
+    year = now.getFullYear();
+    month = now.getMonth();
+  }
+
   const ultimoDia = new Date(year, month + 1, 0).getDate();
-  const mes = String(month + 1).padStart(2, '0');
-  return `${year}-${mes}-${String(ultimoDia).padStart(2, '0')}`;
+  const mesStr = String(month + 1).padStart(2, '0');
+  return `${year}-${mesStr}-${String(ultimoDia).padStart(2, '0')}`;
 };
 
-export default function IngresosEgresosChart({ data }: ChartProps) {
-  const [fechaInicio, setFechaInicio] = useState<string>(getPrimerDiaMes());
-  const [fechaFin, setFechaFin] = useState<string>(getUltimoDiaMes());
+export default function IngresosEgresosChart({ data, selectedMonth }: ChartProps) {
+  const [fechaInicio, setFechaInicio] = useState<string>(getPrimerDiaMes(selectedMonth));
+  const [fechaFin, setFechaFin] = useState<string>(getUltimoDiaMes(selectedMonth));
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<string[]>(CATEGORIAS);
 
   // Alternar selección de categoría
@@ -117,12 +129,14 @@ export default function IngresosEgresosChart({ data }: ChartProps) {
     const groupedByDay = new Map<number, { ingresos: number; egresos: number }>();
 
     datosFiltrados.forEach(reg => {
-      const existing = groupedByDay.get(reg.dia) || { ingresos: 0, egresos: 0 };
-      
+      // Calcular día desde created_at para asegurar consistencia
+      const dia = new Date(reg.created_at).getDate();
+      const existing = groupedByDay.get(dia) || { ingresos: 0, egresos: 0 };
+
       const totalIngresos = (reg.efectivo || 0) + (reg.debito || 0) + (reg.credito || 0) + (reg.transferencia || 0);
       const totalEgresos = reg.egreso || 0;
 
-      groupedByDay.set(reg.dia, {
+      groupedByDay.set(dia, {
         ingresos: existing.ingresos + totalIngresos,
         egresos: existing.egresos + totalEgresos,
       });
@@ -175,16 +189,17 @@ export default function IngresosEgresosChart({ data }: ChartProps) {
     const totalIngresos = chartData.reduce((sum, d) => sum + d.ingresos, 0);
     const totalEgresos = chartData.reduce((sum, d) => sum + d.egresos, 0);
     const diferencia = totalIngresos - totalEgresos;
-    
+
     return { totalIngresos, totalEgresos, diferencia };
   }, [chartData]);
 
-  // Limpiar filtros (volver a valores por defecto)
-  const limpiarFiltros = () => {
-    setFechaInicio(getPrimerDiaMes());
-    setFechaFin(getUltimoDiaMes());
-    setCategoriasSeleccionadas(CATEGORIAS);
-  };
+  // Actualizar fechas cuando cambia el mes seleccionado
+  useEffect(() => {
+    if (selectedMonth) {
+      setFechaInicio(getPrimerDiaMes(selectedMonth));
+      setFechaFin(getUltimoDiaMes(selectedMonth));
+    }
+  }, [selectedMonth]);
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -224,7 +239,11 @@ export default function IngresosEgresosChart({ data }: ChartProps) {
           {/* Botón Limpiar */}
           <div className="flex items-end">
             <button
-              onClick={limpiarFiltros}
+              onClick={() => {
+                setFechaInicio(getPrimerDiaMes(selectedMonth));
+                setFechaFin(getUltimoDiaMes(selectedMonth));
+                setCategoriasSeleccionadas(CATEGORIAS);
+              }}
               className="w-full px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
             >
               Limpiar Filtros
@@ -299,15 +318,15 @@ export default function IngresosEgresosChart({ data }: ChartProps) {
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis 
-              dataKey="dia" 
+            <XAxis
+              dataKey="dia"
               label={{ value: "Día del Mes", position: "insideBottom", offset: -5 }}
               tick={{ fontSize: 12 }}
             />
             <YAxis
               label={{ value: "Monto (CLP)", angle: -90, position: "insideLeft" }}
               tick={{ fontSize: 12 }}
-              tickFormatter={(value) => 
+              tickFormatter={(value) =>
                 new Intl.NumberFormat("es-CL", {
                   notation: "compact",
                   compactDisplay: "short",
@@ -315,19 +334,19 @@ export default function IngresosEgresosChart({ data }: ChartProps) {
               }
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }} />
-            <Legend 
+            <Legend
               wrapperStyle={{ paddingTop: "20px" }}
               iconType="square"
             />
-            <Bar 
-              dataKey="ingresos" 
-              fill="#16A34A" 
+            <Bar
+              dataKey="ingresos"
+              fill="#16A34A"
               name="Ingresos"
               radius={[4, 4, 0, 0]}
             />
-            <Bar 
-              dataKey="egresos" 
-              fill="#DC2626" 
+            <Bar
+              dataKey="egresos"
+              fill="#DC2626"
               name="Egresos"
               radius={[4, 4, 0, 0]}
             />
