@@ -22,9 +22,9 @@ interface Cita {
   };
 }
 
-interface CalendarViewProps {}
+interface CalendarViewProps { }
 
-export default function CalendarView({}: CalendarViewProps) {
+export default function CalendarView({ }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<"semana" | "dia" | "mes">("semana");
   const [showMiniCalendar, setShowMiniCalendar] = useState(false);
@@ -35,42 +35,42 @@ export default function CalendarView({}: CalendarViewProps) {
 
   // Función para obtener citas
   const fetchCitas = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/citas");
-        const data = await response.json();
-        
-        if (data.ok) {
-          // Filtrar citas para mostrar en el calendario (temporalmente incluir PENDIENTE para debug)
-          const citasVisibles = data.citas?.filter((cita: any) => 
-            cita.estado === "CONFIRMADA" || cita.estado === "ATENDIDA" || cita.estado === "PENDIENTE"
-          ) || [];
-          
-          console.log(`Cargadas ${citasVisibles.length} citas confirmadas/atendidas`);
-          console.log("Todas las citas recibidas:", data.citas);
-          
-          // Debug: mostrar detalles de las citas
-          citasVisibles.forEach((cita: any, index: number) => {
-            console.log(`Cita ${index + 1}:`, {
-              mascota: cita.mascota_nombre,
-              servicio: cita.servicios?.nombre,
-              duracion: cita.servicios?.duracion_min,
-              inicio: cita.inicio,
-              fin: cita.fin,
-              estado: cita.estado
-            });
+    try {
+      setLoading(true);
+      const response = await fetch("/api/citas");
+      const data = await response.json();
+
+      if (data.ok) {
+        // Filtrar citas para mostrar en el calendario (solo confirmadas y atendidas)
+        const citasVisibles = data.citas?.filter((cita: any) =>
+          cita.estado === "CONFIRMADA" || cita.estado === "ATENDIDA"
+        ) || [];
+
+        console.log(`Cargadas ${citasVisibles.length} citas confirmadas/atendidas`);
+        console.log("Todas las citas recibidas:", data.citas);
+
+        // Debug: mostrar detalles de las citas
+        citasVisibles.forEach((cita: any, index: number) => {
+          console.log(`Cita ${index + 1}:`, {
+            mascota: cita.mascota_nombre,
+            servicio: cita.servicios?.nombre,
+            duracion: cita.servicios?.duracion_min,
+            inicio: cita.inicio,
+            fin: cita.fin,
+            estado: cita.estado
           });
-          
-          setCitas(citasVisibles);
-        } else {
-          console.error("Error en la respuesta de la API:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching citas:", error);
-      } finally {
-        setLoading(false);
+        });
+
+        setCitas(citasVisibles);
+      } else {
+        console.error("Error en la respuesta de la API:", data);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching citas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Obtener citas al cargar el componente
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function CalendarView({}: CalendarViewProps) {
     const day = startOfWeek.getDay();
     const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Lunes
     startOfWeek.setDate(diff);
-    
+
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek);
@@ -101,7 +101,7 @@ export default function CalendarView({}: CalendarViewProps) {
     const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay() + 1); // Lunes
-    
+
     const dates = [];
     for (let i = 0; i < 42; i++) { // 6 semanas
       const date = new Date(startDate);
@@ -167,13 +167,13 @@ export default function CalendarView({}: CalendarViewProps) {
     const dateStr = getLocalYMD(date);
     console.log(`Buscando citas para fecha: ${dateStr}`);
     console.log(`Total de citas disponibles: ${citas.length}`);
-    
+
     const citasDelDia = citas.filter(cita => {
       if (!cita.inicio) {
         console.log("Cita sin inicio:", cita);
         return false;
       }
-      const citaDate = new Date(cita.inicio);
+      const citaDate = new Date(cita.inicio.endsWith("Z") ? cita.inicio : `${cita.inicio}Z`);
       const citaDateStr = getLocalYMD(citaDate);
       const matches = citaDateStr === dateStr;
       if (matches) {
@@ -181,7 +181,7 @@ export default function CalendarView({}: CalendarViewProps) {
       }
       return matches;
     });
-    
+
     console.log(`Citas encontradas para ${dateStr}: ${citasDelDia.length}`);
     return citasDelDia;
   };
@@ -191,28 +191,28 @@ export default function CalendarView({}: CalendarViewProps) {
     const citasDelDia = getCitasForDate(date);
     const slotTimeStr = timeSlot.toLocaleTimeString();
     console.log(`Buscando citas para slot: ${slotTimeStr}`);
-    
+
     const citasEnSlot = citasDelDia.filter(cita => {
       if (!cita.inicio) return false;
-      
-      const citaStart = new Date(cita.inicio);
+
+      const citaStart = new Date(cita.inicio.endsWith("Z") ? cita.inicio : `${cita.inicio}Z`);
       const slotStart = new Date(timeSlot);
-      
+
       // Verificar si la cita comienza en este slot de 30 minutos
       const citaHour = citaStart.getHours();
       const citaMinute = citaStart.getMinutes();
       const slotHour = slotStart.getHours();
       const slotMinute = slotStart.getMinutes();
-      
+
       const matches = citaHour === slotHour && citaMinute >= slotMinute && citaMinute < slotMinute + 30;
       if (matches) {
         console.log(`Cita encontrada en slot ${slotTimeStr}:`, cita.mascota_nombre, citaStart.toLocaleTimeString());
       }
-      
+
       // La cita debe comenzar en este slot de 30 minutos
       return matches;
     });
-    
+
     console.log(`Citas en slot ${slotTimeStr}: ${citasEnSlot.length}`);
     return citasEnSlot;
   };
@@ -280,7 +280,7 @@ export default function CalendarView({}: CalendarViewProps) {
     const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay() + 1); // Lunes
-    
+
     const days = [];
     for (let i = 0; i < 42; i++) {
       const day = new Date(startDate);
@@ -312,20 +312,20 @@ export default function CalendarView({}: CalendarViewProps) {
       {/* Header del calendario */}
       <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 border-b border-gray-200 bg-indigo-400 text-white">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <button
-              onClick={goToToday}
-              className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white rounded-md hover:bg-gray-100 transition-colors w-full sm:w-auto"
-            >
-              Hoy
-            </button>
-            
-            <button
-              onClick={fetchCitas}
-              className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white rounded-md hover:bg-gray-100 transition-colors w-full sm:w-auto"
-            >
-              Actualizar
-            </button>
-          
+          <button
+            onClick={goToToday}
+            className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white rounded-md hover:bg-gray-100 transition-colors w-full sm:w-auto"
+          >
+            Hoy
+          </button>
+
+          <button
+            onClick={fetchCitas}
+            className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white rounded-md hover:bg-gray-100 transition-colors w-full sm:w-auto"
+          >
+            Actualizar
+          </button>
+
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate("prev")}
@@ -335,19 +335,19 @@ export default function CalendarView({}: CalendarViewProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            
+
             <button
               onClick={() => setShowMiniCalendar(!showMiniCalendar)}
               className="px-3 py-1.5 text-sm font-medium text-indigo-400 bg-white border border-white rounded-md hover:bg-gray-100 transition-colors"
             >
-              {viewMode === "semana" 
+              {viewMode === "semana"
                 ? `${formatDate(weekDates[0])} - ${formatDate(weekDates[6])} ${currentDate.getFullYear()}`
                 : viewMode === "dia"
-                ? `${formatFullDate(currentDate)}`
-                : `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`
+                  ? `${formatFullDate(currentDate)}`
+                  : `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`
               }
             </button>
-            
+
             <button
               onClick={() => navigate("next")}
               className="p-1.5 text-white hover:bg-indigo-500 rounded-md transition-colors"
@@ -366,7 +366,7 @@ export default function CalendarView({}: CalendarViewProps) {
             </svg>
             <span>Filtrar</span>
           </button>
-          
+
           <div className="relative w-full sm:w-auto">
             <select
               value={viewMode}
@@ -419,7 +419,7 @@ export default function CalendarView({}: CalendarViewProps) {
               </button>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-7 gap-1 mb-2">
             {["lun", "mar", "mié", "jue", "vie", "sáb", "dom"].map(day => (
               <div key={day} className="text-xs text-gray-500 text-center py-1">
@@ -427,26 +427,25 @@ export default function CalendarView({}: CalendarViewProps) {
               </div>
             ))}
           </div>
-          
+
           <div className="grid grid-cols-7 gap-1">
             {miniCalendarDays.map((day, index) => {
               const isCurrentMonth = day.getMonth() === currentDate.getMonth();
               const isToday = day.toDateString() === new Date().toDateString();
               const isSelected = day.toDateString() === currentDate.toDateString();
-              
+
               return (
                 <button
                   key={index}
                   onClick={() => selectDate(day)}
-                  className={`w-8 h-8 text-xs rounded-md transition-colors ${
-                    isCurrentMonth
+                  className={`w-8 h-8 text-xs rounded-md transition-colors ${isCurrentMonth
                       ? isSelected
                         ? "bg-blue-600 text-white"
                         : isToday
-                        ? "bg-blue-100 text-blue-600"
-                        : "text-gray-900 hover:bg-gray-100"
+                          ? "bg-blue-100 text-blue-600"
+                          : "text-gray-900 hover:bg-gray-100"
                       : "text-gray-400"
-                  }`}
+                    }`}
                 >
                   {day.getDate()}
                 </button>
@@ -468,30 +467,28 @@ export default function CalendarView({}: CalendarViewProps) {
                   {day}
                 </div>
               ))}
-              
+
               {/* Días del mes */}
               {monthDates.map((date, index) => {
                 const isCurrentMonth = date.getMonth() === currentDate.getMonth();
                 const isToday = date.toDateString() === new Date().toDateString();
                 const citasDelDia = getCitasForDate(date);
-                
+
                 return (
                   <div
                     key={index}
-                    className={`min-h-[120px] p-2 border border-gray-200 ${
-                      isCurrentMonth ? "bg-white" : "bg-gray-50"
-                    } ${isToday ? "bg-blue-50 border-blue-300" : ""}`}
+                    className={`min-h-[120px] p-2 border border-gray-200 ${isCurrentMonth ? "bg-white" : "bg-gray-50"
+                      } ${isToday ? "bg-blue-50 border-blue-300" : ""}`}
                   >
-                    <div className={`text-xs md:text-sm font-medium mb-1 ${
-                      isCurrentMonth 
-                        ? isToday 
-                          ? "text-blue-600" 
+                    <div className={`text-xs md:text-sm font-medium mb-1 ${isCurrentMonth
+                        ? isToday
+                          ? "text-blue-600"
                           : "text-gray-900"
                         : "text-gray-400"
-                    }`}>
+                      }`}>
                       {date.getDate()}
                     </div>
-                    
+
                     <div className="space-y-1">
                       {citasDelDia.slice(0, 3).map((cita, citaIndex) => (
                         <div
@@ -525,11 +522,11 @@ export default function CalendarView({}: CalendarViewProps) {
               <div className="border-r border-gray-200 bg-white sticky left-0 z-20">
                 <div className="h-12 border-b border-gray-200"></div>
                 {timeSlots.map((time, index) => (
-                <div key={index} className="h-12 border-b border-gray-100 flex items-start justify-end pr-2 pt-1 bg-white">
-                  <span className="text-[11px] text-gray-500">
-                    {formatTime(time)}
-                  </span>
-                </div>
+                  <div key={index} className="h-12 border-b border-gray-100 flex items-start justify-end pr-2 pt-1 bg-white">
+                    <span className="text-[11px] text-gray-500">
+                      {formatTime(time)}
+                    </span>
+                  </div>
                 ))}
               </div>
 
@@ -537,89 +534,87 @@ export default function CalendarView({}: CalendarViewProps) {
               {weekDates.map((date, dayIndex) => {
                 const citasDelDia = getCitasForDate(date);
                 const isToday = date.toDateString() === new Date().toDateString();
-                
-                return (
-                <div key={dayIndex} className="border-r border-gray-200 last:border-r-0 bg-white">
-                  {/* Header del día */}
-                  <div className={`h-12 border-b border-gray-200 flex flex-col items-center justify-center ${
-                    isToday ? "bg-blue-50" : ""
-                  }`}>
-                    <div className="text-xs md:text-sm font-medium text-gray-900 uppercase tracking-wide">
-                      {["lun", "mar", "mié", "jue", "vie", "sáb", "dom"][dayIndex]}
-                    </div>
-                    <div className={`text-base md:text-lg font-bold ${
-                      isToday ? "text-blue-600" : "text-gray-900"
-                    }`}>
-                      {date.getDate()}
-                    </div>
-                  </div>
 
-                  {/* Slots de tiempo */}
-                  {timeSlots.map((timeSlot, timeIndex) => {
-                    const citasEnSlot = getCitasForTimeSlot(date, timeSlot);
-                    
-                    return (
-                      <div
-                        key={timeIndex}
-                        className="h-12 border-b border-gray-100 relative hover:bg-gray-50"
-                      >
-                        {citasEnSlot.map((cita, citaIndex) => {
-                          // Calcular cuántos slots debe ocupar la cita
-                          const duracionMinutos = cita.servicios?.duracion_min || 30;
-                          const slotsOcupados = Math.ceil(duracionMinutos / 30);
-                          const alturaTotal = slotsOcupados * slotHeightPx;
-                          const citaStart = new Date(cita.inicio);
-                          const citaEnd = new Date(cita.fin);
-                          const rangoHorario = `${formatTime(citaStart)} - ${formatTime(citaEnd)}`;
-                          const esCorta = duracionMinutos <= 30;
-                          
-                          // Solo mostrar la cita en el primer slot
-                          const slotStart = new Date(timeSlot);
-                          const esPrimerSlot = citaStart.getHours() === slotStart.getHours() && 
-                                             citaStart.getMinutes() === slotStart.getMinutes();
-                          
-                          if (!esPrimerSlot) return null;
-                          
-                          return (
-                            <div
-                              key={citaIndex}
-                              onClick={() => handleCitaClick(cita)}
-                              className="absolute left-1 right-1 bg-amber-300 border border-amber-400 rounded-lg px-2 py-1.5 text-xs md:text-sm overflow-hidden cursor-pointer hover:bg-amber-400 hover:shadow-md transition-all duration-200 z-10"
-                              style={{ height: `${alturaTotal - 8}px` }}
-                              title={`${cita.tutor_nombre} - ${cita.mascota_nombre} - ${cita.servicios.nombre} (${duracionMinutos} min)`}
-                            >
-                              {esCorta ? (
-                                <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-900 md:text-xs">
-                                  <span className="truncate max-w-[40%] text-xs md:text-sm">
-                                    {cita.mascota_nombre}
-                                  </span>
-                                  <span className="text-amber-700">•</span>
-                                  <span className="truncate max-w-[35%] text-amber-800">
-                                    {cita.servicios.nombre}
-                                  </span>
-                                  <span className="text-amber-800 whitespace-nowrap hidden sm:inline">{rangoHorario}</span>
-                                </div>
-                              ) : (
-                                <>
-                                  <div className="font-bold text-amber-900 truncate text-base">
-                                    {cita.mascota_nombre}
-                                  </div>
-                                  <div className="text-amber-800 truncate font-medium">
-                                    {cita.servicios.nombre}
-                                  </div>
-                                  <div className="text-amber-700 truncate text-[11px] md:text-xs">{rangoHorario}</div>
-                                  <div className="text-amber-600 truncate text-[11px] md:text-xs">{duracionMinutos} min</div>
-                                </>
-                              )}
-                            </div>
-                          );
-                        })}
+                return (
+                  <div key={dayIndex} className="border-r border-gray-200 last:border-r-0 bg-white">
+                    {/* Header del día */}
+                    <div className={`h-12 border-b border-gray-200 flex flex-col items-center justify-center ${isToday ? "bg-blue-50" : ""
+                      }`}>
+                      <div className="text-xs md:text-sm font-medium text-gray-900 uppercase tracking-wide">
+                        {["lun", "mar", "mié", "jue", "vie", "sáb", "dom"][dayIndex]}
                       </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
+                      <div className={`text-base md:text-lg font-bold ${isToday ? "text-blue-600" : "text-gray-900"
+                        }`}>
+                        {date.getDate()}
+                      </div>
+                    </div>
+
+                    {/* Slots de tiempo */}
+                    {timeSlots.map((timeSlot, timeIndex) => {
+                      const citasEnSlot = getCitasForTimeSlot(date, timeSlot);
+
+                      return (
+                        <div
+                          key={timeIndex}
+                          className="h-12 border-b border-gray-100 relative hover:bg-gray-50"
+                        >
+                          {citasEnSlot.map((cita, citaIndex) => {
+                            // Calcular cuántos slots debe ocupar la cita
+                            const duracionMinutos = cita.servicios?.duracion_min || 30;
+                            const slotsOcupados = Math.ceil(duracionMinutos / 30);
+                            const alturaTotal = slotsOcupados * slotHeightPx;
+                            const citaStart = new Date(cita.inicio.endsWith("Z") ? cita.inicio : `${cita.inicio}Z`);
+                            const citaEnd = new Date(cita.fin.endsWith("Z") ? cita.fin : `${cita.fin}Z`);
+                            const rangoHorario = `${formatTime(citaStart)} - ${formatTime(citaEnd)}`;
+                            const esCorta = duracionMinutos <= 30;
+
+                            // Solo mostrar la cita en el primer slot
+                            const slotStart = new Date(timeSlot);
+                            const esPrimerSlot = citaStart.getHours() === slotStart.getHours() &&
+                              citaStart.getMinutes() === slotStart.getMinutes();
+
+                            if (!esPrimerSlot) return null;
+
+                            return (
+                              <div
+                                key={citaIndex}
+                                onClick={() => handleCitaClick(cita)}
+                                className="absolute left-1 right-1 bg-amber-300 border border-amber-400 rounded-lg px-2 py-1.5 text-xs md:text-sm overflow-hidden cursor-pointer hover:bg-amber-400 hover:shadow-md transition-all duration-200 z-10"
+                                style={{ height: `${alturaTotal - 8}px` }}
+                                title={`${cita.tutor_nombre} - ${cita.mascota_nombre} - ${cita.servicios.nombre} (${duracionMinutos} min)`}
+                              >
+                                {esCorta ? (
+                                  <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-900 md:text-xs">
+                                    <span className="truncate max-w-[40%] text-xs md:text-sm">
+                                      {cita.mascota_nombre}
+                                    </span>
+                                    <span className="text-amber-700">•</span>
+                                    <span className="truncate max-w-[35%] text-amber-800">
+                                      {cita.servicios.nombre}
+                                    </span>
+                                    <span className="text-amber-800 whitespace-nowrap hidden sm:inline">{rangoHorario}</span>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div className="font-bold text-amber-900 truncate text-base">
+                                      {cita.mascota_nombre}
+                                    </div>
+                                    <div className="text-amber-800 truncate font-medium">
+                                      {cita.servicios.nombre}
+                                    </div>
+                                    <div className="text-amber-700 truncate text-[11px] md:text-xs">{rangoHorario}</div>
+                                    <div className="text-amber-600 truncate text-[11px] md:text-xs">{duracionMinutos} min</div>
+                                  </>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -631,83 +626,83 @@ export default function CalendarView({}: CalendarViewProps) {
                 <div className="h-12 border-b border-gray-200"></div>
                 {timeSlots.map((time, index) => (
                   <div key={index} className="h-12 border-b border-gray-100 flex items-start justify-end pr-2 pt-1">
-                  <span className="text-[11px] text-gray-500">
-                    {formatTime(time)}
-                  </span>
-                </div>
+                    <span className="text-[11px] text-gray-500">
+                      {formatTime(time)}
+                    </span>
+                  </div>
                 ))}
               </div>
 
               {/* Día actual */}
               <div className="col-span-7">
                 <div className="h-12 border-b border-gray-200 flex items-center justify-center bg-blue-50">
-                <div className="text-base md:text-lg font-bold text-blue-600 text-center px-2">
-                  {formatFullDate(currentDate)}
-                </div>
-              </div>
-
-              {timeSlots.map((timeSlot, timeIndex) => {
-                const citasEnSlot = getCitasForTimeSlot(currentDate, timeSlot);
-                
-                return (
-                  <div
-                    key={timeIndex}
-                    className="h-12 border-b border-gray-100 relative hover:bg-gray-50"
-                  >
-                    {citasEnSlot.map((cita, citaIndex) => {
-                      const duracionMinutos = cita.servicios?.duracion_min || 30;
-                      const slotsOcupados = Math.ceil(duracionMinutos / 30);
-                      const alturaTotal = slotsOcupados * slotHeightPx;
-                      const citaStart = new Date(cita.inicio);
-                      const citaEnd = new Date(cita.fin);
-                      const rangoHorario = `${formatTime(citaStart)} - ${formatTime(citaEnd)}`;
-                      const esCorta = duracionMinutos <= 30;
-                      
-                      // Solo mostrar la cita en el primer slot
-                      const slotStart = new Date(timeSlot);
-                      const esPrimerSlot = citaStart.getHours() === slotStart.getHours() && 
-                                         citaStart.getMinutes() === slotStart.getMinutes();
-                      
-                      if (!esPrimerSlot) return null;
-                      
-                      return (
-                        <div
-                          key={citaIndex}
-                          onClick={() => handleCitaClick(cita)}
-                          className="absolute left-1 right-1 bg-gradient-to-br from-yellow-300 to-amber-400 border border-yellow-500 rounded-lg px-2 py-1.5 text-xs md:text-sm overflow-hidden cursor-pointer hover:from-yellow-400 hover:to-amber-500 hover:shadow-lg transition-all duration-200 z-10 flex flex-col justify-center min-h-[48px]"
-                          style={{ height: `${Math.max(alturaTotal - 4, 48)}px` }}
-                          title={`${cita.tutor_nombre} - ${cita.mascota_nombre} - ${cita.servicios.nombre} (${duracionMinutos} min)`}
-                        >
-                          {esCorta ? (
-                            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-amber-900 md:text-xs">
-                              <span className="truncate max-w-[40%] text-xs md:text-sm">
-                                {cita.mascota_nombre}
-                              </span>
-                              <span className="text-amber-700">•</span>
-                              <span className="truncate max-w-[35%] text-amber-800">
-                                {cita.servicios.nombre}
-                              </span>
-                              <span className="text-amber-800 whitespace-nowrap hidden sm:inline">{rangoHorario}</span>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="font-bold text-amber-900 text-base leading-tight text-center">
-                                {cita.mascota_nombre}
-                              </div>
-                              <div className="text-amber-800 font-medium text-sm leading-tight text-center">
-                                {cita.servicios.nombre}
-                              </div>
-                              <div className="text-amber-700 text-[11px] md:text-xs leading-tight text-center">{rangoHorario}</div>
-                              <div className="text-amber-600 text-[11px] md:text-xs leading-tight text-center">{duracionMinutos} min</div>
-                            </>
-                          )}
-                        </div>
-                      );
-                    })}
+                  <div className="text-base md:text-lg font-bold text-blue-600 text-center px-2">
+                    {formatFullDate(currentDate)}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+
+                {timeSlots.map((timeSlot, timeIndex) => {
+                  const citasEnSlot = getCitasForTimeSlot(currentDate, timeSlot);
+
+                  return (
+                    <div
+                      key={timeIndex}
+                      className="h-12 border-b border-gray-100 relative hover:bg-gray-50"
+                    >
+                      {citasEnSlot.map((cita, citaIndex) => {
+                        const duracionMinutos = cita.servicios?.duracion_min || 30;
+                        const slotsOcupados = Math.ceil(duracionMinutos / 30);
+                        const alturaTotal = slotsOcupados * slotHeightPx;
+                        const citaStart = new Date(cita.inicio.endsWith("Z") ? cita.inicio : `${cita.inicio}Z`);
+                        const citaEnd = new Date(cita.fin.endsWith("Z") ? cita.fin : `${cita.fin}Z`);
+                        const rangoHorario = `${formatTime(citaStart)} - ${formatTime(citaEnd)}`;
+                        const esCorta = duracionMinutos <= 30;
+
+                        // Solo mostrar la cita en el primer slot
+                        const slotStart = new Date(timeSlot);
+                        const esPrimerSlot = citaStart.getHours() === slotStart.getHours() &&
+                          citaStart.getMinutes() === slotStart.getMinutes();
+
+                        if (!esPrimerSlot) return null;
+
+                        return (
+                          <div
+                            key={citaIndex}
+                            onClick={() => handleCitaClick(cita)}
+                            className="absolute left-1 right-1 bg-gradient-to-br from-yellow-300 to-amber-400 border border-yellow-500 rounded-lg px-2 py-1.5 text-xs md:text-sm overflow-hidden cursor-pointer hover:from-yellow-400 hover:to-amber-500 hover:shadow-lg transition-all duration-200 z-10 flex flex-col justify-center min-h-[48px]"
+                            style={{ height: `${Math.max(alturaTotal - 4, 48)}px` }}
+                            title={`${cita.tutor_nombre} - ${cita.mascota_nombre} - ${cita.servicios.nombre} (${duracionMinutos} min)`}
+                          >
+                            {esCorta ? (
+                              <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-amber-900 md:text-xs">
+                                <span className="truncate max-w-[40%] text-xs md:text-sm">
+                                  {cita.mascota_nombre}
+                                </span>
+                                <span className="text-amber-700">•</span>
+                                <span className="truncate max-w-[35%] text-amber-800">
+                                  {cita.servicios.nombre}
+                                </span>
+                                <span className="text-amber-800 whitespace-nowrap hidden sm:inline">{rangoHorario}</span>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="font-bold text-amber-900 text-base leading-tight text-center">
+                                  {cita.mascota_nombre}
+                                </div>
+                                <div className="text-amber-800 font-medium text-sm leading-tight text-center">
+                                  {cita.servicios.nombre}
+                                </div>
+                                <div className="text-amber-700 text-[11px] md:text-xs leading-tight text-center">{rangoHorario}</div>
+                                <div className="text-amber-600 text-[11px] md:text-xs leading-tight text-center">{duracionMinutos} min</div>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -729,7 +724,7 @@ export default function CalendarView({}: CalendarViewProps) {
                   </svg>
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -776,8 +771,8 @@ export default function CalendarView({}: CalendarViewProps) {
                   <div>
                     <h4 className="font-medium text-gray-900">
                       {(() => {
-                        const start = new Date(selectedCita.inicio);
-                        const end = new Date(selectedCita.fin);
+                        const start = new Date(selectedCita.inicio.endsWith("Z") ? selectedCita.inicio : `${selectedCita.inicio}Z`);
+                        const end = new Date(selectedCita.fin.endsWith("Z") ? selectedCita.fin : `${selectedCita.fin}Z`);
                         return `${formatTime(start)} - ${formatTime(end)}`;
                       })()}
                     </h4>
